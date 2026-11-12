@@ -8,7 +8,6 @@
 'use strict';
 const CFG={apiKey:"AIzaSyDcyQ5tuDCi5J_D_XcHQqJve4kkxy779yE",authDomain:"prontuario-vetplus.firebaseapp.com",projectId:"prontuario-vetplus",storageBucket:"prontuario-vetplus.firebasestorage.app",messagingSenderId:"116841563518",appId:"1:116841563518:web:7b84815518c94d5fd95f2f"};
 const DOM='vetplus.app';
-const MASTER_LOGIN='hernanibezerra';
 const COLS=['internacoes','tutores','prescricoes','execucoes','evolucoes','intercorrencias','comunicacoes','transfusoes','monitor','anestesias','cirurgias','solicitacoes','assinaturas','plantao','agenda','exclusoes','escalaImgs','medicamentos','procedimentos','protocolos','modelosCirurgicos','modelosDoc','equipe','boxes','config','usuarios'];
 const PAC_COLS=['internacoes','tutores','prescricoes','execucoes','evolucoes','intercorrencias','comunicacoes','transfusoes','monitor','anestesias','cirurgias','solicitacoes','assinaturas','plantao','agenda','exclusoes'];
 
@@ -297,7 +296,7 @@ function start(){injectCSS();
     try{await persist;
       const ref=fs.doc('usuarios/'+u.uid);let s=await ref.get().catch(()=>null);
       const login=emailToLogin(u.email);
-      if((!s||!s.exists)&&login===MASTER_LOGIN){await ref.set({login,nome:'Hernani Bezerra',papel:'master',equipeId:'hernani-bezerra',ativo:true,trocarSenha:false,criadoEm:nowISO()});s=await ref.get()}
+      if(!s||!s.exists){/* primeiro acesso do master: as regras do servidor só permitem isso ao login master */try{await ref.set({login,nome:'Hernani Bezerra',papel:'master',equipeId:'hernani-bezerra',ativo:true,trocarSenha:false,criadoEm:nowISO()});s=await ref.get()}catch(_){s=null}}
       if(!s||!s.exists){gateMsg('Acesso não liberado','Seu usuário ainda não foi liberado pelo master da clínica.',true);return}
       const d=s.data();if(d.ativo===false){gateMsg('Acesso bloqueado','Seu usuário está desativado. Fale com o master da clínica.',true);return}
       if(d.trocarSenha){showTroca(true);return}
