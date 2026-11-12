@@ -1,5 +1,5 @@
 /* VetPlus · service worker: funciona sem internet e entrega imagens salvas no banco (_blob/ID) */
-const V='vp-shell-202611112359';
+const V='vp-shell-202611120003';
 const SHELL=['./','index.html','fb.js','manifest.webmanifest','icon-192.png','icon-512.png','lib/firebase-app-compat.js','lib/firebase-auth-compat.js','lib/firebase-firestore-compat.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k.startsWith('vp-shell-')&&k!==V)await caches.delete(k);await self.clients.claim()})())});

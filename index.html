@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611112359"></script>
-<script src="lib/firebase-auth-compat.js?v=202611112359"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611112359"></script>
-<script src="fb.js?v=202611112359"></script>
+<script src="lib/firebase-app-compat.js?v=202611120003"></script>
+<script src="lib/firebase-auth-compat.js?v=202611120003"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611120003"></script>
+<script src="fb.js?v=202611120003"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -881,7 +881,7 @@ function viewCad(){
   if(t==='descritivos')body=viewDescritivos();
   return`<div class="crumb">Cadastros <span>› ${tabs.find(x=>x[0]===t)[1]}</span></div>
    <div class="page-h"><div><h1>${tabs.find(x=>x[0]===t)[1]}</h1><div class="sub">${t==='docs'?'Textos dos seus TCLE, termos e contratos. Use os campos automáticos para puxar dados do paciente e do tutor.':t==='clinica'?'Dados que aparecem nos documentos e o WhatsApp que recebe as confirmações dos tutores.':t==='boxes'?'Boxes da clínica por setor. O mapa de boxes mostra quem está em cada um.':t==='escalas'?'Imagens de referência das escalas de dor usadas na evolução.':t==='prot'?'Receitas padrão aplicadas na internação ou depois, na prescrição do dia.':t==='med'?'Concentrações usadas na clínica. Ao prescrever, a concentração entra sozinha e o volume é calculado pelo peso.':t==='modelos'?'Banco de descrições por procedimento. Na ficha cirúrgica, busque e inclua quantos precisar; dá para atualizar o texto padrão direto da ficha.':''}</div></div>
-   ${['med','prot','modelos'].includes(t)?`<span class="row" style="gap:8px"><button class="btn" data-act="iaImport" data-k="${t}" ${W()}>${ic('spark')}Importar com IA</button>`:''}${t==='escalas'||t==='clinica'||t==='descritivos'?'':`<button class="btn pri" data-act="${t==='prot'?'protNew':t==='docs'?'docNew':t==='tutores'?'tutNew':'cadEdit'}" data-k="${t}" ${W()}>${ic('plus')}Novo ${lbl}</button>`}${['med','prot','modelos'].includes(t)?'</span>':''}</div>
+   ${['med','prot','modelos'].includes(t)?`<span class="row" style="gap:8px"><button class="btn" data-act="iaImport" data-k="${t}" ${W()}>${ic('spark')}Importar com IA</button>`:''}${t==='equipe'&&S.master?`<button class='btn' type='button' data-allow onclick='window.__vpUsers&&window.__vpUsers()'>${ic('user')}Logins, senhas e permissões</button>`:''}${t==='escalas'||t==='clinica'||t==='descritivos'?'':`<button class="btn pri" data-act="${t==='prot'?'protNew':t==='docs'?'docNew':t==='tutores'?'tutNew':'cadEdit'}" data-k="${t}" ${W()}>${ic('plus')}Novo ${lbl}</button>`}${['med','prot','modelos'].includes(t)?'</span>':''}</div>
    <div class="subtabs">${tabs.map(x=>`<a href="#cad-${x[0]==='med'?'med':x[0]}" class="${x[0]===t?'on':''}">${x[1]}</a>`).join('')}</div>
    <div class="panel">${body}</div>`;
 }

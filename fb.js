@@ -227,17 +227,19 @@ function trocaSenha(){const ov=modal('Trocar minha senha',`<form id="fbTS" class
 /* ---------- usuários (master) ---------- */
 function eqOpts(sel){return `<option value="">— nenhum —</option>`+EQUIPE.filter(e=>e.ativo!==false||e.id===sel).map(e=>`<option value="${esc(e.id)}" ${e.id===sel?'selected':''}>${esc(e.nome)}${e.funcao?' · '+esc(e.funcao):''}</option>`).join('')}
 async function loadEquipe(){try{const s=await fs.collection('equipe').get();EQUIPE=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.nome).localeCompare(String(b.nome)))}catch(_){}}
+const waitUsers=async ok=>{for(let i=0;i<30&&!ok();i++)await new Promise(r=>setTimeout(r,100))};
 async function usersPanel(){await loadEquipe();
   const list=[...USERS].sort((a,b)=>(a.ativo===false)-(b.ativo===false)||String(a.nome||a.login).localeCompare(String(b.nome||b.login)));
-  const ov=modal('Usuários e senhas',`<div class="note">Cada pessoa entra com o próprio usuário. Ao criar, você define uma <b>senha provisória</b>; no primeiro acesso o sistema obriga a pessoa a criar uma senha só dela. Se alguém esquecer a senha, desative o usuário antigo e crie um novo (por exemplo <i>katia.viana2</i>). Os registros antigos continuam no nome da pessoa.</div>
-   <div style="display:flex;flex-direction:column;gap:8px">${list.map(u=>`<div class="fb-u"><div class="nm"><b>${esc(u.nome||u.login)}</b><small>usuário: ${esc(u.login)}${u.equipeId?' · '+esc((EQUIPE.find(e=>e.id===u.equipeId)||{}).nome||u.equipeId):''}${u.ultimoAcesso?' · último acesso '+esc(new Date(u.ultimoAcesso).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})):' · ainda não entrou'}</small></div>
+  const ov=modal('Usuários e senhas',`<div class="note">Você cadastra o e-mail (ou um nome de usuário) e a senha de cada pessoa e marca o que ela pode fazer. Para mudar as permissões depois, clique em <b>Editar</b> no nome dela. Se alguém esquecer a senha, desative o cadastro antigo e crie um novo com outro e-mail ou usuário; os registros antigos continuam no nome da pessoa.</div>
+   <div style="display:flex;flex-direction:column;gap:8px">${list.map(u=>`<div class="fb-u"><div class="nm"><b>${esc(u.nome||u.login)}</b><small>usuário: ${esc(u.login)}${u.equipeId?' · '+esc((EQUIPE.find(e=>e.id===u.equipeId)||{}).nome||u.equipeId):''}${u.papel!=='master'?'<br>Pode: '+(PERMS.filter(([k])=>u.perm&&u.perm[k]).map(([k])=>({ajustes:'ajustar cadastros',exportar:'exportar histórico',protocolos:'protocolos/descrições/documentos',excluir:'excluir registros',medicamentos:'medicamentos'})[k]).join(', ')||'só lançar nas fichas'):''}${u.ultimoAcesso?' · último acesso '+esc(new Date(u.ultimoAcesso).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})):' · ainda não entrou'}</small></div>
      <span class="fb-tag ${u.ativo===false?'off':''}">${u.ativo===false?'Desativado':u.papel==='master'?'Master':'Equipe'}</span>
      ${u.id!==ME.uid?`<button class="fb-btn sec sm" data-e="${esc(u.id)}">Editar</button>`:''}</div>`).join('')||'<div class="note">Nenhum usuário.</div>'}</div>
    <form id="fbNU" style="display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line,#D5E3E3);padding-top:14px"><b>Novo usuário</b>
-    <div class="row"><label>Nome completo<input name="nome" required></label><label>Usuário (login)<input name="login" autocapitalize="none" spellcheck="false" placeholder="ex.: katia.viana" required pattern="[a-zA-Z0-9._\\-]{3,40}" title="Use letras, números, ponto, hífen ou sublinhado (sem espaços)"></label></div>
-    <div class="row"><label>Senha provisória<input name="senha" minlength="6" required placeholder="mínimo 6 caracteres"></label><label>Perfil<select name="papel"><option value="equipe">Equipe</option><option value="master">Master</option></select></label></div>
+    <div class="row"><label>Nome completo<input name="nome" required></label><label>E-mail ou usuário (para entrar)<input name="login" autocapitalize="none" spellcheck="false" placeholder="ex.: katia@gmail.com ou katia.viana" required pattern="[a-zA-Z0-9._@+\\-]{3,80}" title="Sem espaços"></label></div>
+    <div class="row"><label>Senha<input name="senha" minlength="6" required placeholder="mínimo 6 caracteres"></label><label>Perfil<select name="papel"><option value="equipe">Equipe</option><option value="master">Master</option></select></label></div>
     <label>Vincular ao cadastro da equipe (nome e CRMV nos documentos)<select name="equipeId">${eqOpts('')}</select></label>
     ${permBoxes({},false)}
+    <label class="chk"><input type="checkbox" name="troca"> Pedir para a pessoa trocar a senha no primeiro acesso</label>
     <div class="fb-err" id="fbNUe"></div><button class="fb-btn">Criar usuário</button></form>`);
   ov.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>editUser(b.dataset.e));
   const f=ov.querySelector('#fbNU');f.onsubmit=async e=>{e.preventDefault();const er=ov.querySelector('#fbNUe');const login=f.login.value.trim().toLowerCase();
@@ -245,8 +247,8 @@ async function usersPanel(){await loadEquipe();
     const btn=f.querySelector('button');btn.disabled=true;btn.textContent='Criando…';
     try{const sec=firebase.apps.find(a=>a.name==='sec')||firebase.initializeApp(CFG,'sec');const sa=sec.auth();await sa.setPersistence(firebase.auth.Auth.Persistence.NONE);
       const c=await sa.createUserWithEmailAndPassword(loginToEmail(login),f.senha.value);const uid=c.user.uid;await sa.signOut();
-      await fs.doc('usuarios/'+uid).set({login,nome:f.nome.value.trim(),papel:f.papel.value,equipeId:f.equipeId.value||null,perm:permRead(f),ativo:true,trocarSenha:true,criadoEm:nowISO(),criadoPor:ME.uid});
-      usersPanel()}catch(x){btn.disabled=false;btn.textContent='Criar usuário';er.textContent=authMsg(x)}}}
+      await fs.doc('usuarios/'+uid).set({login,nome:f.nome.value.trim(),papel:f.papel.value,equipeId:f.equipeId.value||null,perm:permRead(f),ativo:true,trocarSenha:!!f.troca.checked,criadoEm:nowISO(),criadoPor:ME.uid});
+      await waitUsers(()=>USERS.some(x=>x.id===uid));usersPanel()}catch(x){btn.disabled=false;btn.textContent='Criar usuário';er.textContent=authMsg(x)}}}
 async function editUser(id){const u=USERS.find(x=>x.id===id);if(!u)return;await loadEquipe();
   const ov=modal('Editar usuário',`<form id="fbEU" style="display:flex;flex-direction:column;gap:12px"><div class="note">Usuário: <b>${esc(u.login)}</b></div>
    <label>Nome completo<input name="nome" value="${esc(u.nome||'')}" required></label>
@@ -256,8 +258,9 @@ async function editUser(id){const u=USERS.find(x=>x.id===id);if(!u)return;await 
    <label class="chk"><input type="checkbox" name="ativo" ${u.ativo!==false?'checked':''}> Pode entrar no sistema (desmarque para bloquear o acesso)</label>
    <div class="fb-err" id="fbEUe"></div><div style="display:flex;gap:8px"><button type="button" class="fb-btn sec" id="fbBack">Voltar</button><button class="fb-btn" style="flex:1">Salvar</button></div></form>`);
   ov.querySelector('#fbBack').onclick=usersPanel;
-  const f=ov.querySelector('#fbEU');f.onsubmit=async e=>{e.preventDefault();try{await fs.doc('usuarios/'+id).update({nome:f.nome.value.trim(),papel:f.papel.value,equipeId:f.equipeId.value||null,perm:permRead(f),ativo:f.ativo.checked,alteradoEm:nowISO()});usersPanel()}catch(x){ov.querySelector('#fbEUe').textContent='Não foi possível salvar ('+(x.code||x.message)+').'}}}
+  const f=ov.querySelector('#fbEU');f.onsubmit=async e=>{e.preventDefault();try{await fs.doc('usuarios/'+id).update({nome:f.nome.value.trim(),papel:f.papel.value,equipeId:f.equipeId.value||null,perm:permRead(f),ativo:f.ativo.checked,alteradoEm:nowISO()});const at=nowISO();await waitUsers(()=>{const x=USERS.find(z=>z.id===id);return x&&x.alteradoEm&&x.alteradoEm>=at.slice(0,16)});usersPanel()}catch(x){ov.querySelector('#fbEUe').textContent='Não foi possível salvar ('+(x.code||x.message)+').'}}}
 
+window.__vpUsers=()=>{if(ME&&ME.papel==='master')usersPanel()};
 /* ---------- IA (master) ---------- */
 function iaPanel(){const ov=modal('Configurar IA (Gemini)',`<div class="note">Cole aqui a chave gratuita do Gemini (Google AI Studio → <i>Get API key</i>). Antes de enviar qualquer texto para a IA, o sistema troca nome, CPF, telefone, e-mail e endereço do tutor por códigos e só devolve os dados reais depois, no seu aparelho.</div>
   <form id="fbIA" style="display:flex;flex-direction:column;gap:12px"><label>Chave da API<input name="key" value="${esc(IA&&IA.key||'')}" autocomplete="off" spellcheck="false" placeholder="AIza…"></label>
