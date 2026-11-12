@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611112320"></script>
-<script src="lib/firebase-auth-compat.js?v=202611112320"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611112320"></script>
-<script src="fb.js?v=202611112320"></script>
+<script src="lib/firebase-app-compat.js?v=202611112350"></script>
+<script src="lib/firebase-auth-compat.js?v=202611112350"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611112350"></script>
+<script src="fb.js?v=202611112350"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -556,6 +556,9 @@ form[data-fin] .inp:disabled,form[data-fin] select:disabled,form[data-fin] texta
 }
 @media (max-width:480px){.g4,.g6{grid-template-columns:repeat(2,minmax(0,1fr))}.page-h h1{font-size:22px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.cad-ro .main [data-act]:not([data-act=protOpen]):not([data-act=docPrint]):not([data-act=close]):not([data-allow]){display:none!important}
+.cad-ro .main :is(input,select,textarea):not(.search input):not([type=search]){pointer-events:none;background:var(--surface-2)}
+.cad-ro .main .page-h::after{content:"Somente o master pode alterar estes cadastros.";display:block;margin-top:8px;font-size:13px;color:var(--ink-2)}
 </style>
 
 </head>
@@ -762,7 +765,7 @@ function nav(){
 }
 function render(force){setTimeout(tutImport,0);setTimeout(lockFinal,0);
   if(!force&&S.dirty){S.pending=true;return}
-  S.pending=false;nav();
+  S.pending=false;nav();document.body.classList.toggle('cad-ro',cadRO());
   const m=$('#main');
   if(!S.ready){m.innerHTML=S.noDb?noDbView():`<div class="empty"><h3>Carregando prontuário…</h3></div>`;return}
   const sx=window.scrollX,sy=window.scrollY;const mapScroll=$('.map-wrap')?.scrollLeft;
@@ -1952,7 +1955,7 @@ async function exportPDF(mode){
 }
 
 /* ---------- Ações ---------- */
-function fail(e){console.error(e);const c=e&&e.code;if(c==='ficha_finalizada'){toast('Ficha finalizada: ninguém pode alterar. Só o master pode reabrir.');return}if(c==='master_only'){toast('Só o master ou quem fez o registro pode excluir.');return}if(c==='bloqueio_fin'){toast('Bloqueado: medicações suspensas por não pagamento do tutor. Só o master libera após a quitação.');return}toast(c==='invalid_argument'?'Você não tem permissão para alterar este prontuário.':c==='quota_exceeded'?'O banco atingiu o limite. Remova registros antigos.':'Não foi possível salvar. Tente de novo.')}
+function fail(e){console.error(e);const c=e&&e.code;if(c==='ficha_finalizada'){toast('Ficha finalizada: ninguém pode alterar. Só o master pode reabrir.');return}if(c==='master_only'){toast('Só o master ou quem fez o registro pode excluir.');return}if(c==='cad_master'){toast('Só o master pode alterar protocolos, medicamentos, descrições e cadastros.');return}if(c==='bloqueio_fin'){toast('Bloqueado: medicações suspensas por não pagamento do tutor. Só o master libera após a quitação.');return}toast(c==='invalid_argument'?'Você não tem permissão para alterar este prontuário.':c==='quota_exceeded'?'O banco atingiu o limite. Remova registros antigos.':'Não foi possível salvar. Tente de novo.')}
 function formData(sel){return Object.fromEntries(new FormData($(sel)))}
 async function savePresc(patch){const p=curP();try{await S.db.doc(`prescricoes/${p.id}_${S.day}`).update({...patch,editadoEm:nowDT()})}catch(e){fail(e)}}
 async function createPresc(day,base){const p=curP();const src=base?JSON.parse(JSON.stringify(base)):{itens:[],obs:''};
@@ -3916,6 +3919,9 @@ function modalIA(k){let L=[];const nome=IA_TIPOS[k];
     else for(const p of L){const its=p.itens.map(({semCadastro,...i})=>i);await S.db.collection('protocolos').doc().set({...p,itens:its,importadoIA:true,criadoEm:nowDT()})}
     closeModal();toast(L.length+' '+nome+' salvo(s) como rascunho')}catch(e){fail(e)}}}
 Object.assign(ACT,{iaImport(el){modalIA(el.dataset.k)}});
+const MASTER_COLS=['medicamentos','protocolos','modelosCirurgicos','modelosDoc','procedimentos','equipe','config','escalaImgs'];
+const isMCol=p=>MASTER_COLS.includes(String(p).split('/')[0]);
+function cadRO(){return !S.master&&(S.view==='prot'||(S.view==='cad'&&!['tutores','boxes'].includes(S.cadTab)))}
 function confirmDiscard(go){confirmBox('Há alterações não salvas nesta ficha. Sair e descartar?','Descartar',()=>{S.dirty=false;go()});return false}
 
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const f=ACT[el.dataset.act];if(!f)return;if(el.disabled)return;f(el,e)});
@@ -3986,10 +3992,10 @@ async function boot(){
   S.user=user;try{S.master=user?!!(await user.isOwner()):false}catch(_){S.master=false}document.body.classList.toggle('not-master',!S.master);
   S._rawdb=db;
   const wrapRef=r=>({id:r.id,path:r.path,get:()=>r.get(),
-   set:async(d,o)=>{await blkGuard(r.path,d);await finGuard(r,d);d=await authStamp(r,d);return o?r.set(d,o):r.set(d)},
-   update:async d=>{await blkGuard(r.path,d);await finGuard(r,d);if(!S.master&&d&&'criadoUid' in d){d={...d};delete d.criadoUid}return r.update(d)},
-   delete:async()=>{if(S.master)return r.delete();try{const g=await r.get();const x=g.exists?g.data():null;if(x&&x.criadoUid&&x.criadoUid===S.uid&&!x.finalizada)return r.delete()}catch(_){}throw{code:'master_only'}},onSnapshot:(a,b)=>r.onSnapshot(a,b),collection:c=>r.collection(c),acquire:o=>r.acquire(o)});
-  const wrapCol=(c,p)=>new Proxy(c,{get(t,k){if(k==='doc')return(...a)=>wrapRef(t.doc(...a));if(k==='add')return async d=>{await blkGuard(p+'/_',d);return t.add(d)};const v=t[k];return typeof v==='function'?v.bind(t):v}});
+   set:async(d,o)=>{if(!S.master&&isMCol(r.path))throw{code:'cad_master'};await blkGuard(r.path,d);await finGuard(r,d);d=await authStamp(r,d);return o?r.set(d,o):r.set(d)},
+   update:async d=>{if(!S.master&&isMCol(r.path))throw{code:'cad_master'};await blkGuard(r.path,d);await finGuard(r,d);if(!S.master&&d&&'criadoUid' in d){d={...d};delete d.criadoUid}return r.update(d)},
+   delete:async()=>{if(S.master)return r.delete();if(isMCol(r.path))throw{code:'cad_master'};try{const g=await r.get();const x=g.exists?g.data():null;if(x&&x.criadoUid&&x.criadoUid===S.uid&&!x.finalizada)return r.delete()}catch(_){}throw{code:'master_only'}},onSnapshot:(a,b)=>r.onSnapshot(a,b),collection:c=>r.collection(c),acquire:o=>r.acquire(o)});
+  const wrapCol=(c,p)=>new Proxy(c,{get(t,k){if(k==='doc')return(...a)=>wrapRef(t.doc(...a));if(k==='add')return async d=>{if(!S.master&&isMCol(p))throw{code:'cad_master'};await blkGuard(p+'/_',d);return t.add(d)};const v=t[k];return typeof v==='function'?v.bind(t):v}});
   S.db={doc:p=>wrapRef(db.doc(p)),collection:p=>wrapCol(db.collection(p),p)};
   try{S.uid=user?await user.id():null}catch(e){}
   try{const c=user?await user.can('data.write'):null;if(c===false)S.canWrite=false}catch(e){}
