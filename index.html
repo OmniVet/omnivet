@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611112350"></script>
-<script src="lib/firebase-auth-compat.js?v=202611112350"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611112350"></script>
-<script src="fb.js?v=202611112350"></script>
+<script src="lib/firebase-app-compat.js?v=202611112359"></script>
+<script src="lib/firebase-auth-compat.js?v=202611112359"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611112359"></script>
+<script src="fb.js?v=202611112359"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -557,8 +557,10 @@ form[data-fin] .inp:disabled,form[data-fin] select:disabled,form[data-fin] texta
 @media (max-width:480px){.g4,.g6{grid-template-columns:repeat(2,minmax(0,1fr))}.page-h h1{font-size:22px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .cad-ro .main [data-act]:not([data-act=protOpen]):not([data-act=docPrint]):not([data-act=close]):not([data-allow]){display:none!important}
-.cad-ro .main :is(input,select,textarea):not(.search input):not([type=search]){pointer-events:none;background:var(--surface-2)}
-.cad-ro .main .page-h::after{content:"Somente o master pode alterar estes cadastros.";display:block;margin-top:8px;font-size:13px;color:var(--ink-2)}
+.cad-ro .main :is(input,select,textarea):not([type=search]){pointer-events:none;background:var(--surface-2)}
+.cad-ro .main .page-h::after{content:"Você pode consultar. Para alterar, peça ao master a permissão.";display:block;margin-top:8px;font-size:13px;color:var(--ink-2)}
+.no-ajustes :is([data-act=editInt],[data-act=tutEdit]){display:none!important}
+.no-exportar :is([data-act=histExp],[data-act=pdf]){display:none!important}
 </style>
 
 </head>
@@ -765,7 +767,7 @@ function nav(){
 }
 function render(force){setTimeout(tutImport,0);setTimeout(lockFinal,0);
   if(!force&&S.dirty){S.pending=true;return}
-  S.pending=false;nav();document.body.classList.toggle('cad-ro',cadRO());
+  S.pending=false;nav();permClasses();
   const m=$('#main');
   if(!S.ready){m.innerHTML=S.noDb?noDbView():`<div class="empty"><h3>Carregando prontuário…</h3></div>`;return}
   const sx=window.scrollX,sy=window.scrollY;const mapScroll=$('.map-wrap')?.scrollLeft;
@@ -1584,7 +1586,7 @@ function modalCad(k,id){
     <label class="f spanall">Posologia / referência<textarea class="inp" name="ref" rows="2" placeholder="Ex.: cães BID ou TID; gatos SID ou BID; IV lento">${esc(x.ref||'')}</textarea></label><label class="chk spanall"><input type="checkbox" name="extra" ${x.extra?'checked':''}><span><b>$ Fora do pacote</b> · não incluso em plano de saúde nem na diária convencional. Só aplicar com autorização prévia do tutor.</span></label><div class="muted small spanall">A dose padrão entra sozinha na prescrição, na unidade escolhida acima, conforme a espécie do paciente. Sempre confira antes de salvar.</div></div>`;
   if(k==='proc')body=`<label class="f">Nome *<input class="inp" name="nome" value="${esc(x.nome||'')}"></label><label class="f">Frequência padrão<select class="inp" name="freq">${FREQS.map(([v,l])=>`<option value="${v}" ${String(x.freq||'24')===v?'selected':''}>${l}</option>`).join('')}</select></label><label class="f">Instruções<textarea class="inp" name="instrucoes" rows="3">${esc(x.instrucoes||'')}</textarea></label>`;
   if(k==='equipe')body=`<label class="f">Nome *<input class="inp" name="nome" value="${esc(x.nome||'')}"></label><div class="grid g2"><label class="f">Função<select class="inp" name="funcao">${funcOpts(x.funcao||FUNCOES[0])}</select></label><label class="f">CRMV (nº e UF)<input class="inp" name="crmv" value="${esc(x.crmv||'')}" placeholder="Ex.: 1234 CE"></label><label class="f">CRMV / registro<input class="inp" name="registro" value="${esc(x.registro||'')}"></label></div><label class="f">E-mail (para o login na versão definitiva)<input class="inp" type="email" name="email" value="${esc(x.email||'')}" placeholder="nome@exemplo.com"></label><label class="row small"><input type="checkbox" name="ativo" ${x.ativo===false?'':'checked'}> Ativo (aparece nas listas)</label>
-  ${S.master?`<div class="f"><span>Permissões dadas pelo master</span><div class="chks"><label class="chk"><input type="checkbox" name="pAjustes" ${x.pAjustes?'checked':''}><span>Pode fazer ajustes em cadastros, protocolos e documentos</span></label><label class="chk"><input type="checkbox" name="pExcluir" ${x.pExcluir?'checked':''}><span>Pode excluir registros e históricos</span></label><label class="chk"><input type="checkbox" name="pTutor" ${x.pTutor===false?'':'checked'}><span>Vê os dados do tutor (CPF, endereço, telefone)</span></label></div><span class="muted small">Ficam guardadas agora e passam a valer quando cada pessoa tiver o próprio login. O RT só faz ajustes se você marcar a primeira opção.</span></div>`:''}`;
+  `;
   if(k==='boxes')body=`<div class="grid g3"><label class="f">Nome do box *<input class="inp" name="nome" value="${esc(x.nome||'')}" placeholder="Ex.: 3, Gatil 1, Isolamento A"></label><label class="f">Setor<select class="inp" name="setor">${SETORES.map(o=>`<option ${x.setor===o?'selected':''}>${o}</option>`).join('')}</select></label><label class="f">Ordem<input class="inp tnum" name="ordem" inputmode="numeric" value="${esc(x.ordem??'')}"></label></div>`;
   if(k==='modelos')body=`<div class="grid g2"><label class="f">Nome do procedimento *<input class="inp" name="nome" value="${esc(x.nome||'')}"></label><label class="f">Categoria<input class="inp" name="categoria" list="catList" value="${esc(x.categoria||'')}"><datalist id="catList">${[...new Set(S.modelos.map(m=>m.categoria).filter(Boolean))].map(c=>`<option value="${esc(c)}">`).join('')}</datalist></label></div><label class="f">Texto<textarea class="inp" name="texto" rows="14" style="min-height:260px">${esc(x.texto||'')}</textarea></label>`;
   openModal(`${H((id?'Editar ':'Novo ')+{med:'medicamento',proc:'procedimento',equipe:'membro da equipe',modelos:'modelo cirúrgico'}[k])}<form class="modal-b" id="fCad" onsubmit="return false">${body}</form><div class="modal-f"><button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="cadOk">Salvar</button></div>`,k==='modelos'?'wide':'');
@@ -1758,7 +1760,7 @@ const JSPDF='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
 const AUTOT='https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
 function loadScript(src){return new Promise((res,rej)=>{if($$('script').some(s=>s.src===src&&s.dataset.ok))return res();const s=document.createElement('script');s.src=src;s.onload=()=>{s.dataset.ok=1;res()};s.onerror=()=>rej(new Error('load'));document.head.appendChild(s)})}
 async function imgData(id){const r=await fetch('_blob/'+id);if(!r.ok)throw 0;const b=await r.blob();const bm=await createImageBitmap(b);const c=document.createElement('canvas');const sc=Math.min(1,1400/Math.max(bm.width,bm.height));c.width=bm.width*sc;c.height=bm.height*sc;c.getContext('2d').drawImage(bm,0,0,c.width,c.height);return{url:c.toDataURL('image/jpeg',.82),w:c.width,h:c.height}}
-async function exportPDF(mode){
+async function exportPDF(mode){if(!PERM('exportar')){toast('Você não tem permissão para exportar o histórico. Fale com o master.');return}
   const p=curP();if(!p)return;
   if(!S.downloads){toast('Não foi possível preparar o arquivo. Recarregue a página');return}
   toast('Gerando PDF…');
@@ -1955,7 +1957,7 @@ async function exportPDF(mode){
 }
 
 /* ---------- Ações ---------- */
-function fail(e){console.error(e);const c=e&&e.code;if(c==='ficha_finalizada'){toast('Ficha finalizada: ninguém pode alterar. Só o master pode reabrir.');return}if(c==='master_only'){toast('Só o master ou quem fez o registro pode excluir.');return}if(c==='cad_master'){toast('Só o master pode alterar protocolos, medicamentos, descrições e cadastros.');return}if(c==='bloqueio_fin'){toast('Bloqueado: medicações suspensas por não pagamento do tutor. Só o master libera após a quitação.');return}toast(c==='invalid_argument'?'Você não tem permissão para alterar este prontuário.':c==='quota_exceeded'?'O banco atingiu o limite. Remova registros antigos.':'Não foi possível salvar. Tente de novo.')}
+function fail(e){console.error(e);const c=e&&e.code;if(c==='ficha_finalizada'){toast('Ficha finalizada: ninguém pode alterar. Só o master pode reabrir.');return}if(c==='master_only'){toast('Você só pode excluir o que você mesmo lançou.');return}if(c==='sem_perm'){toast('Você não tem permissão para alterar isso. Fale com o master.');return}if(c==='bloqueio_fin'){toast('Bloqueado: medicações suspensas por não pagamento do tutor. Só o master libera após a quitação.');return}toast(c==='invalid_argument'?'Você não tem permissão para alterar este prontuário.':c==='quota_exceeded'?'O banco atingiu o limite. Remova registros antigos.':'Não foi possível salvar. Tente de novo.')}
 function formData(sel){return Object.fromEntries(new FormData($(sel)))}
 async function savePresc(patch){const p=curP();try{await S.db.doc(`prescricoes/${p.id}_${S.day}`).update({...patch,editadoEm:nowDT()})}catch(e){fail(e)}}
 async function createPresc(day,base){const p=curP();const src=base?JSON.parse(JSON.stringify(base)):{itens:[],obs:''};
@@ -2861,7 +2863,7 @@ function viewClinica(){const c=S.clinica||{};return`<form class="panel" id="fCli
   <label class="f">Estado (UF)<input class="inp" name="estado" maxlength="2" value="${esc(c.estado||'')}"></label>
   <label class="f">Responsável técnico<input class="inp" name="rt" value="${esc(c.rt||'')}"></label>
   <label class="f">CRMV do responsável técnico<input class="inp" name="crmv" value="${esc(c.crmv||'')}"></label>
-  <div class="spanall row"><span class="spacer"></span><button class="btn pri" data-act="cliSave" ${W()}>${ic('check')}Salvar dados da clínica</button></div></div></form>${S.master?permPanelHTML():''}`}
+  <div class="spanall row"><span class="spacer"></span><button class="btn pri" data-act="cliSave" ${W()}>${ic('check')}Salvar dados da clínica</button></div></div></form>`}
 
 Object.assign(ACT,{
  sigNew(){modalSigNew()},
@@ -3424,9 +3426,9 @@ async function saveDocx(WB,p){try{await loadScript(DOCXJS)}catch(e){toast('Não 
   try{await S.downloads.save({filename:fname,data:blob});toast('Arquivo Word salvo')}catch(e){if(e?.code!=='declined')toast('Não foi possível salvar o arquivo Word')}}
 
 /* ===== Histórico: exportar e excluir (master ou quem o master permitir) */
-const canDelHist=()=>!!(S.master||(S.clinica?.permExcluir||[]).includes(S.uid));
+const canDelHist=()=>PERM('excluir');
 const DEL_COLS=['prescricoes','execucoes','evolucoes','intercorrencias','comunicacoes','transfusoes','monitor','anestesias','cirurgias','solicitacoes','assinaturas','plantao'];
-async function histExport(id,mode){if(!S.downloads){toast('Não foi possível preparar o arquivo. Recarregue a página');return}
+async function histExport(id,mode){if(!PERM('exportar')){toast('Você não tem permissão para exportar o histórico. Fale com o master.');return}if(!S.downloads){toast('Não foi possível preparar o arquivo. Recarregue a página');return}
   const back=S.view==='historico';if(S.pid!==id){location.hash='#p-'+id;toast('Carregando o prontuário…');const t0=Date.now();await new Promise(r=>{const w=()=>{if((S.pid===id&&S.pLoadN>=9)||Date.now()-t0>10000)r();else setTimeout(w,150)};w()});await new Promise(r=>setTimeout(r,300))}
   await exportPDF(mode);if(back)location.hash='#historico'}
 function modalHistDel(id){if(!canDelHist()){toast('Somente o master ou quem ele autorizar pode excluir históricos');return}const p=byId(S.intern,id);if(!p)return;
@@ -3919,9 +3921,12 @@ function modalIA(k){let L=[];const nome=IA_TIPOS[k];
     else for(const p of L){const its=p.itens.map(({semCadastro,...i})=>i);await S.db.collection('protocolos').doc().set({...p,itens:its,importadoIA:true,criadoEm:nowDT()})}
     closeModal();toast(L.length+' '+nome+' salvo(s) como rascunho')}catch(e){fail(e)}}}
 Object.assign(ACT,{iaImport(el){modalIA(el.dataset.k)}});
-const MASTER_COLS=['medicamentos','protocolos','modelosCirurgicos','modelosDoc','procedimentos','equipe','config','escalaImgs'];
-const isMCol=p=>MASTER_COLS.includes(String(p).split('/')[0]);
-function cadRO(){return !S.master&&(S.view==='prot'||(S.view==='cad'&&!['tutores','boxes'].includes(S.cadTab)))}
+const PERM=k=>!!(S.master||(window.__vpPerm||{})[k]);
+const COL_PERM={medicamentos:'medicamentos',protocolos:'protocolos',modelosCirurgicos:'protocolos',modelosDoc:'protocolos',escalaImgs:'protocolos',procedimentos:'ajustes',equipe:'ajustes',boxes:'ajustes',config:'ajustes'};
+const colPermOk=p=>{const k=COL_PERM[String(p).split('/')[0]];return !k||PERM(k)};
+const TAB_PERM={med:'medicamentos',prot:'protocolos',modelos:'protocolos',docs:'protocolos',descritivos:'protocolos',escalas:'protocolos',proc:'ajustes',equipe:'ajustes',boxes:'ajustes',clinica:'ajustes',tutores:'ajustes'};
+function cadRO(){if(S.master)return false;if(S.view==='prot')return !PERM('protocolos');if(S.view==='cad'){const k=TAB_PERM[S.cadTab];return !!k&&!PERM(k)}return false}
+function permClasses(){const b=document.body.classList;b.toggle('cad-ro',cadRO());b.toggle('no-ajustes',!PERM('ajustes'));b.toggle('no-exportar',!PERM('exportar'));b.toggle('not-master',!PERM('excluir'))}
 function confirmDiscard(go){confirmBox('Há alterações não salvas nesta ficha. Sair e descartar?','Descartar',()=>{S.dirty=false;go()});return false}
 
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const f=ACT[el.dataset.act];if(!f)return;if(el.disabled)return;f(el,e)});
@@ -3992,10 +3997,10 @@ async function boot(){
   S.user=user;try{S.master=user?!!(await user.isOwner()):false}catch(_){S.master=false}document.body.classList.toggle('not-master',!S.master);
   S._rawdb=db;
   const wrapRef=r=>({id:r.id,path:r.path,get:()=>r.get(),
-   set:async(d,o)=>{if(!S.master&&isMCol(r.path))throw{code:'cad_master'};await blkGuard(r.path,d);await finGuard(r,d);d=await authStamp(r,d);return o?r.set(d,o):r.set(d)},
-   update:async d=>{if(!S.master&&isMCol(r.path))throw{code:'cad_master'};await blkGuard(r.path,d);await finGuard(r,d);if(!S.master&&d&&'criadoUid' in d){d={...d};delete d.criadoUid}return r.update(d)},
-   delete:async()=>{if(S.master)return r.delete();if(isMCol(r.path))throw{code:'cad_master'};try{const g=await r.get();const x=g.exists?g.data():null;if(x&&x.criadoUid&&x.criadoUid===S.uid&&!x.finalizada)return r.delete()}catch(_){}throw{code:'master_only'}},onSnapshot:(a,b)=>r.onSnapshot(a,b),collection:c=>r.collection(c),acquire:o=>r.acquire(o)});
-  const wrapCol=(c,p)=>new Proxy(c,{get(t,k){if(k==='doc')return(...a)=>wrapRef(t.doc(...a));if(k==='add')return async d=>{if(!S.master&&isMCol(p))throw{code:'cad_master'};await blkGuard(p+'/_',d);return t.add(d)};const v=t[k];return typeof v==='function'?v.bind(t):v}});
+   set:async(d,o)=>{if(!colPermOk(r.path))throw{code:'sem_perm'};await blkGuard(r.path,d);await finGuard(r,d);d=await authStamp(r,d);return o?r.set(d,o):r.set(d)},
+   update:async d=>{if(!colPermOk(r.path))throw{code:'sem_perm'};await blkGuard(r.path,d);await finGuard(r,d);if(!S.master&&d&&'criadoUid' in d){d={...d};delete d.criadoUid}return r.update(d)},
+   delete:async()=>{if(!colPermOk(r.path))throw{code:'sem_perm'};if(S.master||PERM('excluir'))return r.delete();try{const g=await r.get();const x=g.exists?g.data():null;if(x&&x.criadoUid&&x.criadoUid===S.uid&&!x.finalizada)return r.delete()}catch(_){}throw{code:'master_only'}},onSnapshot:(a,b)=>r.onSnapshot(a,b),collection:c=>r.collection(c),acquire:o=>r.acquire(o)});
+  const wrapCol=(c,p)=>new Proxy(c,{get(t,k){if(k==='doc')return(...a)=>wrapRef(t.doc(...a));if(k==='add')return async d=>{if(!colPermOk(p))throw{code:'sem_perm'};await blkGuard(p+'/_',d);return t.add(d)};const v=t[k];return typeof v==='function'?v.bind(t):v}});
   S.db={doc:p=>wrapRef(db.doc(p)),collection:p=>wrapCol(db.collection(p),p)};
   try{S.uid=user?await user.id():null}catch(e){}
   try{const c=user?await user.can('data.write'):null;if(c===false)S.canWrite=false}catch(e){}

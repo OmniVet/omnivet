@@ -28,6 +28,9 @@ const appS=()=>{try{return typeof S!=='undefined'?S:null}catch(_){return null}};
 const appRender=()=>{try{if(typeof render==='function')render()}catch(_){}};
 
 let ME=null,USERS=[],IA=null,EQUIPE=[];
+const PERMS=[['ajustes','Pode fazer ajustes nos cadastros do paciente, do tutor e demais informações'],['exportar','Pode exportar o histórico completo do paciente (PDF/Word)'],['protocolos','Pode ajustar, cadastrar ou excluir protocolos de tratamento, descrições cirúrgicas e documentos'],['excluir','Pode excluir registros (de qualquer pessoa) e históricos'],['medicamentos','Pode ajustar, cadastrar ou excluir medicamentos (concentrações, doses e apresentações)']];
+const permBoxes=(pm,dis)=>`<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:13px;color:var(--ink-2,#4A656D)">Permissões (pode marcar várias)</b>${PERMS.map(([k,l])=>`<label class="chk"><input type="checkbox" name="perm_${k}" ${pm&&pm[k]?'checked':''} ${dis?'disabled':''}> ${l}</label>`).join('')}<div class="note" style="padding:8px 10px">Todos os usuários sempre veem todos os dados do tutor e do pet, quem administrou cada medicamento e os registros do histórico, e todos lançam nas fichas dos pacientes. O master tem todas as permissões.</div></div>`;
+const permRead=f=>Object.fromEntries(PERMS.map(([k])=>[k,!!(f['perm_'+k]&&f['perm_'+k].checked)]));
 let resolveReady;const readyP=new Promise(r=>resolveReady=r);
 
 /* ---------- banco: mesma interface usada pelo app ---------- */
@@ -234,6 +237,7 @@ async function usersPanel(){await loadEquipe();
     <div class="row"><label>Nome completo<input name="nome" required></label><label>Usuário (login)<input name="login" autocapitalize="none" spellcheck="false" placeholder="ex.: katia.viana" required pattern="[a-zA-Z0-9._\\-]{3,40}" title="Use letras, números, ponto, hífen ou sublinhado (sem espaços)"></label></div>
     <div class="row"><label>Senha provisória<input name="senha" minlength="6" required placeholder="mínimo 6 caracteres"></label><label>Perfil<select name="papel"><option value="equipe">Equipe</option><option value="master">Master</option></select></label></div>
     <label>Vincular ao cadastro da equipe (nome e CRMV nos documentos)<select name="equipeId">${eqOpts('')}</select></label>
+    ${permBoxes({},false)}
     <div class="fb-err" id="fbNUe"></div><button class="fb-btn">Criar usuário</button></form>`);
   ov.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>editUser(b.dataset.e));
   const f=ov.querySelector('#fbNU');f.onsubmit=async e=>{e.preventDefault();const er=ov.querySelector('#fbNUe');const login=f.login.value.trim().toLowerCase();
@@ -241,17 +245,18 @@ async function usersPanel(){await loadEquipe();
     const btn=f.querySelector('button');btn.disabled=true;btn.textContent='Criando…';
     try{const sec=firebase.apps.find(a=>a.name==='sec')||firebase.initializeApp(CFG,'sec');const sa=sec.auth();await sa.setPersistence(firebase.auth.Auth.Persistence.NONE);
       const c=await sa.createUserWithEmailAndPassword(loginToEmail(login),f.senha.value);const uid=c.user.uid;await sa.signOut();
-      await fs.doc('usuarios/'+uid).set({login,nome:f.nome.value.trim(),papel:f.papel.value,equipeId:f.equipeId.value||null,ativo:true,trocarSenha:true,criadoEm:nowISO(),criadoPor:ME.uid});
+      await fs.doc('usuarios/'+uid).set({login,nome:f.nome.value.trim(),papel:f.papel.value,equipeId:f.equipeId.value||null,perm:permRead(f),ativo:true,trocarSenha:true,criadoEm:nowISO(),criadoPor:ME.uid});
       usersPanel()}catch(x){btn.disabled=false;btn.textContent='Criar usuário';er.textContent=authMsg(x)}}}
 async function editUser(id){const u=USERS.find(x=>x.id===id);if(!u)return;await loadEquipe();
   const ov=modal('Editar usuário',`<form id="fbEU" style="display:flex;flex-direction:column;gap:12px"><div class="note">Usuário: <b>${esc(u.login)}</b></div>
    <label>Nome completo<input name="nome" value="${esc(u.nome||'')}" required></label>
    <div class="row"><label>Perfil<select name="papel"><option value="equipe" ${u.papel!=='master'?'selected':''}>Equipe</option><option value="master" ${u.papel==='master'?'selected':''}>Master</option></select></label>
    <label>Vínculo com a equipe<select name="equipeId">${eqOpts(u.equipeId||'')}</select></label></div>
+   ${permBoxes(u.perm||{},false)}
    <label class="chk"><input type="checkbox" name="ativo" ${u.ativo!==false?'checked':''}> Pode entrar no sistema (desmarque para bloquear o acesso)</label>
    <div class="fb-err" id="fbEUe"></div><div style="display:flex;gap:8px"><button type="button" class="fb-btn sec" id="fbBack">Voltar</button><button class="fb-btn" style="flex:1">Salvar</button></div></form>`);
   ov.querySelector('#fbBack').onclick=usersPanel;
-  const f=ov.querySelector('#fbEU');f.onsubmit=async e=>{e.preventDefault();try{await fs.doc('usuarios/'+id).update({nome:f.nome.value.trim(),papel:f.papel.value,equipeId:f.equipeId.value||null,ativo:f.ativo.checked,alteradoEm:nowISO()});usersPanel()}catch(x){ov.querySelector('#fbEUe').textContent='Não foi possível salvar ('+(x.code||x.message)+').'}}}
+  const f=ov.querySelector('#fbEU');f.onsubmit=async e=>{e.preventDefault();try{await fs.doc('usuarios/'+id).update({nome:f.nome.value.trim(),papel:f.papel.value,equipeId:f.equipeId.value||null,perm:permRead(f),ativo:f.ativo.checked,alteradoEm:nowISO()});usersPanel()}catch(x){ov.querySelector('#fbEUe').textContent='Não foi possível salvar ('+(x.code||x.message)+').'}}}
 
 /* ---------- IA (master) ---------- */
 function iaPanel(){const ov=modal('Configurar IA (Gemini)',`<div class="note">Cole aqui a chave gratuita do Gemini (Google AI Studio → <i>Get API key</i>). Antes de enviar qualquer texto para a IA, o sistema troca nome, CPF, telefone, e-mail e endereço do tutor por códigos e só devolve os dados reais depois, no seu aparelho.</div>
@@ -300,10 +305,10 @@ function start(){injectCSS();
       if(!s||!s.exists){gateMsg('Acesso não liberado','Seu usuário ainda não foi liberado pelo master da clínica.',true);return}
       const d=s.data();if(d.ativo===false){gateMsg('Acesso bloqueado','Seu usuário está desativado. Fale com o master da clínica.',true);return}
       if(d.trocarSenha){showTroca(true);return}
-      ME={uid:u.uid,...d,login:d.login||login};
+      ME={uid:u.uid,...d,login:d.login||login};window.__vpPerm=ME.papel==='master'?Object.fromEntries(PERMS.map(([k])=>[k,true])):(ME.perm||{});
       try{if(ME.equipeId)localStorage.setItem('vp_resp',JSON.stringify(ME.equipeId))}catch(_){}
       ref.update({ultimoAcesso:nowISO()}).catch(()=>{});
-      fs.collection('usuarios').onSnapshot(x=>{USERS=x.docs.map(d=>({id:d.id,...d.data()}));const me=USERS.find(z=>z.id===ME.uid);if(me&&me.ativo===false)logout()},()=>{});
+      fs.collection('usuarios').onSnapshot(x=>{USERS=x.docs.map(d=>({id:d.id,...d.data()}));const me=USERS.find(z=>z.id===ME.uid);if(me&&me.ativo===false)logout();if(me&&me.papel!=='master'){window.__vpPerm=me.perm||{};appRender()}},()=>{});
       await new Promise(res=>{let first=true;fs.doc('config/ia').onSnapshot(x=>{IA=x.exists?x.data():null;const S_=appS();if(S_&&!first){S_.sample=IA&&IA.key?sample:null;appRender()}if(first){first=false;res()}},()=>{if(first){first=false;res()}})});
       if('serviceWorker' in navigator&&navigator.serviceWorker.controller==null){await Promise.race([new Promise(r=>navigator.serviceWorker.addEventListener('controllerchange',r,{once:true})),new Promise(r=>setTimeout(r,2500))])}
       paintAcct();hideGate();resolveReady()}
