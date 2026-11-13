@@ -112,6 +112,17 @@ async function sample(prompt,o){o=o||{};if(!IA||!IA.key)throw{code:'ia_off',mess
           if(d){full+=d;o.onText&&o.onText({text:unredact(full,map),delta:d})}}catch(_){}}}
     return{text:unredact(full,map),truncated:false}}
   throw last||new Error('IA indisponível')}
+window.__vpTranscribe=async blob=>{if(!IA||!IA.key)throw new Error('A IA ainda não foi configurada (menu da conta › Configurar IA).');
+  if(blob.size>18*1024*1024)throw new Error('Áudio muito grande (máximo 18 MB).');
+  let type=blob.type||'audio/ogg';if(/opus|ogg/.test(blob.name||'')||!type)type='audio/ogg';
+  const data=await b64of(blob);let last;
+  for(const m of [...new Set([IA.modelo||'gemini-flash-latest','gemini-2.5-flash'])]){
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent?key=${encodeURIComponent(IA.key)}`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{role:'user',parts:[{inline_data:{mime_type:type,data}},{text:'Transcreva este áudio em português do Brasil, palavra por palavra, com pontuação. Responda somente com a transcrição, sem comentários.'}]}],generationConfig:{temperature:0}})});
+    if(r.status===404){last=new Error('modelo indisponível');continue}
+    if(!r.ok){let msg='';try{msg=(await r.json()).error.message}catch(_){}throw new Error('IA: '+(msg||r.status))}
+    const j=await r.json();return(((j.candidates||[])[0]||{}).content||{parts:[]}).parts.filter(x=>!x.thought).map(x=>x.text||'').join('')}
+  throw last||new Error('IA indisponível')};
 sample.json=async(p,o)=>{const r=await sample(p,o);const m=r.text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);return m?JSON.parse(m[0]):null};
 
 /* ---------- window.claude ---------- */

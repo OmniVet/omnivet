@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611131318"></script>
-<script src="lib/firebase-auth-compat.js?v=202611131318"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611131318"></script>
-<script src="fb.js?v=202611131318"></script>
+<script src="lib/firebase-app-compat.js?v=202611131358"></script>
+<script src="lib/firebase-auth-compat.js?v=202611131358"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611131358"></script>
+<script src="fb.js?v=202611131358"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -82,6 +82,21 @@ svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .home-c .ls{display:flex;flex-wrap:wrap;gap:6px}.home-c .ls a{font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:99px;text-decoration:none;color:var(--ink-2);background:var(--surface-2)}
 .home-c .ls a:hover{border-color:var(--brand);color:var(--brand-text)}.home-c .sub2{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;width:100%;margin-top:4px}
 .home-c .st{display:flex;gap:16px;flex-wrap:wrap}.home-c .st b{font-size:22px;font-family:var(--f-display);display:block;line-height:1.1}.home-c .st span{font-size:12px;color:var(--ink-3)}
+.rub-box{display:flex;flex-direction:column;gap:10px;margin-top:10px}.rub{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 12px;background:var(--surface)}.rub img{height:56px;max-width:200px;object-fit:contain;background:#fff}
+.tl-ev{display:grid;grid-template-columns:52px 26px minmax(0,1fr);gap:8px;align-items:start;padding:7px 0;border-bottom:1px dashed var(--line-2)}.tl-ev:last-child{border-bottom:0}
+.tl-ev .hr{font-family:var(--f-mono,monospace);font-size:13px;color:var(--ink-2);padding-top:2px}.tl-ev .ti{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--ink-2)}.tl-ev .ti .i{width:15px;height:15px}
+.tl-ev .ti.adm{background:var(--brand-soft);color:var(--brand-text)}.tl-ev .ti.doc{background:var(--info-soft,#E0EEFA);color:var(--info,#2F6FB0)}.tl-ev .ti.med{background:var(--ok-soft,#DDF3E6);color:var(--ok,#1B8F4E)}.tl-ev .ti.cir{background:var(--warn-soft,#FBEBD3);color:var(--warn,#A7650A)}.tl-ev .ti.bad{background:var(--crit-soft);color:var(--crit)}
+.tl-ev b{font-weight:600}.tl-ev .ds{font-size:13px;color:var(--ink-2)}.tl-day{font-family:var(--f-display);font-weight:800;font-size:14px;margin:16px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.stp{display:flex;gap:0;margin:10px 0 4px;flex-wrap:wrap}.stp li{list-style:none;display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-3);padding:4px 10px 4px 0}
+.stp li .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);font-weight:700;font-size:11.5px;background:var(--surface)}
+.stp li.done{color:var(--ok)}.stp li.done .n{background:var(--ok);border-color:var(--ok);color:#fff}.stp li.cur{color:var(--ink);font-weight:700}.stp li.cur .n{border-color:var(--brand);color:var(--brand-text)}
+.stp li+li::before{content:"";width:18px;height:2px;background:var(--line);margin-right:6px}
+.nextstep{font-size:13.5px;background:var(--brand-soft);color:var(--brand-text);border-radius:8px;padding:8px 12px;margin-top:6px}
+.pick{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.pk{font:inherit;font-size:14px;padding:8px 12px;min-height:38px;border:1px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink-2);cursor:pointer}
+.pk:hover{border-color:var(--brand)}.pk.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);font-weight:600}
+.flu-sug{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface-2);padding:12px;display:flex;flex-direction:column;gap:8px}
+.flu-sug b.t{font-size:13px}.flu-sug .muted{font-size:12.5px;line-height:1.45}
 .soon{align-self:flex-start;display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--ink-3);border:1px solid var(--line)}
 .nav-h{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:12px 10px 4px}
 .nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);color:var(--ink-2);text-decoration:none;font-weight:500}
@@ -836,7 +851,7 @@ function viewInternados(){
     return`<button class="pcard" style="--u:${u[2]}" data-act="open" data-id="${p.id}">
       <div class="top"><div><h3>${esc(p.nome)} ${p.exemplo?'<span class="ex-tag">Exemplo</span>':''}${blkTag(p,1)}${defecTag(p)}</h3><div class="muted small">${esc([p.especie,p.raca,p.peso?num(p.peso,2)+' kg':''].filter(Boolean).join(' · '))}</div></div>${avatar(p)}</div>
       ${p.saidaRegistrada?'<div class="row"><span class="chip warn">Saída registrada · aguardando arquivamento</span></div>':''}${alertChips(p,true)}
-      <div class="row"><span class="chip ${u[1]}">${u[0]}</span>${p.tipoInt==='Semi-internação'?'<span class="chip info">Semi-internação</span>':''}${p.box?`<span class="chip">Box ${esc(p.box)}</span>`:'<span class="chip">Sem box</span>'}</div>
+      <div class="row"><span class="chip ${u[1]}">${u[0]}</span>${semiP(p)?'<span class="chip info">Semi-intensivo</span>':''}${p.box?`<span class="chip">Box ${esc(p.box)}</span>`:'<span class="chip">Sem box</span>'}</div>
       <dl class="kv" style="margin:0">
         <dt>Tutor</dt><dd>${esc(p.tutor||'—')}</dd>
         <dt>Duração</dt><dd class="tnum">${durStr(p.entrada)}</dd>
@@ -919,7 +934,7 @@ function viewCad(){
 function viewPaciente(){
   const p=curP();if(!p)return emptyBox('bed','Paciente não encontrado','Ele pode ter sido removido. Volte para a lista de internados.','<a class="btn" href="#internados">Voltar</a>');
   const u=URG[p.urgencia]||URG.nao;
-  const tabs=[['admissao','Admissão',ic('clip')],['docs','Documentos',ic('file')],['prescricao','Prescrição',ic('pill')],['mapa','Mapa de execução',ic('grid')],['evolucao','Evolução',ic('thermo')],['comunicacao','Comunicação com o tutor',ic('users')],['semi','Semi-internamento',ic('monitor')],['anestesia','Anestesia',ic('anes')],['cirurgia','Cirurgias',ic('scalp')],['transfusao','Transfusão',ic('drop')],['solic','Exames e serviços',ic('file')],['alta','Saída',ic('door')],['linha','Linha do tempo',ic('hist')]];
+  const tabs=[['admissao','Admissão',ic('clip')],['docs','Documentos',ic('file')],['prescricao','Prescrição',ic('pill')],['mapa','Mapa de execução',ic('grid')],['evolucao','Evolução',ic('thermo')],['comunicacao','Comunicação com o tutor',ic('users')],['semi','Semi-intensivo',ic('monitor')],['anestesia','Anestesia',ic('anes')],['cirurgia','Cirurgias',ic('scalp')],['transfusao','Transfusão',ic('drop')],['solic','Exames e serviços',ic('file')],['alta','Saída',ic('door')],['linha','Linha do tempo',ic('hist')]];
   let body='';
   if(S.tab==='admissao')body=tabAdmissao(p);
   else if(S.tab==='prescricao')body=tabPrescricao(p);
@@ -937,7 +952,7 @@ function viewPaciente(){
   return`<div class="crumb"><a href="#internados" style="color:inherit;text-decoration:none">Internação</a> <span>› ${esc(p.nome)}</span></div>
   <div class="panel" style="margin:10px 0 16px;border-top:3px solid ${u[2]}">
    <div class="phead">${S.assets?`<label class="avwrap" title="Trocar foto">${avatar(p,'lg')}<span class="avcam">${ic('cam')}</span><input type="file" id="fotoPac" accept="image/*" hidden></label>`:avatar(p,'lg')}
-    <div style="flex:1;min-width:220px"><div class="row"><h1>${esc(p.nome)}</h1>${p.exemplo?'<span class="ex-tag">Exemplo</span>':''}<span class="chip ${u[1]}">${u[0]}</span>${p.tipoInt==='Semi-internação'?'<span class="chip info">Semi-internação</span>':''}${blkTag(p)}${p.status==='alta'?(l=>`<span class="chip ${l[1]}">${esc(l[0])}</span>`)(saidaLabel(p)):'<span class="chip brand">Internado</span>'}</div>
+    <div style="flex:1;min-width:220px"><div class="row"><h1>${esc(p.nome)}</h1>${p.exemplo?'<span class="ex-tag">Exemplo</span>':''}<span class="chip ${u[1]}">${u[0]}</span>${semiP(p)?'<span class="chip info">Semi-intensivo</span>':''}${blkTag(p)}${p.status==='alta'?(l=>`<span class="chip ${l[1]}">${esc(l[0])}</span>`)(saidaLabel(p)):'<span class="chip brand">Internado</span>'}</div>
      <div class="pmeta"><span>${esc([p.especie,p.raca,p.sexo,p.idade].filter(Boolean).join(' · ')||'—')}</span><span>Peso <b class="tnum">${p.peso?num(p.peso,2)+' kg':'—'}</b></span><span>Tutor <b>${esc(p.tutor||'—')}</b>${p.telefone?` · <span class="mono">${esc(p.telefone)}</span>`:''}</span></div>
      <div class="pmeta"><span>Entrada <b class="tnum">${fmtDT(p.entrada)}</b></span><span>Duração <b class="tnum">${durStr(p.entrada,p.status==='alta'?p.saida:null)}</b></span><span>Alta prevista <b style="color:${p.altaPrevista&&p.altaPrevista<today()&&p.status!=='alta'?'var(--crit)':'inherit'}">${fmtD(p.altaPrevista)}</b></span><span>Box <b>${esc(p.box||'Sem box')}</b></span><span>Microchip <b class="mono">${esc(p.microchip||'—')}</b></span>${p.vet?`<span>Vet. responsável <b>${esc(equipeNome(p.vet))}</b></span>`:''}</div>
      ${p.motivo?`<div class="pmeta"><span>Motivo <b>${esc(p.motivo)}</b></span></div>`:''}
@@ -1005,7 +1020,7 @@ function itemsTable(itens,ctx,peso){
     return`<tr class="${it.suspenso?'susp':''}"><td><div class="typ ${tp}">${ic(tp==='flu'?'drop':tp==='proc'?'hand':tp==='alim'?'bowl':'pill')}</div></td>
      <td><div class="nm" ${it.cancelado?'style="text-decoration:line-through;opacity:.6"':''}>${ctx==='prot'?itemName0(it)+(medExtra(it)?' <span class="chip aut">$ fora do pacote</span>':''):itemName(it)}</div>${it.obs?`<div class="muted small">${esc(it.obs)}</div>`:''}${it.cancelado?`<span class="chip crit">Cancelado · lançado por engano${it.cancelado.por?' · '+esc(equipeNome(it.cancelado.por)):''}</span>`:it.suspenso?'<span class="chip crit">Suspenso</span>':''}${it.doseManut!=null&&ctx==='presc'?(it.dataIni===S.day?`<span class="chip info">Dose do 1º dia · depois ${num(it.doseManut,3)} ${esc(it.doseUn)}</span>`:`<span class="chip">Dose de manutenção (1º dia ${fmtDs(it.dataIni)})</span>`):''}${it.doseD1!=null&&ctx==='prot'?`<span class="chip info">1º dia ${num(it.doseD1,3)} ${esc(it.doseUn)} · depois ${num(it.dose,3)}</span>`:''}${it.protocolo&&ctx==='presc'?`<span class="chip small">${esc(it.protocolo)}</span>`:''}${it.grupo&&ctx==='prot'?`<span class="chip info">Alternativa · ${esc(it.grupo)}</span> `:''}${it.diasMax?`<span class="chip">Por ${it.diasMax} dia(s)${it.dataIni?' · até '+fmtDs(addDays(it.dataIni,it.diasMax-1)):''}</span>`:''}${ctx==='prot'&&(it.doseGato!=null||(it.horariosGato||[]).length||it.suspensoGato)?`<div class="small" style="color:var(--info)">Gatos: ${it.suspensoGato?'não usar':[it.doseGato!=null?num(it.doseGato,3)+' '+esc(it.doseUn):'',(it.horariosGato||[]).join(', ')].filter(Boolean).join(' · ')}</div>`:''}</td>
      <td>${dose}</td><td>${vol}</td><td>${esc(it.tipo==='proc'?'—':it.via||'IV')}</td>
-     <td>${it.tipo==='fluido'?'Contínua':freqLbl(it.freq)}<div class="muted small">${it.tipo==='fluido'?`conferir a cada ${it.conferir||2}h`:''}</div></td>
+     <td>${it.tipo==='fluido'?(it.manut?'Contínua':fluDur(it)+' horas'):freqLbl(it.freq)}<div class="muted small">${it.tipo==='fluido'?`início ${esc(it.inicio||'08:00')}${fluDur(it)<24?' · até '+esc(it.fim||''):''}`:''}</div></td>
      <td><div class="hrs">${hs.map(h=>`<span>${h}</span>`).join('')||'<span>SN</span>'}</div></td>
      <td style="text-align:right;white-space:nowrap">${ctx==='presc'&&medExtra(it)?`<button class="btn sm ghost" data-act="autReg" data-id="${it.id}" title="Autorização do tutor" ${W()}>$</button>`:''}<button class="btn sm ghost" data-act="itemEdit" data-ctx="${ctx}" data-id="${it.id}" ${W()} aria-label="Editar">${ic('edit')}</button><button class="btn sm ghost danger ${ctx==='presc'?own(it):''}" data-act="itemDel" data-ctx="${ctx}" data-id="${it.id}" ${W()} aria-label="Remover">${ic('trash')}</button></td></tr>`}).join('');
   return`<div class="tbl-wrap"><table class="tbl"><thead><tr><th></th><th>Item</th><th>Dose / taxa</th><th>Volume</th><th>Via</th><th>Frequência</th><th>Horários</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
@@ -1273,6 +1288,39 @@ function saidaLabel(p){const a=p.alta||{};const t=a.tipo||(a.condicao==='Óbito'
   if(t==='obito')return[(OB_CAUSA[a.obito?.causa]||'Óbito'),'crit'];return[SAIDA[t].l,SAIDA[t].c]}
 function obitoTxt(o){if(!o)return'';const c=o.causa==='eutanasia'?'Paciente submetido a eutanásia, com autorização do tutor':'Paciente veio a óbito durante a internação';return`${c}${o.hora?' às '+o.hora:''}${o.causaProvavel?'. Causa provável: '+o.causaProvavel:''}. Destino do corpo: ${OB_DEST[o.destino]||'a definir'}.`}
 function chkList(list,ck,cls){return list.map(([k,l,dep])=>`<label class="chk ${cls||''}" ${dep?`data-dep="${dep}"`:''}><input type="checkbox" name="ck_${k}" ${ck[k]?'checked':''}><span>${l}</span></label>`).join('')}
+function cienciaTxt(p){const a=p.alta||{};return `Declaro que recebi o(a) paciente ${p.nome} e que fui orientado(a) pela equipe sobre:
+• o tratamento realizado durante a internação e o tratamento a seguir em casa (medicações, doses, horários e duração);
+• a alimentação, os cuidados e as restrições necessárias;
+• os sinais de alerta: em caso de piora, de mudança no quadro ou se o paciente não responder ao tratamento, devo retornar à clínica;
+• em caso de dúvidas, devo retornar para reavaliação médica${a.retorno?'; retorno marcado para '+fmtD(a.retorno):''}.
+Recebi as orientações por escrito e tive a oportunidade de esclarecer minhas dúvidas.`}
+const canDel=()=>!!(S.master||(window.__vpPerm||{}).excluir);
+function modalRubrica(){const p=curP();const tu=tutorOf(p)||{};
+  openModal(`${H('Rubrica do tutor · saída de '+esc(p.nome))}<div class="modal-b">
+   <div class="decl" style="white-space:pre-line;max-height:34vh;overflow:auto">${esc(cienciaTxt(p))}</div>
+   <label class="f">Nome de quem está assinando<input class="inp" id="rubNome" value="${esc((p.alta||{}).entregueA||tu.nome||p.tutor||'')}"></label>
+   <div class="f">Rubrica (assine com o dedo ou a caneta)<canvas id="sigPad" style="width:100%;height:150px;border:1px dashed var(--line);border-radius:10px;background:#fff;touch-action:none"></canvas><button class="btn sm ghost" id="sigClr" type="button" style="align-self:flex-start">Limpar</button></div>
+   <div class="muted small">Data e hora: ${fmtDT(nowDT())} (registradas automaticamente)</div>
+  </div><div class="modal-f"><button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="rubOk">${ic('check')}Confirmar rubrica</button></div>`);
+  setTimeout(padInit,30);
+  $('#rubOk').onclick=async()=>{if(!padHasInk()){toast('Peça ao tutor para rubricar no quadro');return}const nome=$('#rubNome').value.trim();if(!nome){toast('Informe o nome de quem assinou');$('#rubNome').focus();return}
+    try{await S.db.doc('internacoes/'+p.id).update({alta:{rubrica:{img:padData(),nome,em:nowDT(),coletadoPor:lsGet('vp_resp','')||null,texto:cienciaTxt(p)}}});closeModal();toast('Rubrica registrada')}catch(e){fail(e)}}}
+async function altaPapelPDF(){const p=curP();const a={...(p.alta||{}),...($('#fAlta')?saidaCollect():{})};
+  try{await loadScript(JSPDF)}catch(e){toast('Não foi possível carregar o gerador de PDF');return}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const PW=210,M=18;const cl=S.clinica||{};const lg=await logoPNG();
+  const L=t=>String(t??'').replace(/[–—]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/…/g,'...').replace(/•/g,'-').replace(/[^\x00-\xFF]/g,'');const K={lg,cl,L,PW,M};
+  const tu=tutorOf(p)||{};const IDF=docHeader(phCtx(p,tu,{})).split('\n').slice(1).filter(Boolean);
+  let y=drawDocHeader(doc,K,'Saída hospitalar · orientações e ciência do tutor',IDF);
+  const need=h=>{if(y+h>278){doc.addPage();y=20}};
+  const T=t=>{need(10);doc.setFont('helvetica','bold');doc.setFontSize(10.5);doc.setTextColor(7,115,105);doc.text(L(t),M,y);y+=5.5;doc.setTextColor(20,48,58)};
+  const P=t=>{if(!t)return;doc.setFont('helvetica','normal');doc.setFontSize(10);for(const ln of doc.splitTextToSize(L(t),PW-2*M)){need(5);doc.text(ln,M,y);y+=4.8}y+=2};
+  P(`Saída em ${fmtDT(a.dataHora||nowDT())}${a.responsavel?' · Vet. responsável: '+equipeNome(a.responsavel):''}`);
+  if(a.resumo){T('Resumo da internação');P(a.resumo)}if(a.medicacoes){T('Medicações para casa');P(a.medicacoes)}if(a.alimentacao){T('Alimentação');P(a.alimentacao)}if(a.cuidados){T('Cuidados e sinais de alerta');P(a.cuidados)}if(a.retorno){T('Retorno');P(fmtD(a.retorno))}
+  T('Ciência do tutor');P(cienciaTxt(p));
+  need(40);y+=16;doc.setDrawColor(120,140,145);doc.setLineWidth(.3);doc.line(M,y,M+80,y);doc.line(PW-M-62,y,PW-M,y);doc.setFontSize(8.6);doc.setFont('helvetica','bold');doc.text(L(tu.nome||p.tutor||'Tutor(a)'),M,y+4.5);doc.text(L('Data e hora'),PW-M-62,y+4.5);doc.setFont('helvetica','normal');doc.text(L('Rubrica do tutor(a)'+(tu.cpf?' · CPF '+cpfMask(tu.cpf):'')),M,y+8.6);doc.text(L('____/____/______  às  ____:____'),PW-M-62,y+8.6);
+  if(a.rubrica){y+=16;need(30);doc.setFontSize(8.4);doc.text(L(`Rubrica digital registrada em ${fmtDT(a.rubrica.em)} por ${a.rubrica.nome}:`),M,y);try{doc.addImage(a.rubrica.img,'PNG',M,y+2,50,18)}catch(_){}}
+  docFooters(doc,K,[{t:'Saída hospitalar · '+p.nome,s:1}],'');
+  await S.downloads.save({filename:`Saida_${String(p.nome).replace(/[^\w-]+/g,'_')}.pdf`,data:doc.output('blob')});toast('PDF pronto para imprimir')}
 function tabAlta(p){
   const a=p.alta||{};const adm=p.admissao||{};const qv=adm.q||{};const cf=a.conf||{};const ck=a.check||{};const pr=a.params||{};const ob=a.obito||{};const tr=a.transf||{};
   const tipo=a.tipo||'alta';
@@ -1282,7 +1330,7 @@ function tabAlta(p){
      <input class="inp" name="cn_${k}" value="${esc(cf[k]?.nota||'')}" placeholder="Observação na saída">
      <label class="row small" style="white-space:nowrap"><input type="checkbox" name="cc_${k}" ${cf[k]?.ok?'checked':''}> ${lbl}</label></div>`}).join('');
   const sl=p.status==='alta'?saidaLabel(p):null;
-  return`${sl?`<div class="banner ${sl[1]==='crit'?'warn':'ok'}" style="margin-bottom:14px">${ic('check')}<b>${esc(sl[0])} registrada em ${fmtDT(p.saida)}</b> · arquivado no histórico<span class="spacer"></span>${S.master?`<button class="btn sm" data-act="reabrir">Reabrir internação</button>`:''}</div>`:''}
+  return`${sl?`<div class="banner ${sl[1]==='crit'?'warn':'ok'}" style="margin-bottom:14px">${ic('check')}<b>${esc(sl[0])} registrada em ${fmtDT(p.saida)}</b> · arquivado no histórico<span class="spacer"></span>${canDel()?`<button class="btn sm" data-act="reabrir">Reabrir internação</button>`:''}</div>`:''}
   ${p.status!=='alta'&&p.saidaRegistrada?`<div class="banner warn" style="margin-bottom:14px">${ic('door')}<b>Saída registrada em ${fmtDT(p.saida)}${p.saidaRegPor?' por '+esc(equipeNome(p.saidaRegPor)):''}</b> · aguardando arquivamento pelo master<span class="spacer"></span>${S.master?`<button class="btn sm pri" data-act="arquivar">Arquivar internação</button>`:''}<button class="btn sm" data-act="desfazerSaida" ${W()}>Desfazer registro</button></div>`:''}
   <form class="panel" id="fAlta" data-track onsubmit="return false" data-tipo="${tipo}" data-causa="${ob.causa||'natural'}">
    <div class="panel-h"><h2>Ficha de saída hospitalar</h2><span class="spacer"></span>${a.salvoEm?`<span class="muted small">Salva em ${fmtDT(a.salvoEm)}</span>`:''}</div>
@@ -1349,6 +1397,13 @@ ${ob.protocolo?`<input type="hidden" name="ob_protocolo" value="${esc(ob.protoco
      </div>
     </div>
 
+    <div data-show="vivo transferencia">
+     <div class="sec-t">Ciência do tutor</div>
+     <div class="decl" style="white-space:pre-line">${esc(cienciaTxt(p))}</div>
+     <div class="rub-box">${a.rubrica?`<div class="rub"><img src="${esc(a.rubrica.img)}" alt="Rubrica do tutor"><div><b>${esc(a.rubrica.nome||'')}</b><br><span class="muted small">Rubrica em ${fmtDT(a.rubrica.em)}</span></div></div>`:'<span class="muted small">Ainda sem rubrica do tutor.</span>'}
+      <div class="row" style="gap:6px"><button class="btn ${a.rubrica?'':'pri'}" type="button" data-act="rubColetar" ${W()}>${ic('edit')}${a.rubrica?'Coletar de novo':'Tutor rubrica no tablet'}</button><button class="btn" type="button" data-act="rubPapel">${ic('file')}Imprimir para assinar no papel</button>${a.rubPapel?`<span class="chip ok">Via em papel assinada · ${fmtDT(a.rubPapel.em)}</span>`:`<button class="btn ghost" type="button" data-act="rubPapelOk" ${W()}>${ic('check')}Papel assinado</button>`}</div></div>
+    </div>
+
     <div data-show="vivo transferencia obito">
      <div class="sec-t">Conferência com a admissão</div>
      ${confRows||'<div class="muted small">Nenhum item marcado como “Sim” em medicação, alimentação, pertences ou cuidados na admissão.</div>'}
@@ -1377,22 +1432,31 @@ function saidaCollect(){
 }
 
 /* Linha do tempo */
-function tabLinha(p){
-  const start=p.entrada?p.entrada.slice(0,10):today();const end=p.status==='alta'&&p.saida?p.saida.slice(0,10):today();
-  const days=[];for(let d=start;d<=end&&days.length<120;d=addDays(d,1))days.push(d);
-  const cirs=S.pCir;
-  return`<div class="panel"><div class="panel-h"><h2>Linha do tempo da internação</h2><span class="muted small">${days.length} dia(s) · ${fmtD(start)} a ${fmtD(end)}</span></div><div class="tl">
-   ${days.reverse().map((d,i)=>{const pr=S.pPresc[d];const mk=S.pExec[d]||{};let tot=0,ok=0,nao=0,inter=0;
-     if(pr)for(const it of pr.itens||[])for(const h of horarios(it)){tot++;const m=mk[it.id+'|'+h];if(m?.s==='ok')ok++;if(m?.s==='nao')nao++}
-     for(const v of Object.values(mk))if(v&&v.interc&&v.interc!=='Nenhuma')inter++;
-     const cs=cirs.filter(c=>(c.data||'').slice(0,10)===d);
-     const dn=Math.round((parseD(d)-parseD(start))/864e5)+1;
-     return`<div class="tl-d"><div class="dd">${fmtD(d)}<small>${wd(d)} · ${dn}º dia</small></div>
-      <div class="mid row">${pr?`<span class="chip brand">${(pr.itens||[]).length} itens prescritos</span><span class="chip ${ok===tot&&tot?'ok':''} tnum">${ok}/${tot} feitos</span>${nao?`<span class="chip crit">${nao} não feito(s)</span>`:''}${inter?`<span class="chip warn">${inter} intercorrência(s)</span>`:''}`:'<span class="chip warn">Sem prescrição</span>'}
-       ${cs.map(c=>`<span class="chip info">${ic('scalp')}${esc(c.titulo||'Cirurgia')}</span>`).join('')}${(n=>n?`<span class="chip ${n>=3?'ok':'warn'}">${ic('thermo')}${n} avaliação(ões)</span>`:'')(S.pEvo.filter(e=>e.data===d).length)}${(n=>n?`<span class="chip crit">${ic('flag')}${n} intercorrência(s)</span>`:'')(S.pInter.filter(x=>x.data===d).length)}${(n=>n?`<span class="chip">${n} comunicação(ões)</span>`:'')(S.pComm.filter(x=>String(x.em).slice(0,10)===d).length)}${S.pMon[d]?`<span class="chip info">${ic('monitor')}Semi: ${Object.values(S.pMon[d].horas||{}).filter(Boolean).length}/24 h</span>`:''}${d===start?'<span class="chip">Admissão</span>':''}${p.status==='alta'&&d===end?(l=>`<span class="chip ${l[1]}">Saída: ${esc(l[0])}</span>`)(saidaLabel(p)):''}</div>
-      <div class="row"><button class="btn sm" data-act="goDay" data-d="${d}" data-t="prescricao">Prescrição</button><button class="btn sm" data-act="goDay" data-d="${d}" data-t="mapa">Mapa</button></div></div>`}).join('')}
-  </div></div>`;
-}
+function linhaEventos(p){const E=[];const add=(t,tipo,icn,tit,ds)=>{if(t)E.push({t:String(t).slice(0,16),tipo,icn,tit,ds})};
+  add(p.entrada,'adm','bed','Admissão',[p.motivo,p.box?'Box '+p.box:'',semiP(p)?'Semi-intensivo':''].filter(Boolean).join(' · '));
+  if(p.admissao?.salvoEm)add(p.admissao.salvoEm,'adm','clip','Ficha de admissão preenchida','');
+  for(const x of sigOf(p.id)){if(x.status==='cancelado')continue;const nm=x.docs.map(d=>d.nome).join(', ');
+    if(x.assinadoEm)add(x.assinadoEm,'doc','file','Tutor assinou os termos',nm);if(x.confirmadoEm)add(x.confirmadoEm,'doc','check','Assinatura confirmada',[nm,x.canal].filter(Boolean).join(' · '));if(x.fotoPapel&&x.papelEm)add(x.papelEm,'doc','cam','Via em papel assinada',nm)}
+  for(const [d,mk] of Object.entries(S.pExec)){const pr=S.pPresc[d];const its=Object.fromEntries((pr?.itens||[]).map(i=>[i.id,i]));
+    for(const [k,m] of Object.entries(mk||{})){if(!m)continue;const it=its[k.split('|')[0]];const nm=it?(it.tipo==='fluido'?'Fluidoterapia '+(it.soro||''):it.nome):'Item da prescrição';
+      const quem=equipeNome(m.por||m.resp)||'';const t=m.em||(d+'T'+(m.hora||k.split('|')[1]));
+      if(m.s==='ok')add(t,it?.tipo==='proc'?'':'med',it?.tipo==='fluido'?'drop':it?.tipo==='proc'?'hand':it?.tipo==='alim'?'bowl':'pill',nm+(it?.tipo==='med'&&it.volume!=null?` · ${num(it.volume)} mL ${it.via||''}`:''),[quem&&'por '+quem,m.interc&&m.interc!=='Nenhuma'?m.interc:'',m.obs].filter(Boolean).join(' · '));
+      else if(m.s==='nao')add(t,'bad','x','Não realizado: '+nm,[m.motivo,m.obs,quem].filter(Boolean).join(' · '))}}
+  for(const e of S.pEvo)add(e.data+'T'+(e.hora||'00:00'),'','thermo','Parâmetros / evolução',[e.estado,e.temp&&e.temp+' °C',e.fc&&'FC '+e.fc,e.fr&&'FR '+e.fr,e.dor,equipeNome(e.avaliador)].filter(Boolean).join(' · '));
+  for(const a of S.pAnest)add(a.data,'cir','anes','Anestesia',[a.procedimento,equipeNome(a.anestesista)].filter(Boolean).join(' · '));
+  for(const c of S.pCir)add(c.data,'cir','scalp','Cirurgia: '+(c.titulo||'procedimento'),equipeNome(c.cirurgiao));
+  for(const x of S.pTransf)add(x.data+'T'+(x.inicio||'00:00'),'cir','drop','Transfusão',x.componente||'');
+  for(const x of S.pInter)add(x.data+'T'+(x.inicio||'00:00'),'bad','flag','Intercorrência: '+(x.tipo||''),x.descricao||'');
+  for(const x of S.pComm)add(x.em,'','users','Comunicação com o tutor ('+(x.canal||'')+')',equipeNome(x.autor)||'');
+  for(const x of solOf(p.id))add(x.em,'','file','Solicitado: '+(x.item||''),x.status||'');
+  for(const [d,m] of Object.entries(S.pMon))add(d+'T'+(m.inicio||'00:00'),'','monitor','Ficha de semi-intensivo','');
+  if(p.alta?.rubrica)add(p.alta.rubrica.em,'doc','edit','Tutor rubricou a ciência da saída',p.alta.rubrica.nome);
+  if(p.status==='alta'&&p.saida){const l=saidaLabel(p);add(p.saida,'adm','door','Saída: '+l[0],p.alta?.entregueA?'entregue a '+p.alta.entregueA:'')}
+  return E.sort((a,b)=>a.t.localeCompare(b.t))}
+function tabLinha(p){const E=linhaEventos(p);const start=p.entrada?p.entrada.slice(0,10):today();let last='';
+  const body=E.map(e=>{const d=e.t.slice(0,10);let hd='';if(d!==last){last=d;const dn=Math.round((parseD(d)-parseD(start))/864e5)+1;hd=`<div class="tl-day">${fmtD(d)} <span class="muted small" style="font-weight:500">${wd(d)}${dn>0?' · '+dn+'º dia':''}</span><span class="spacer"></span><button class="btn sm" data-act="goDay" data-d="${d}" data-t="prescricao">Prescrição</button><button class="btn sm" data-act="goDay" data-d="${d}" data-t="mapa">Mapa</button></div>`}
+    return hd+`<div class="tl-ev"><span class="hr">${e.t.slice(11,16)||'—'}</span><span class="ti ${e.tipo}">${ic(e.icn)}</span><div><b>${esc(e.tit)}</b>${e.ds?`<div class="ds">${esc(e.ds)}</div>`:''}</div></div>`}).join('');
+  return`<div class="panel"><div class="panel-h"><h2>Linha do tempo do paciente</h2><span class="muted small">em ordem cronológica · ${E.length} registro(s)</span></div><div class="panel-b">${body||'<div class="muted">Nada registrado ainda.</div>'}</div></div>`}
 
 /* ---------- Modal ---------- */
 function openModal(html,cls=''){ $('#modalRoot').innerHTML=`<div class="ov" data-act="ovClose"><div class="modal ${cls}" role="dialog" aria-modal="true">${html}</div></div>`;const f=$('#modalRoot input:not([type=hidden]):not([type=radio]),#modalRoot select,#modalRoot textarea');if(f)setTimeout(()=>f.focus(),30)}
@@ -1402,20 +1466,36 @@ function confirmBox(msg,ok,fn,danger=true){openModal(`<div class="modal-h"><h2>C
 const H=s=>`<div class="modal-h"><h2>${s}</h2><button class="btn icon ghost" data-act="close" aria-label="Fechar">${ic('x')}</button></div>`;
 
 /* Nova / editar internação */
+const MOTIVOS=['Hidratação','Estabilização','Pós-operatório','Pré-operatório','Suspeita de gastroenterite','Vômito / diarreia','Parvovirose','Dor','Observação','Convulsão','Trauma / atropelamento','Intoxicação','Insuficiência renal','Obstrução urinária','Dificuldade respiratória','Não come (anorexia)','Transfusão','Exames / procedimento','Outro'];
+const RACAS={'Cão':['SRD (sem raça definida)','Shih-tzu','Poodle','Yorkshire','Lhasa Apso','Pinscher','Maltês','Spitz alemão (Lulu)','Chihuahua','Dachshund (Salsicha)','Pug','Bulldog francês','Bulldog inglês','Beagle','Border Collie','Golden Retriever','Labrador','Pastor alemão','Rottweiler','Pit Bull','American Bully','Boxer','Husky siberiano','Cocker Spaniel','Schnauzer','Basset Hound','Dobermann','Akita','Chow Chow','Shar-pei','Fila brasileiro','Dálmata','Jack Russell','Pequinês','Bichon Frisé','Cane Corso','Dogue alemão','Weimaraner','Pastor belga'],
+ 'Gato':['SRD (sem raça definida)','Siamês','Persa','Himalaio','Maine Coon','Angorá','Ragdoll','Sphynx','Bengal','British Shorthair','Exótico','Scottish Fold','Azul russo','Sagrado da Birmânia','Norueguês da floresta','Abissínio','Savannah']};
+const PELAGENS={'Cão':['Preta','Branca','Marrom / chocolate','Caramelo','Dourada','Creme','Cinza / azul','Bege','Preta e branca','Preta e marrom (black and tan)','Tricolor','Tigrada','Malhada / manchada','Merle','Arlequim','Ruão'],
+ 'Gato':['Preta','Branca','Cinza / azul','Laranja (ruivo)','Creme','Preta e branca (frajola)','Cinza e branca','Laranja e branca','Tigrada cinza','Tigrada laranja','Tigrada marrom','Escaminha (tartaruga)','Tricolor (cálico)','Siamesa (pontas escuras)','Bicolor']};
+function admWire(){const f=$('#fInt');if(!f)return;
+  const esp=()=>(f.querySelector('input[name=especie]:checked')||{}).value||'Cão';
+  const fill=()=>{const e=esp();$('#racaList').innerHTML=(RACAS[e]||[]).map(r=>`<option value="${esc(r)}">`).join('');
+    const cur=$('#pelIn').value;$('#pelPick').innerHTML=(PELAGENS[e]||[]).map(o=>`<button type="button" class="pk ${cur===o?'on':''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')};
+  fill();$$('#espSeg input').forEach(r=>r.addEventListener('change',fill));
+  $('#pelPick').addEventListener('click',e=>{const b=e.target.closest('.pk');if(!b)return;const on=!b.classList.contains('on');$$('#pelPick .pk').forEach(x=>x.classList.remove('on'));if(on){b.classList.add('on');$('#pelIn').value=b.dataset.v}else $('#pelIn').value=''});
+  $('#pelIn').addEventListener('input',()=>$$('#pelPick .pk').forEach(x=>x.classList.toggle('on',x.dataset.v===$('#pelIn').value)));
+  const syncM=()=>{const sel=$$('#motPick .pk.on').map(x=>x.dataset.v);const extra=$('#motIn').value.split(/\s*;\s*/).filter(x=>x&&!MOTIVOS.includes(x));$('#motIn').value=[...sel,...extra].join('; ')};
+  $('#motPick').addEventListener('click',e=>{const b=e.target.closest('.pk');if(!b)return;b.classList.toggle('on');syncM()});
+}
+const semiP=p=>!!p&&/^semi/i.test(String(p.tipoInt||''));
 function modalInt(p){
   const isNew=!p||!p.id;p=p&&p.id?p:{entrada:nowDT(),especie:'Cão',urgencia:'nao',...(p||{})};
   openModal(`${H(p.id?'Editar dados do paciente':'Nova internação')}<form class="modal-b" id="fInt" onsubmit="return false">
    <div class="sec-t" style="margin:0">Paciente</div>
    <div class="grid g3">
     <label class="f">Nome do paciente *<input class="inp" name="nome" required value="${esc(p.nome||'')}"></label>
-    <label class="f">Espécie<select class="inp" name="especie">${['Cão','Gato','Ave','Roedor','Réptil','Outro'].map(o=>`<option ${p.especie===o?'selected':''}>${o}</option>`).join('')}</select></label>
-    <label class="f">Raça<input class="inp" name="raca" value="${esc(p.raca||'')}"></label>
+    <div class="f">Espécie<div class="seg" id="espSeg">${['Cão','Gato'].map(o=>`<label><input type="radio" name="especie" value="${o}" ${(p.especie||'Cão')===o?'checked':''}><span>${o}</span></label>`).join('')}</div></div>
+    <label class="f">Raça<input class="inp" name="raca" list="racaList" value="${esc(p.raca||'')}" placeholder="Toque e escolha ou digite"><datalist id="racaList"></datalist></label>
     <label class="f">Sexo<select class="inp" name="sexo">${['','Macho','Fêmea','Macho castrado','Fêmea castrada'].map(o=>`<option ${p.sexo===o?'selected':''}>${o}</option>`).join('')}</select></label>
     <label class="f">Idade<input class="inp" name="idade" value="${esc(p.idade||'')}" placeholder="Ex.: 6 anos"></label>
     <label class="f">Peso (kg)<input class="inp tnum" name="peso" inputmode="decimal" value="${esc(p.peso??'')}"></label>
     <label class="f span2">Nº do microchip<input class="inp mono" name="microchip" inputmode="numeric" value="${esc(p.microchip||'')}" placeholder="15 dígitos"></label>
-    <label class="f">Pelagem<input class="inp" name="pelagem" value="${esc(p.pelagem||'')}"></label>
    </div>
+   <div class="f">Pelagem / cor<div class="pick" id="pelPick"></div><input class="inp" name="pelagem" id="pelIn" value="${esc(p.pelagem||'')}" placeholder="Toque numa opção acima ou escreva" style="margin-top:6px"></div>
    <div class="sec-t" style="margin:0">Tutor</div>
    <input type="hidden" name="tutorId" id="tutId" value="${esc(p.tutorId||'')}">
    <div class="row" style="gap:8px;align-items:flex-start"><div class="ac" style="flex:1;min-width:240px"><input class="inp" id="tutBusca" placeholder="Buscar tutor já cadastrado (nome, CPF ou telefone)…" autocomplete="off"><div class="ac-list" id="tutRes" hidden></div></div><span id="tutVinc">${p.tutorId&&byId(S.tutores,p.tutorId)?`<span class="chip ok">${ic('check')}Vinculado ao cadastro do tutor</span> <button type="button" class="btn sm ghost" id="tutDesv">Desvincular</button>`:'<span class="muted small">Sem cadastro vinculado: ao salvar, o tutor é cadastrado.</span>'}</span></div>
@@ -1433,17 +1513,17 @@ function modalInt(p){
    <div class="grid g3">
     <label class="f">Entrada<input class="inp" type="datetime-local" name="entrada" value="${esc(p.entrada||'')}"></label>
     <label class="f">Alta prevista<input class="inp" type="date" name="altaPrevista" value="${esc(p.altaPrevista||'')}"></label>
-    <label class="f">Tipo<select class="inp" name="tipoInt">${['Internação','Semi-internação'].map(o=>`<option ${p.tipoInt===o?'selected':''}>${o}</option>`).join('')}</select></label>
+    <label class="f">Tipo<select class="inp" name="tipoInt">${['Internação','Semi-intensivo'].map(o=>`<option ${p.tipoInt===o?'selected':''}>${o}</option>`).join('')}</select></label>
     <label class="f">Box<input class="inp" name="box" list="boxList" value="${esc(p.box||'')}" placeholder="Escolha ou digite"><datalist id="boxList">${S.boxes.filter(b=>!ativos().some(q=>q.id!==p.id&&String(q.box||'').toLowerCase()===String(b.nome).toLowerCase())).map(b=>`<option value="${esc(b.nome)}">${esc(b.setor||'')}</option>`).join('')}</datalist></label>
     <label class="f">Isolamento<select class="inp" name="isolamentoSel"><option value="">Não</option><option value="1" ${p.isolamento?'selected':''}>Sim</option></select></label>
     <label class="f">Motivo do isolamento<input class="inp" name="isolamentoMotivo" value="${esc(p.isolamentoMotivo||'')}" placeholder="Parvovirose, cinomose, FeLV…"></label>
     <label class="f">Vet. responsável<select class="inp" name="vet"><option value="">—</option>${S.equipe.filter(e=>e.ativo!==false).map(e=>`<option value="${e.id}" ${p.vet===e.id?'selected':''}>${esc(e.nome)}</option>`).join('')}</select></label>
-    <label class="f span2">Motivo da internação<input class="inp" name="motivo" value="${esc(p.motivo||'')}"></label>
+    <div class="f spanall">Motivo da internação <span class="muted small" style="font-weight:400">(toque em um ou mais)</span><div class="pick" id="motPick">${MOTIVOS.map(o=>`<button type="button" class="pk ${String(p.motivo||'').split(/\s*;\s*/).includes(o)?'on':''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div><input class="inp" name="motivo" id="motIn" value="${esc(p.motivo||'')}" placeholder="Ou descreva o motivo" style="margin-top:6px"></div>
     ${isNew?`<label class="f spanall">Protocolo de prescrição (opcional)<select class="inp" id="intProt"><option value="">Nenhum, vou prescrever depois</option>${S.prots.filter(protOk).map(x=>`<option value="${x.id}">${esc(x.nome)} · ${(x.itens||[]).length} itens</option>`).join('')}</select><span class="muted small" style="font-weight:400">Depois de internar, abre a revisão do protocolo para ajustar doses e horários e lançar com o nome de quem prescreveu.</span></label>`:''}
    </div>
    <div class="f">Prioridade<div class="seg">${Object.entries(URG).map(([k,v])=>`<label><input type="radio" name="urgencia" value="${k}" ${p.urgencia===k?'checked':''} class="${k==='critico'?'bad':''}"><span>${v[0]}</span></label>`).join('')}</div></div>
-  </form><div class="modal-f">${p.id?`<button class="btn ghost danger" data-act="intDel" style="margin-right:auto">Excluir internação</button>`:''}<button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="intOk">${p.id?'Salvar':'Internar paciente'}</button></div>`,'wide');
-  tutPickWire();
+  </form><div class="modal-f">${p.id&&canDel()?`<button class="btn ghost danger" data-act="intDel" style="margin-right:auto">Excluir internação</button>`:''}<button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="intOk">${p.id?'Salvar':'Internar paciente'}</button></div>`,'wide');
+  tutPickWire();admWire();
   $('#intOk').onclick=async()=>{
     const f=$('#fInt');const fd=Object.fromEntries(new FormData(f));if(!fd.nome.trim()){f.nome.focus();return}
     fd.ufTutor=(fd.ufTutor||'').trim().toUpperCase();try{fd.tutorId=await tutorSync(fd)}catch(_){}
@@ -1454,7 +1534,7 @@ function modalInt(p){
       if(p.id){await S.db.doc('internacoes/'+p.id).update(fd);toast('Dados salvos');closeModal();return}
       const ref=S.db.collection('internacoes').doc();await ref.set({...fd,status:'internado',criadoEm:nowDT(),criadoPor:S.uid||null});
       if(S.agInternar){try{await S.db.doc('agenda/'+S.agInternar).update({internacaoId:ref.id,status:'realizado',realizadoEm:nowDT()})}catch(_){}S.agInternar=null}
-      closeModal();S.tab=fd.tipoInt==='Semi-internação'?'semi':prot?'prescricao':'admissao';location.hash='p-'+ref.id;toast('Paciente internado');
+      closeModal();S.tab=semiP(fd)?'semi':prot?'prescricao':'admissao';location.hash='p-'+ref.id;toast('Paciente internado');
       if(prot){const t0=Date.now();const w=()=>{if(curP()&&S.view==='paciente'){S.day=(fd.entrada||nowDT()).slice(0,10);render(true);modalAplicarProt(prot)}else if(Date.now()-t0<5000)setTimeout(w,150)};setTimeout(w,150)}
     }catch(e){fail(e)}
   };
@@ -1462,6 +1542,25 @@ function modalInt(p){
 
 /* Item de prescrição / protocolo */
 const parseHs=s=>[...new Set(String(s||'').split(/[,;\s]+/).map(x=>{const m=x.match(/^(\d{1,2})(?:[:hH](\d{2})?)?$/);if(!m)return null;const h=+m[1],mi=+(m[2]||0);return h<24&&mi<60?pad(h)+':'+pad(mi):null}).filter(Boolean))].sort();
+function fluDur(it){if(!it||it.ate==='24h'||!it.fim)return 24;const d=Math.round(((toMin(it.fim)-toMin(it.inicio||'08:00')+1440)%1440)/60);return [4,8,12,24].includes(d)?d:(d||24)}
+function fluWire(f,peso){
+  const esp=(curP()||{}).especie==='Gato'?'Gato':'Cão';
+  const setDur=()=>{const d=Number((f.querySelector('input[name=durH]:checked')||{}).value||24);const ini=f.inicio.value||'08:00';
+    if(d>=24){f.ate.value='24h';f.fim.value='';f.conferir.value=24;$('#durTxt').textContent='Do início ('+ini+') por 24 horas'}
+    else{const fim=toHM((toMin(ini)+d*60)%1440);f.ate.value='ate';f.fim.value=fim;f.conferir.value=d;$('#durTxt').textContent='De '+ini+' até '+fim}};
+  const setKgH=v=>{const t=$('#tKgH');t.value=String(v).replace('.',',');t.dispatchEvent(new Event('input',{bubbles:true}))};
+  const setMlH=v=>{const t=$('#tMlH');t.value=String(Math.round(v*10)/10).replace('.',',');t.dispatchEvent(new Event('input',{bubbles:true}))};
+  const draw=()=>{const d=Number(f.conferir.value)||24;const man=esp==='Gato'?2:2.5;
+    $('#fluSug').innerHTML=`<b class="t">Sugestões de taxa ${peso?`· ${esc(esp)} de ${num(peso,1)} kg`:'(informe o peso do paciente)'}</b>
+     <div class="pick">${[2,3,4,5].map(v=>`<button type="button" class="pk" data-k="${v}">${v} mL/kg/h${peso?' = '+num(v*peso,1)+' mL/h':''}</button>`).join('')}</div>
+     <span class="muted">3 a 5 mL/kg/h: reposição e pós-operatório. Manutenção: cão 2 a 3 mL/kg/h (50 a 60 mL/kg/dia); gato 2 mL/kg/h (40 a 50 mL/kg/dia). Durante anestesia: cão 5 mL/kg/h, gato 3 mL/kg/h.</span>
+     <b class="t" style="margin-top:4px">Desidratação: repor o déficit em ${d} horas + manutenção</b>
+     <div class="pick">${[5,6,8,10,12].map(v=>{const tx=peso?peso*v*10/d+peso*man:null;return`<button type="button" class="pk" data-ml="${tx||''}">${v}%${tx?' → '+num(tx,1)+' mL/h':''}</button>`}).join('')}</div>
+     <span class="muted">Déficit (mL) = peso (kg) × % de desidratação × 10. Ex.: 10 kg com 8% = 800 mL. Taxa = déficit ÷ horas escolhidas + manutenção (${man} mL/kg/h). Choque: bolus de 10 a 20 mL/kg (cão) ou 5 a 10 mL/kg (gato) em 15 a 20 min, reavaliando — não usar esta sugestão.</span>`};
+  $('#fluSug').addEventListener('click',e=>{const b=e.target.closest('.pk');if(!b)return;if(!peso){toast('Informe o peso do paciente primeiro');return}if(b.dataset.k)setKgH(Number(b.dataset.k));else if(b.dataset.ml)setMlH(Number(b.dataset.ml))});
+  $$('#durSeg input').forEach(r=>r.addEventListener('change',()=>{setDur();draw()}));f.inicio.addEventListener('change',setDur);
+  setDur();draw();
+}
 function modalItem(tipo,it,kind='presc'){
   const C=CTX(kind);const peso=C.peso;
   it=it?{...it}:{tipo,id:rid(),via:tipo==='med'?'SC':'IV',freq:tipo==='proc'?'24':tipo==='alim'?'12':'8',qtdUn:'g',alimento:'Ração seca',agua:'À vontade',inicio:'08:00',doseUn:'mL/kg',concUn:'mg/mL',ate:'24h',conferir:2,soro:'Ringer com lactato'};
@@ -1476,11 +1575,11 @@ function modalItem(tipo,it,kind='presc'){
      <label class="f">Taxa (mL/kg/h)<input class="inp tnum" name="taxaKgH" id="tKgH" inputmode="decimal" value="${esc(it.taxaKgH??'')}" placeholder="Ex.: 5"></label>
      <label class="f">Taxa na bomba (mL/h) *<input class="inp tnum" name="taxa" id="tMlH" inputmode="decimal" value="${esc(it.taxa??'')}"></label>
      <label class="f">Início<input class="inp" type="time" name="inicio" value="${esc(it.inicio||'08:00')}"></label>
-     <div class="f">Duração<div class="seg"><label><input type="radio" name="ate" value="24h" ${it.ate==='24h'?'checked':''}><span>24 horas</span></label><label><input type="radio" name="ate" value="ate" ${it.ate!=='24h'?'checked':''}><span>Até um horário</span></label></div></div>
-     <label class="f">Término<input class="inp" type="time" name="fim" value="${esc(it.fim||'20:00')}"></label>
+     <div class="f span2">Por quanto tempo<div class="seg" id="durSeg">${[4,8,12,24].map(h=>`<label><input type="radio" name="durH" value="${h}" ${fluDur(it)===h?'checked':''}><span>${h} horas</span></label>`).join('')}</div><span class="muted small" id="durTxt" style="font-weight:400"></span></div>
+     <input type="hidden" name="ate" value="${esc(it.ate||'24h')}"><input type="hidden" name="fim" value="${esc(it.fim||'')}"><input type="hidden" name="conferir" value="${esc(fluDur(it))}">
      <label class="f">Manter por (dias)<input class="inp tnum" name="diasMax" inputmode="numeric" value="${esc(it.diasMax||'')}" placeholder="Em branco = sem limite"></label>
      <label class="chk spanall"><input type="checkbox" name="manut" ${it.manut?'checked':''}><span><b>Manutenção contínua</b> · taxa fixa, 24 horas por dia, sem horário para parar. Segue igual quando a prescrição for duplicada para os próximos dias.</span></label>
-     <label class="f">Conferir a cada (h)<select class="inp" name="conferir">${[1,2,3,4,6,8,12].map(o=>`<option ${Number(it.conferir)===o?'selected':''}>${o}</option>`).join('')}</select></label>
+     <div class="f spanall"><div class="flu-sug" id="fluSug"></div></div>
      <label class="f spanall">Aditivos<input class="inp" name="aditivos" value="${esc(it.aditivos||'')}" placeholder="Ex.: KCl 20 mEq/L, glicose 2,5%"></label>
     </div><div class="calc" id="calcOut"></div>`;
   } else if(tipo==='alim'){
@@ -1533,7 +1632,7 @@ function modalItem(tipo,it,kind='presc'){
     if(tipo==='fluido'){const t=parseFloat(String(fd.taxa||'').replace(',','.'));const mins=fd.ate==='24h'?1440:((toMin(fd.fim)-toMin(fd.inicio)+1440)%1440||1440);$('#calcOut').innerHTML=t?`<span>Volume no período <b>${num(t*mins/60,0)} mL</b></span>${peso?`<span>Equivale a <b>${num(t*24/peso,1)} mL/kg/dia</b></span>`:''}`:'<span>Informe a taxa em mL/h</span>'}
     $('#hrsOut').textContent=horarios(tmp).join('  ')||'sem horário fixo (SN)'};
   const tk=$('#tKgH'),tm=$('#tMlH');if(tk){tk.addEventListener('input',()=>{const v=nv(tk.value);if(v!=null&&peso)tm.value=String(Math.round(v*peso*10)/10).replace('.',',')});tm.addEventListener('input',()=>{const v=nv(tm.value);if(v!=null&&peso)tk.value=String(Math.round(v/peso*100)/100).replace('.',',')});if(!peso)tk.placeholder='Informe o peso'}
-  f.addEventListener('input',upd);f.addEventListener('change',upd);upd();
+  if(tipo==='fluido')fluWire(f,peso);f.addEventListener('input',upd);f.addEventListener('change',upd);upd();
   if($('#mkdBtn'))$('#mkdBtn').onclick=()=>{const v=parseFloat(String($('#mkd').value).replace(',','.'));if(v&&peso){f.taxa.value=String(Math.round(v*peso/24*10)/10).replace('.',',');upd()}else toast(peso?'Informe o valor em mL/kg/dia':'Informe o peso primeiro')};
   const acIn=$('#acIn');
   if(acIn){
@@ -1895,9 +1994,9 @@ async function exportPDF(mode){if(!PERM('exportar')){toast('Você não tem permi
       if(col)y+=chh+8;y+=2}}
   }
 
-  // 4b. Semi-internamento
+  // 4b. Semi-intensivo
   for(const d of Object.keys(S.pMon).sort()){const m=S.pMon[d];const st=semiStats(m,p);const hs=semiHours(m);const H=m.horas||{};
-    h2(`Semi-internamento · ${fmtD(d)} · ${m.inicio} às ${toHM(toMin(m.inicio)+1440)}`);
+    h2(`Semi-intensivo · ${fmtD(d)} · ${m.inicio} às ${toHM(toMin(m.inicio)+1440)}`);
     kv([['Peso',st.peso?num(st.peso,2)+' kg':''],['Horas registradas',st.n+'/24'],['Fluido infundido',num(st.inT,0)+' mL'],['Diurese',num(st.outT,0)+' mL'],['Débito urinário',st.uo==null?'':num(st.uo,2)+' mL/kg/h'],['Balanço',num(st.inT-st.outT,0)+' mL']]);
     const rows=hs.filter(x=>H[x.h]).map(x=>({...H[x.h],hora:x.h}));CH=chartData(rows)||[];for(const c of CH)if(c.ss.length)pdfChart(c);
     if(rows.length)table(['Hora','FC','FR','T','PAS/PAM','SpO2','TPC','Glic.','Lact.','Dor','Diur.','Fluido','Achados','Resp.'],rows.map(r=>[r.hora,r.fc||'',r.fr||'',r.temp||'',[r.pas,r.pam].filter(Boolean).join('/'),r.spo2||'',r.tpc||'',r.glic||'',r.lactato||'',r.dor||'',r.diurese||'',r.fluido||'',[r.mucosas,r.consc,r.padResp,r.pulso&&'Pulso '+r.pulso,r.fezes&&r.fezes!=='Não'&&'Fezes '+r.fezes,r.vomito&&r.vomito!=='Não'&&'Vômito '+r.vomito,r.agua&&'Água: '+r.agua,r.alim&&'Alim.: '+r.alim,r.obs].filter(Boolean).join(' · '),initials(eqn(r.resp)||'')]),{styles:{fontSize:6.6,cellPadding:1,textColor:[20,48,58],lineColor:[205,222,222],lineWidth:.1,overflow:'linebreak'},columnStyles:{12:{cellWidth:46}}});
@@ -1932,7 +2031,8 @@ async function exportPDF(mode){if(!PERM('exportar')){toast('Você não tem permi
     kv([['Hemograma 1h após',t.hemo1h?('Sim'+(t.hemo1hHora?' às '+t.hemo1hHora:'')):''],['Resultado 1h',t.hemo1hRes],['Hemograma 12h após',t.hemo12h?('Sim'+(t.hemo12hHora?' às '+t.hemo12hHora:'')):''],['Resultado 12h',t.hemo12hRes]]);para('Intercorrências e conduta',t.intercorrencias);
   }
   // 5d. Documentos
-  {const sg=sigOf(p.id).filter(x=>x.status!=='cancelado').reverse();if(sg.length){h2('Documentos (TCLE e contratos)');table(['Documento','Tutor','Assinado em','Código','Situação'],sg.flatMap(x=>x.docs.map(d=>[d.nome,x.tutor?.nome||'',x.assinadoEm?fmtDT(x.assinadoEm):'-',x.codigo||'-',(SIG_ST[sigStatus(x)]||[''])[0]])));para('','Os documentos assinados, com assinatura e certificado, são exportados separadamente na aba Documentos.')}}
+  {const sg=sigOf(p.id).filter(x=>x.status!=='cancelado').reverse();if(sg.length){h2('Documentos (TCLE e contratos)');table(['Documento','Tutor','Assinado em','Código','Situação'],sg.flatMap(x=>x.docs.map(d=>[d.nome,x.tutor?.nome||'',x.assinadoEm?fmtDT(x.assinadoEm):'-',x.codigo||'-',(SIG_ST[sigStatus(x)]||[''])[0]])));for(const x of sg){const st=sigStatus(x);if(!['assinado','confirmado','aguardando','pronto'].includes(st))continue;for(const d of x.docs){if(!d.texto)continue;if(!WB){doc.addPage();y=TOP}h2(d.nome);para('',d.texto);kv([['Situação',(SIG_ST[st]||[''])[0]],['Aceito em',d.aceitoEm?fmtDT(d.aceitoEm):''],['Código',x.codigo],['Integridade',d.hash?d.hash.slice(0,20)+'...':'']])}
+    if(x.assinatura){ensure(34);try{doc.addImage(x.assinatura,'PNG',M,y,60,22)}catch(_){}y+=25;doc.setFontSize(8.5);doc.setFont('helvetica','normal');ink();doc.text(L(`Assinatura eletrônica de ${x.tutor?.nome||'tutor(a)'} em ${x.assinadoEm?fmtDT(x.assinadoEm):'-'}${x.confirmadoEm?' · confirmada em '+fmtDT(x.confirmadoEm):''}`),M,y);y+=8}}}}
   // 5e. Intercorrências e comunicação
   {const it=[...S.pInter].sort((a,b)=>String(a.data+a.inicio).localeCompare(String(b.data+b.inicio)));if(it.length){h2('Intercorrências e eventos adversos');
     for(const x of it){h3(`${fmtD(x.data)} · ${x.inicio}${x.fim?' a '+x.fim:''} · ${x.tipo}${x.gravidade?' ('+x.gravidade+')':''}`);para('',x.descricao);
@@ -1946,6 +2046,7 @@ async function exportPDF(mode){if(!PERM('exportar')){toast('Você não tem permi
 
   // 6. Saída hospitalar
   const al=p.alta;
+  if(al&&(al.rubrica||al.rubPapel)){h2('Ciência do tutor na saída');para('',al.rubrica?.texto||cienciaTxt(p));if(al.rubrica){ensure(30);try{doc.addImage(al.rubrica.img,'PNG',M,y,55,20)}catch(_){}y+=23;doc.setFontSize(8.5);doc.setFont('helvetica','normal');ink();doc.text(L(`Rubrica de ${al.rubrica.nome} em ${fmtDT(al.rubrica.em)}`),M,y);y+=7}if(al.rubPapel)para('','Via em papel assinada pelo tutor, registrada em '+fmtDT(al.rubPapel.em)+'.')}
   if(al){const tp=al.tipo||'alta';const nomeT=tp==='obito'?(OB_CAUSA[al.obito?.causa]||'Óbito'):SAIDA[tp]?.l||'Alta';
     h2(`Saída hospitalar · ${nomeT}${p.status==='alta'?'':' (rascunho)'}`);
     kv([['Tipo de saída',nomeT],['Data e hora',fmtDT(al.dataHora)],['Vet. responsável',eqn(al.responsavel)],['Entregue a',tp!=='obito'?al.entregueA:''],['Retorno',al.retorno?fmtD(al.retorno):'']]);
@@ -2000,7 +2101,7 @@ const ACT={
  open(el){location.hash='p-'+el.dataset.id},
  novaInt(){modalInt()},
  editInt(){modalInt(curP())},
- intDel(){const p=curP();confirmBox(`Excluir a internação de <b>${esc(p.nome)}</b>? As fichas diárias ficam no banco, mas o paciente some das listas.`,'Excluir',async()=>{try{await S.db.doc('internacoes/'+p.id).delete();location.hash='internados';toast('Internação excluída')}catch(e){fail(e)}})},
+ intDel(){const p=curP();if(!canDel()){toast('Só quem tem permissão para excluir pode apagar uma internação.');return}confirmBox(`Excluir a internação de <b>${esc(p.nome)}</b>? As fichas diárias ficam no banco, mas o paciente some das listas.`,'Excluir',async()=>{try{await S.db.doc('internacoes/'+p.id).delete();location.hash='internados';toast('Internação excluída')}catch(e){fail(e)}})},
  close(){closeModal()},
  ovClose(el,e){if(e.target===el)closeModal()},
  tab(el,e){e.preventDefault();if(S.dirty&&!confirmDiscard(()=>{S.tab=el.dataset.t;render(true)}))return;S.tab=el.dataset.t;render(true)},
@@ -2081,13 +2182,13 @@ Object.assign(ACT,{
  lbFit(el){const i=$('.lb-img img');i.classList.toggle('real');el.textContent=i.classList.contains('real')?'Ajustar à tela':'Tamanho real'},
  fotoDel(el){const f=el.dataset.f;confirmBox('Remover esta foto? Não dá para desfazer.','Remover',async()=>{$(`#fCir figure[data-fid="${f}"]`)?.remove();try{await cirWrite();try{await S.assets.delete(f)}catch(e){}toast('Foto removida')}catch(e){fail(e)}})},
  async saveAlta(el,e,final){const p=curP();const a=saidaCollect();
-   const patch={alta:a};if(final){patch.saidaRegistrada=true;patch.saidaRegEm=nowDT();patch.saidaRegPor=a.responsavel||lsGet('vp_resp','')||null;patch.saidaTipo=a.tipo;patch.saida=a.dataHora||nowDT()}
-   try{await S.db.doc('internacoes/'+p.id).update(patch);S.dirty=false;render(true);toast(final?(S.master?'Saída registrada. Agora você pode arquivar.':'Saída registrada. O master vai conferir e arquivar.'):'Rascunho da saída salvo')}catch(e){fail(e)}},
+   const patch={alta:a};if(final){patch.saidaRegistrada=true;patch.saidaRegEm=nowDT();patch.saidaRegPor=a.responsavel||lsGet('vp_resp','')||null;patch.saidaTipo=a.tipo;patch.saida=a.dataHora||nowDT();patch.status='alta';patch.arquivadoEm=nowDT();patch.arquivadoPor=S.uid||null}
+   try{await S.db.doc('internacoes/'+p.id).update(patch);S.dirty=false;render(true);toast(final?'Saída registrada. Paciente arquivado no histórico.':'Rascunho da saída salvo')}catch(e){fail(e)}},
  arquivar(){const p=curP();if(!S.master){toast('Somente o master pode arquivar.');return}confirmBox(`Arquivar a internação de <b>${esc(p.nome)}</b>? Ela sai da lista de internados e vai para o histórico.`,'Arquivar',async()=>{try{await S.db.doc('internacoes/'+p.id).update({status:'alta',saida:p.saida||p.alta?.dataHora||nowDT(),arquivadoEm:nowDT(),arquivadoPor:S.uid||null});toast('Internação arquivada')}catch(e){fail(e)}},false)},
  desfazerSaida(){const p=curP();confirmBox('Desfazer o registro de saída? O paciente continua internado e a ficha fica como rascunho.','Desfazer',async()=>{try{await S.db.doc('internacoes/'+p.id).update({saidaRegistrada:false})}catch(e){fail(e)}},false)},
  darAlta(el,e){const p=curP();const a=saidaCollect();const pend=Object.values(a.check).filter(v=>!v).length+Object.values(a.conf).filter(v=>!v.ok).length;
    const nome=a.tipo==='obito'?OB_CAUSA[a.obito?.causa]||'Óbito':SAIDA[a.tipo].l;
-   confirmBox(`Registrar <b>${esc(nome)}</b> de <b>${esc(p.nome)}</b> em ${fmtDT(a.dataHora)}?${S.master?'':' O arquivamento é feito depois pelo master.'}${pend?`<br><br><span style="color:var(--warn)">${pend} item(ns) do checklist ainda sem marcar.</span>`:''}`,'Registrar saída',()=>ACT.saveAlta(el,e,true),false)},
+   confirmBox(`Registrar <b>${esc(nome)}</b> de <b>${esc(p.nome)}</b> em ${fmtDT(a.dataHora)}?<br>O paciente sai da lista de internados e vai para o histórico.${pend?`<br><br><span style="color:var(--warn)">${pend} item(ns) do checklist ainda sem marcar.</span>`:''}`,'Registrar saída',()=>ACT.saveAlta(el,e,true),false)},
 });
 document.addEventListener('change',async e=>{
   const t=e.target;
@@ -2247,7 +2348,7 @@ Object.assign(ACT,{
  orDel(el){const p=curP();const x=(p.orientacoes||[]).find(o=>o.id===el.dataset.id);confirmBox(`Remover a orientação “${esc(x?.texto||'')}”?`,'Remover',async()=>{try{await S.db.doc('internacoes/'+p.id).update({orientacoes:(p.orientacoes||[]).filter(o=>o.id!==el.dataset.id)});toast('Orientação removida')}catch(e){fail(e)}})},
 });
 
-/* Semi-internamento: monitoração hora a hora, 24h, uma ficha por dia */
+/* Semi-intensivo: monitoração hora a hora, 24h, uma ficha por dia */
 const SEMI_P=[
  ['fc','FC','n','bpm'],['fr','FR','n','mpm'],['temp','Temperatura','n','°C'],['pas','PAS','n','mmHg'],['pam','PAM','n','mmHg'],['spo2','SpO₂','n','%'],['tpc','TPC','n','s'],['glic','Glicemia','n','mg/dL'],['lactato','Lactato','n','mmol/L'],['dor','Dor (0–10)','n',''],
  ['mucosas','Mucosas','s',EVO.mucosas],['consc','Consciência','s',['Alerta','Deprimido','Estuporoso','Comatoso']],['padResp','Padrão respiratório','s',EVO.respiracao],['pulso','Pulso','s',EVO.pulso],
@@ -2266,8 +2367,8 @@ function semiStats(m,p){const H=m.horas||{};const ent=Object.entries(H).filter((
 function tabSemi(p){
   const d=S.day;const m=S.pMon[d];
   if(!m){const hNow=pad(new Date().getHours())+':00';
-    return`<div class="panel"><div class="panel-h"><h2>Semi-internamento</h2>${dayNav(p)}</div>
-     ${emptyBox('monitor','Sem ficha de semi-internamento em '+fmtD(d),'A ficha cobre 24 horas a partir do horário de início, com registro hora a hora. É uma ficha por dia.',`<div class="row" style="justify-content:center"><label class="row small">Início<select class="inp" id="semiIni" style="width:auto">${[...Array(24).keys()].map(i=>`<option ${pad(i)+':00'===hNow?'selected':''}>${pad(i)}:00</option>`).join('')}</select></label><label class="row small">Peso<input class="inp tnum" id="semiPeso0" style="width:80px" inputmode="decimal" value="${esc(p.peso??'')}"> kg</label><button class="btn pri" data-act="semiStart" ${W()}>${ic('plus')}Iniciar ficha de 24h</button></div>`)}</div>`}
+    return`<div class="panel"><div class="panel-h"><h2>Semi-intensivo</h2>${dayNav(p)}</div>
+     ${emptyBox('monitor','Sem ficha de semi-intensivo em '+fmtD(d),'A ficha cobre 24 horas a partir do horário de início, com registro hora a hora. É uma ficha por dia.',`<div class="row" style="justify-content:center"><label class="row small">Início<select class="inp" id="semiIni" style="width:auto">${[...Array(24).keys()].map(i=>`<option ${pad(i)+':00'===hNow?'selected':''}>${pad(i)}:00</option>`).join('')}</select></label><label class="row small">Peso<input class="inp tnum" id="semiPeso0" style="width:80px" inputmode="decimal" value="${esc(p.peso??'')}"> kg</label><button class="btn pri" data-act="semiStart" ${W()}>${ic('plus')}Iniciar ficha de 24h</button></div>`)}</div>`}
   const hs=semiHours(m);const H=m.horas||{};const now=Date.now();
   const cur=hs.find(x=>now>=x.abs&&now<x.abs+3600000);
   const st=semiStats(m,p);const rows=hs.filter(x=>H[x.h]).map(x=>({...H[x.h],hora:x.h}));
@@ -2280,7 +2381,7 @@ function tabSemi(p){
    </tbody></table></div>`;
   const obs=rows.filter(r=>r.obs);
   return`<div class="panel">
-   <div class="panel-h"><h2>Semi-internamento</h2>${dayNav(p)}<span class="spacer"></span><span class="muted small">${esc(m.inicio)} às ${fim} (24h)</span>
+   <div class="panel-h"><h2>Semi-intensivo</h2>${dayNav(p)}<span class="spacer"></span><span class="muted small">${esc(m.inicio)} às ${fim} (24h)</span>
     <label class="row small muted" for="semiPeso">Peso<input id="semiPeso" class="inp tnum" style="width:74px;padding:5px 8px" inputmode="decimal" value="${esc(m.peso??'')}" ${W()}> kg</label>
     <button class="btn pri" data-act="semiHour" data-h="${(cur&&!H[cur.h]?cur:nextDue||cur||hs[0]).h}" ${W()}>${ic('plus')}Registrar ${(cur&&!H[cur.h]?cur:nextDue||cur||hs[0]).h}</button></div>
    <div class="panel-b tiles">${tile('Horas registradas',`${st.n}/24`,st.n>=24?'ok':'')}${tile('Fluido infundido',num(st.inT,0)+' mL')}${tile('Diurese',num(st.outT,0)+' mL')}${tile('Débito urinário',st.uo==null?'—':num(st.uo,2)+' mL/kg/h',uoC)}${tile('Balanço (fluido − diurese)',(st.inT-st.outT>0?'+':'')+num(st.inT-st.outT,0)+' mL')}
@@ -2296,7 +2397,7 @@ function modalSemi(h){
   const fld=([k,l,t,u])=>t==='n'?`<label class="f">${l}${u?` (${u})`:''}<input class="inp tnum" name="${k}" inputmode="decimal" value="${esc(e[k]??'')}"></label>`
     :t==='s'?`<label class="f">${l}<select class="inp" name="${k}"><option value="">—</option>${u.map(o=>`<option ${e[k]===o?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`
     :`<label class="f spanall">${l}<textarea class="inp" name="${k}" rows="2">${esc(e[k]||'')}</textarea></label>`;
-  openModal(`${H('Semi-internamento · '+esc(p.nome))}<form class="modal-b" id="fSemi" onsubmit="return false">
+  openModal(`${H('Semi-intensivo · '+esc(p.nome))}<form class="modal-b" id="fSemi" onsubmit="return false">
    <div class="row"><label class="f" style="max-width:160px">Hora<select class="inp" name="_h" id="semiH">${hs.map(x=>`<option ${x.h===h?'selected':''}>${x.h}</option>`).join('')}</select></label><span class="muted small" style="align-self:end;padding-bottom:10px">Registrado agora às ${nowHM()}</span></div>
    <div class="sec-t" style="margin:0">Sinais vitais</div><div class="grid g4">${SEMI_P.slice(0,10).map(fld).join('')}</div>
    <div class="sec-t" style="margin:0">Avaliação</div><div class="grid g4">${SEMI_P.slice(10,14).map(fld).join('')}</div>
@@ -2594,7 +2695,7 @@ function viewPlantao(){
    ${plRelatoHTML(turno)}
    ${ps.length?`<div class="plantao">${ps.map(p=>{const x=plantaoData(p);const u=URG[p.urgencia]||URG.nao;const o=p.orientacoes||[];
     return`<article class="pl" style="--u:${u[2]}">
-     <header>${avatar(p)}<div style="min-width:0;flex:1"><div class="row" style="gap:6px"><b class="pln">${esc(p.nome)}</b><span class="chip ${u[1]}">${u[0]}</span>${p.box?`<span class="chip">Box ${esc(p.box)}</span>`:''}${p.tipoInt==='Semi-internação'?'<span class="chip info">Semi</span>':''}</div>
+     <header>${avatar(p)}<div style="min-width:0;flex:1"><div class="row" style="gap:6px"><b class="pln">${esc(p.nome)}</b><span class="chip ${u[1]}">${u[0]}</span>${p.box?`<span class="chip">Box ${esc(p.box)}</span>`:''}${semiP(p)?'<span class="chip info">Semi</span>':''}</div>
       <div class="muted small">${esc([p.especie,p.peso?num(p.peso,1)+' kg':'',x.d+'º dia'].filter(Boolean).join(' · '))}${p.motivo?' · '+esc(p.motivo):''}</div></div><button class="btn sm ghost" data-act="open" data-id="${p.id}">Abrir</button></header>
      ${alertChips(p)}
      ${o.length?`<div class="pl-or">${ic('flag')}<span>${o.map(z=>esc(z.texto)).join(' · ')}</span></div>`:''}
@@ -2670,6 +2771,11 @@ const docHTML=t=>String(t||'').split('\n').map(l=>!l.trim()?'':isHeadLine(l)?`<h
 async function logoPNG(){const id=S.clinica?.logo;if(!id)return null;if(S._logo&&S._logo.id===id)return S._logo;try{const r=await fetch('_blob/'+id);const bm=await createImageBitmap(await r.blob());const sc=Math.min(1,500/Math.max(bm.width,bm.height));const c=document.createElement('canvas');c.width=bm.width*sc;c.height=bm.height*sc;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(bm,0,0,c.width,c.height);S._logo={id,url:c.toDataURL('image/png'),w:c.width,h:c.height};return S._logo}catch(e){return null}}
 function drawLogo(doc,lg,x,y,h){if(!lg)return 0;const w=h*lg.w/lg.h;doc.addImage(lg.url,'PNG',x,y,w,h);return w}
 const PH=[['paciente','Nome do paciente'],['especie','Espécie'],['raca','Raça'],['sexo','Sexo'],['idade','Idade'],['peso','Peso'],['microchip','Microchip'],['tutor','Nome do tutor'],['cpf','CPF do tutor'],['endereco','Endereço do tutor'],['tutor_cidade','Cidade do tutor'],['tutor_estado','Estado (UF) do tutor'],['data_procedimento','Data do exame / procedimento'],['telefone','Telefone do tutor'],['email','E-mail do tutor'],['data','Data da assinatura'],['data_extenso','Data por extenso'],['cidade','Cidade da clínica'],['estado','Estado da clínica'],['rg','RG do tutor'],['clinica','Nome da clínica'],['cnpj','CNPJ da clínica'],['clinica_endereco','Endereço da clínica'],['clinica_telefone','Telefone da clínica'],['vet','Veterinário responsável'],['crmv','CRMV do veterinário'],['procedimento','Procedimento informado no pacote']];
+function sigSteps(s,st){if(st==='cancelado')return'';
+  const steps=['Montar pacote','Revisar textos','Tutor assina',s.remoto?'Tutor aprova pelo WhatsApp':'Confirmar (papel ou WhatsApp)','Concluído'];
+  const cur={pendente:1,pronto:2,assinado:3,aguardando:3,expirado:3,confirmado:5}[st]??1;
+  const next={pendente:'Toque em “Revisar e preparar” para conferir os textos com os dados do tutor.',pronto:'Toque em “Coletar assinatura aqui” (tutor presente) ou envie para aprovar pelo WhatsApp.',assinado:'Imprima o termo de confirmação, o tutor assina no papel, tire a foto e toque em “Anexar foto e concluir”.',aguardando:'Aguardando a mensagem do tutor. Quando chegar, toque em “Confirmar mensagem recebida”.',expirado:'O código venceu. Gere um novo código.',confirmado:s.fotoPapel?'':'Pronto. Se quiser reforçar, imprima para o tutor assinar também no papel e anexe a foto.'}[st]||'';
+  return`<ol class="stp">${steps.map((t,i)=>`<li class="${i<cur?'done':i===cur?'cur':''}"><span class="n">${i<cur?'✓':i+1}</span>${t}</li>`).join('')}</ol>${next?`<div class="nextstep"><b>Próximo passo:</b> ${next}</div>`:''}`}
 const SIG_ST={pendente:['Montado · falta revisar os textos','warn'],pronto:['Pronto para assinar','info'],assinado:['Assinado · falta a foto do termo em papel','warn'],aguardando:['Aguardando confirmação do tutor','info'],confirmado:['Assinado e confirmado','ok'],expirado:['Código expirado','crit'],cancelado:['Cancelado','']};
 const sigStatus=s=>s.status==='aguardando'&&s.expiraEm&&Date.now()>new Date(s.expiraEm).getTime()?'expirado':s.status;
 const sigOf=pid=>S.assin.filter(x=>x.internacaoId===pid).sort((a,b)=>String(b.criadoEm).localeCompare(String(a.criadoEm)));
@@ -2693,9 +2799,11 @@ function tabDocs(p){const l=sigOf(p.id);const cl=S.clinica||{};
        ${st==='pronto'?`<button class="btn pri sm" data-act="sigColetar" data-id="${s.id}" ${W()}>${ic('edit')}Coletar assinatura aqui</button><button class="btn sm" data-act="sigEmail" data-id="${s.id}" ${W()}>${ic('file')}Enviar por e-mail</button><button class="btn sm" data-act="sigRemoto" data-id="${s.id}" ${W()}>${ic('users')}Aprovar pelo WhatsApp</button><button class="btn sm ghost" data-act="sigPrep" data-id="${s.id}" ${W()}>Editar textos</button>`:''}
        ${st==='assinado'?`<button class="btn sm" data-act="sigTermo" data-id="${s.id}">${ic('file')}Imprimir termo de confirmação</button><button class="btn pri sm" data-act="sigPapel" data-id="${s.id}" ${W()}>${ic('cam')}Anexar foto e concluir</button>`:''}
        ${st==='aguardando'?`${s.remoto?`<button class="btn sm" data-act="remWa" data-id="${s.id}">Reenviar ao tutor</button>`:`<button class="btn sm" data-act="sigQR" data-id="${s.id}">QR e link do WhatsApp</button>`}<button class="btn pri sm" data-act="sigConfirmar" data-id="${s.id}" ${W()}>${ic('check')}Confirmar mensagem recebida</button>`:''}
+       ${st==='confirmado'&&!s.fotoPapel?`<button class="btn sm" data-act="sigTermo" data-id="${s.id}">${ic('file')}Imprimir para assinar no papel</button><button class="btn sm" data-act="sigPapel" data-id="${s.id}" ${W()}>${ic('cam')}Anexar foto do papel</button>`:''}
        ${st==='expirado'?`<button class="btn pri sm" data-act="sigRenovar" data-id="${s.id}" ${W()}>Gerar novo código</button>`:''}
        ${s.assinatura||s.remoto||st==='pronto'?`<button class="btn sm" data-act="sigPdf" data-id="${s.id}">${ic('file')}PDF</button>`:''}
        ${st!=='confirmado'?`<button class="btn sm ghost danger" data-act="sigCancel" data-id="${s.id}" ${W()} aria-label="Cancelar pacote">${ic('trash')}</button>`:''}</div></div>
+     ${sigSteps(s,st)}
      <ol class="sig-docs">${s.docs.map((d,di)=>`<li><span>${esc(d.nome)}</span>${(st==='pendente'||st==='pronto')&&s.docs.length>1?`<button class="xbtn" data-act="sigDocRm" data-id="${s.id}" data-i="${di}" title="Tirar este documento do pacote" ${W()}>${ic('x')}</button>`:''}${d.aceitoEm?`<span class="muted small">aceito ${fmtDT(d.aceitoEm).slice(11)}</span>`:''}${d.hash?`<span class="mono muted small" title="${esc(d.hash)}">#${esc(d.hash.slice(0,10))}</span>`:''}</li>`).join('')}</ol></div>`}).join(''):emptyBox('file','Nenhum documento para este paciente','Monte um pacote com os termos de que o paciente precisa. O tutor lê e aceita cada um, assina uma vez só, e confirma tudo com um único código pelo WhatsApp dele.')}
    <div class="panel-b muted small" style="border-top:1px solid var(--line-2)"><b>Passo a passo:</b> monte o pacote › <b>Revisar e preparar</b> (os textos saem preenchidos com os dados do tutor e ficam travados) › se quiser, <b>Enviar por e-mail</b> para leitura prévia › no dia, <b>Coletar assinatura aqui</b>: o tutor só lê, marca “Li e concordo” e assina uma vez › imprima o <b>termo de confirmação</b>, o tutor assina o papel, tire a foto e toque em <b>Concluído</b>.<br><b>Em casa:</b> toque em “Enviar para assinar em casa”. O tutor recebe o PDF já preenchido pelo WhatsApp e aprova respondendo “ACEITO” com o código. A equipe confirma e o pacote aparece como aprovado. Sem custo: usa só o link oficial do WhatsApp.</div></div>`}
 
@@ -3091,7 +3199,7 @@ function tabComm(p){const l=commOf(p.id);const tel=p.telefone;
    <button class="btn" data-act="comNew" data-c="Presencial" ${W()}>${ic('users')}Registrar conversa</button><button class="btn pri" data-act="comNew" data-c="WhatsApp" ${W()}>${ic('plus')}Novo boletim</button></div>
    ${l.length?`<div class="com-l">${l.map(c=>`<div class="com" data-act="comEdit" data-id="${c.id}" role="button" tabindex="0">
      <div class="row" style="gap:8px"><span class="mono small">${fmtDT(c.em)}</span><span class="chip ${c.canal==='WhatsApp'?'ok':'info'}">${esc(c.canal)}</span>${c.canal==='WhatsApp'?`<span class="chip ${c.enviadoEm?'ok':'warn'}">${c.enviadoEm?'Enviado '+fmtDT(c.enviadoEm).slice(11):'Não enviado'}</span>`:''}<span class="spacer"></span><span class="small"><b>${esc(equipeNome(c.autor)||'')}</b>${c.funcao?' · '+esc(c.funcao):''}</span></div>
-     <div class="com-t">${esc(c.textoTutor||c.registro||c.rascunho||'')}</div>
+     <div class="com-t">${esc(c.textoTutor||c.registro||c.rascunho||'')}</div>${(c.imagens||[]).length?`<div class="row" style="gap:6px">${c.imagens.map(id=>`<img src="_blob/${esc(id)}" alt="" style="height:48px;width:48px;object-fit:cover;border-radius:6px">`).join('')}</div>`:''}
      ${c.reacao?`<div class="small muted"><b>Impressão / resposta do tutor:</b> ${esc(c.reacao)}</div>`:''}</div>`).join('')}</div>`:emptyBox('users','Nenhuma comunicação registrada','Registre boletins enviados pelo WhatsApp e conversas presenciais ou por telefone, sempre com o nome e a função de quem passou a informação.')}</div>`}
 function resumoTecnico(p){const d=S.day;const e=[...S.pEvo.filter(x=>x.data===d)].sort((a,b)=>String(b.hora).localeCompare(String(a.hora)))[0];const pr=S.pPresc[d];const it=interOf(p.id).filter(x=>x.data===d);const L=[];
   L.push(`Paciente ${p.nome} (${[p.especie,p.raca].filter(Boolean).join(', ')}), ${Math.floor((Date.now()-new Date(p.entrada).getTime())/864e5)+1}º dia de internação${p.motivo?', motivo: '+p.motivo:''}.`);
@@ -3100,6 +3208,15 @@ function resumoTecnico(p){const d=S.day;const e=[...S.pEvo.filter(x=>x.data===d)
   if(it.length)L.push(`Intercorrências hoje: ${it.map(x=>`${x.tipo} às ${x.inicio}${x.resposta?' ('+x.resposta.toLowerCase()+')':''}`).join('; ')}.`);
   if((p.orientacoes||[]).length)L.push(`Cuidados: ${p.orientacoes.map(o=>o.texto).join('; ')}.`);
   return L.join('\n')}
+let DICT=null;
+function dictar(btn,ta){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(DICT){try{DICT.stop()}catch(_){}return}
+  if(!SR){toast('Ditado indisponível neste navegador. Use o 🎤 do teclado do celular ou tablet.');ta.focus();return}
+  const r=new SR();r.lang='pt-BR';r.continuous=true;r.interimResults=true;const base=(ta.value||'').trim();let fin='';
+  r.onresult=e=>{let it='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=t+' ';else it+=t}ta.value=(base?base+' ':'')+fin+it};
+  r.onerror=e=>toast(['not-allowed','service-not-allowed','audio-capture'].includes(e.error)?'O microfone não foi liberado. Use o 🎤 do teclado.':'Ditado interrompido.');
+  r.onend=()=>{DICT=null;btn.classList.remove('rec');btn.innerHTML=ic('mic')+'Ditar'};
+  try{r.start();DICT=r;btn.classList.add('rec');btn.innerHTML=ic('mic')+'Parar ditado';toast('Pode falar…')}catch(e){DICT=null;toast('Não foi possível abrir o microfone.')}}
 function modalComm(c,canal0){const p=curP();const isNew=!c;c=c||{canal:canal0||'WhatsApp',em:nowDT(),autor:lsGet('vp_resp','')};const pres=c.canal!=='WhatsApp';
   const eqOpt=v=>S.equipe.filter(e=>e.ativo!==false||e.id===v).map(e=>`<option value="${e.id}" data-f="${esc(e.funcao||'')}" ${v===e.id?'selected':''}>${esc(e.nome)}${e.funcao?' · '+esc(e.funcao):''}</option>`).join('');
   openModal(`${H((isNew?(pres?'Registrar conversa':'Novo boletim'):'Comunicação')+' · '+esc(p.nome))}<form class="modal-b" id="fCom" onsubmit="return false">
@@ -3110,15 +3227,24 @@ function modalComm(c,canal0){const p=curP();const isNew=!c;c=c||{canal:canal0||'
     <label class="f span2">Falou com<input class="inp" name="interlocutor" value="${esc(c.interlocutor||p.tutor||'')}" placeholder="Nome de quem recebeu a informação"></label></div>
    <div data-cm="wpp" ${pres?'hidden':''} class="grid" style="gap:12px">
     <label class="f">1. Como o paciente está (pode escrever do jeito técnico)<textarea class="inp" name="rascunho" id="cRasc" rows="5">${esc(c.rascunho||'')}</textarea></label>
-    <div class="row" style="gap:6px"><button type="button" class="btn sm" id="cDados">${ic('clip')}Puxar dados de hoje do prontuário</button><button type="button" class="btn sm pri" id="cIA" ${S.sample?'':'hidden'}>${ic('edit')}Reescrever para o tutor com IA</button><button type="button" class="btn sm ghost" id="cStop" hidden>Parar</button><span class="muted small" id="cIAst"></span></div>
+    <div class="row" style="gap:6px"><button type="button" class="btn sm" id="cDit">${ic('mic')}Ditar</button><label class="btn sm" style="cursor:pointer">${ic('mic')}Transcrever áudio<input type="file" id="cAud" accept="audio/*,video/mp4,.ogg,.opus,.m4a,.mp3,.wav,.aac" hidden></label><button type="button" class="btn sm" id="cDados">${ic('clip')}Puxar dados de hoje do prontuário</button><button type="button" class="btn sm pri" id="cIA" ${S.sample?'':'hidden'}>${ic('edit')}Reescrever para o tutor com IA</button><button type="button" class="btn sm ghost" id="cStop" hidden>Parar</button><span class="muted small" id="cIAst"></span></div>
     <label class="f">2. Mensagem para o tutor (revise antes de enviar)<textarea class="inp" name="textoTutor" id="cTxt" rows="8" placeholder="${S.sample?'Toque em Reescrever com IA ou escreva aqui':'Escreva a mensagem que vai para o tutor'}">${esc(c.textoTutor||'')}</textarea></label>
-    <div class="row" style="gap:6px">${p.telefone?`<a class="btn pri" id="cWpp" target="_blank" rel="noopener" href="#">${ic('copy')}Abrir no WhatsApp e enviar</a>`:'<span class="banner warn small">Telefone do tutor não cadastrado. Edite os dados do paciente.</span>'}<button type="button" class="btn sm" id="cCopy">Copiar texto</button><span class="muted small">${c.enviadoEm?'Enviado em '+fmtDT(c.enviadoEm):''}</span></div></div>
+    <div class="f">Imagens para o tutor<div class="row" id="cImgs" style="gap:8px;flex-wrap:wrap"></div><label class="btn sm" style="cursor:pointer;align-self:flex-start">${ic('cam')}Anexar imagem<input type="file" id="cImgIn" accept="image/*" multiple hidden></label></div>
+    <div class="row" style="gap:6px"><button type="button" class="btn" id="cShare" hidden>${ic('copy')}Enviar com imagem (WhatsApp)</button>${p.telefone?`<a class="btn pri" id="cWpp" target="_blank" rel="noopener" href="#">${ic('copy')}Abrir no WhatsApp e enviar</a>`:'<span class="banner warn small">Telefone do tutor não cadastrado. Edite os dados do paciente.</span>'}<button type="button" class="btn sm" id="cCopy">Copiar texto</button><span class="muted small">${c.enviadoEm?'Enviado em '+fmtDT(c.enviadoEm):''}</span></div></div>
    <div data-cm="pres" ${pres?'':'hidden'} class="grid" style="gap:12px">
     <label class="f">O que foi informado ao tutor *<textarea class="inp" name="registro" id="cReg" rows="5" placeholder="Resumo do que foi explicado: quadro, exames, tratamento, prognóstico, custos">${esc(c.registro||'')}</textarea></label></div>
    <label class="f">Impressão / resposta do tutor<textarea class="inp" name="reacao" rows="2" placeholder="Ex.: tutora compreendeu, autorizou exames, pediu atualização à noite">${esc(c.reacao||'')}</textarea></label>
    <label class="row small"><input type="checkbox" name="pendente" ${c.pendente?'checked':''}> Tutor pediu retorno / nova atualização</label>
   </form><div class="modal-f">${isNew?'':`<button class="btn ghost danger ${own(c)}" id="cDel" style="margin-right:auto">Excluir</button>`}<button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="cOk">${ic('check')}Salvar</button></div>`,'wide');
-  const f=$('#fCom');let enviado=c.enviadoEm||null;let ctl=null;
+  const f=$('#fCom');let enviado=c.enviadoEm||null;let ctl=null;let imgs=[...(c.imagens||[])];
+  const drawImgs=()=>{$('#cImgs').innerHTML=imgs.map((id,i)=>`<span style="position:relative"><img src="_blob/${esc(id)}" alt="" style="height:72px;width:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line)"><button type="button" class="xbtn" data-i="${i}" aria-label="Remover" style="position:absolute;top:-6px;right:-6px">${ic('x')}</button></span>`).join('');$('#cShare').hidden=!imgs.length||!navigator.canShare};
+  drawImgs();$('#cImgs').onclick=e=>{const b=e.target.closest('[data-i]');if(b){imgs.splice(+b.dataset.i,1);drawImgs()}};
+  $('#cImgIn').onchange=async e=>{for(const fl of e.target.files){try{const r=await S.assets.upload(fl,fl.type?undefined:{type:'image/jpeg'});imgs.push(r.id)}catch(err){toast('Não foi possível anexar a imagem')}}e.target.value='';drawImgs()};
+  $('#cShare').onclick=async()=>{const t=$('#cTxt').value.trim();try{const files=[];for(const id of imgs){const b=await (await fetch('_blob/'+id)).blob();files.push(new File([b],'imagem-'+files.length+'.jpg',{type:b.type||'image/jpeg'}))}
+    if(navigator.canShare&&navigator.canShare({files})){try{await navigator.clipboard.writeText(t)}catch(_){}await navigator.share({files,text:t});enviado=nowDT();toast('Depois de enviar, toque em Salvar.')}else toast('Este aparelho não envia imagens direto. Abra o WhatsApp e anexe a imagem.')}catch(e){if(e?.name!=='AbortError')toast('Não foi possível compartilhar')}};
+  $('#cDit').onclick=()=>dictar($('#cDit'),$('#cRasc'));
+  $('#cAud').onchange=async e=>{const fl=e.target.files[0];e.target.value='';if(!fl)return;if(!window.__vpTranscribe){toast('A transcrição usa a IA. Peça ao master para configurar a IA no menu da conta.');return}
+    const r=$('#cRasc');const old=r.value;r.value=(old?old+'\n':'')+'Transcrevendo o áudio…';try{const t=await window.__vpTranscribe(fl);r.value=(old?old+'\n':'')+t.trim();toast('Áudio transcrito. Revise o texto.')}catch(err){r.value=old;toast(err?.message||'Não foi possível transcrever o áudio')}};
   const tog=()=>{const pr=$('#cCanal').value!=='WhatsApp';$('[data-cm=wpp]',f).hidden=pr;$('[data-cm=pres]',f).hidden=!pr};$('#cCanal').onchange=tog;
   $('#cAutor').onchange=()=>{const o=$('#cAutor').selectedOptions[0];const fn=o?.dataset.f;if(fn&&!$('#cFunc').value){const m=COM_FUNC.find(x=>norm(x).startsWith(norm(fn).slice(0,6)));if(m)$('#cFunc').value=m}};if(isNew)$('#cAutor').onchange();
   const wppLink=()=>{const a=$('#cWpp');if(!a)return;const t=$('#cTxt').value.trim();a.href=t?`https://wa.me/${foneBR(p.telefone)}?text=${encodeURIComponent(t)}`:'#';a.classList.toggle('disabled',!t)};
@@ -3148,11 +3274,14 @@ ${raw}`;
   $('#cStop').onclick=()=>ctl?.abort();
   $('#cOk').onclick=async()=>{const fd=Object.fromEntries(new FormData(f));fd.pendente=!!fd.pendente;if(!fd.autor){toast('Selecione quem passou a informação');$('#cAutor').focus();return}
     if(fd.canal==='WhatsApp'&&!fd.textoTutor.trim()){toast('Escreva a mensagem para o tutor');$('#cTxt').focus();return}if(fd.canal!=='WhatsApp'&&!fd.registro.trim()){toast('Descreva o que foi informado');$('#cReg').focus();return}
-    lsSet('vp_resp',fd.autor);const doc={...fd,internacaoId:p.id,enviadoEm:fd.canal==='WhatsApp'?enviado:null};
+    lsSet('vp_resp',fd.autor);const doc={...fd,imagens:imgs,internacaoId:p.id,enviadoEm:fd.canal==='WhatsApp'?enviado:null};
     try{if(isNew)await S.db.collection('comunicacoes').doc().set({...doc,criadoEm:nowDT(),criadoPor:S.uid||null});else await S.db.doc('comunicacoes/'+c.id).update({...doc,editadoEm:nowDT()});closeModal();toast('Comunicação registrada')}catch(e){fail(e)}};
   if($('#cDel'))$('#cDel').onclick=()=>confirmBox('Excluir este registro de comunicação?','Excluir',async()=>{try{await S.db.doc('comunicacoes/'+c.id).delete();toast('Registro excluído')}catch(e){fail(e)}});
 }
 Object.assign(ACT,{
+ rubColetar(){modalRubrica()},
+ rubPapel(){altaPapelPDF()},
+ async rubPapelOk(){const p=curP();confirmBox('Confirmar que o tutor assinou a via em papel da saída (com data e hora)?','Confirmar',async()=>{try{await S.db.doc('internacoes/'+p.id).update({alta:{rubPapel:{em:nowDT(),por:lsGet('vp_resp','')||null}}});toast('Via em papel registrada')}catch(e){fail(e)}},false)},
  evoSub(el,e){e.preventDefault();S.evoSub=el.dataset.k;render(true)},
  comQuick(){modalComm(null,'WhatsApp')},
  interNew(el){modalInter(null,el.dataset.t)},
