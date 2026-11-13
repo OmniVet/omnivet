@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611120003"></script>
-<script src="lib/firebase-auth-compat.js?v=202611120003"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611120003"></script>
-<script src="fb.js?v=202611120003"></script>
+<script src="lib/firebase-app-compat.js?v=202611131318"></script>
+<script src="lib/firebase-auth-compat.js?v=202611131318"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611131318"></script>
+<script src="fb.js?v=202611131318"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -71,6 +71,18 @@ svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .clinic span{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--brand-text);font-weight:700}
 .clinic b{display:block;font-size:14px}
 .nav{display:flex;flex-direction:column;gap:2px}
+.nav-g{margin:2px 0}.nav-g summary{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);color:var(--ink-2);font-weight:500;cursor:pointer;list-style:none}
+.nav-g summary::-webkit-details-marker{display:none}.nav-g summary::after{content:"";margin-left:auto;width:7px;height:7px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(-45deg);transition:transform .15s}
+.nav-g[open] summary::after{transform:rotate(45deg)}.nav-g summary:hover{background:var(--surface-2);color:var(--ink)}.nav-g a{padding-left:22px;font-size:13.5px}
+.home-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.home-c{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:12px}
+.home-c .hh{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+.home-c .hi{width:42px;height:42px;border-radius:12px;background:var(--brand-soft);color:var(--brand-text);display:grid;place-items:center;flex:none}.home-c .hi .i{width:22px;height:22px}
+.home-c h2{font-size:17px;margin:0}.home-c .hh small{display:block;color:var(--ink-3);font-size:12.5px;margin-top:2px}
+.home-c .ls{display:flex;flex-wrap:wrap;gap:6px}.home-c .ls a{font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:99px;text-decoration:none;color:var(--ink-2);background:var(--surface-2)}
+.home-c .ls a:hover{border-color:var(--brand);color:var(--brand-text)}.home-c .sub2{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;width:100%;margin-top:4px}
+.home-c .st{display:flex;gap:16px;flex-wrap:wrap}.home-c .st b{font-size:22px;font-family:var(--f-display);display:block;line-height:1.1}.home-c .st span{font-size:12px;color:var(--ink-3)}
+.soon{align-self:flex-start;display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--ink-3);border:1px solid var(--line)}
 .nav-h{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:12px 10px 4px}
 .nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);color:var(--ink-2);text-decoration:none;font-weight:500}
 .nav a:hover{background:var(--surface-2);color:var(--ink)}
@@ -579,7 +591,7 @@ form[data-fin] .inp:disabled,form[data-fin] select:disabled,form[data-fin] texta
   <div style="min-width:0">
     <div class="topbar">
       <button class="btn icon" data-act="menu" aria-label="Abrir menu"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-      <b>VetPlus · Internação</b>
+      <b>VetPlus</b>
       <button class="btn icon" type="button" id="fbAcctTop" aria-label="Minha conta"></button>
     </div>
     <main class="main" id="main"><div class="empty"><h3>Carregando prontuário…</h3></div></main>
@@ -619,6 +631,13 @@ const IC={
  file:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
  mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
  spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+ home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10M10 20v-6h4v6"/>',
+ box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+ flask:'<path d="M9 3h6M10 3v6L4.5 18.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3"/><path d="M7 15h10"/>',
+ chart:'<path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/>',
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ build:'<path d="M4 21V5l8-3 8 3v16M4 21h16M9 21v-5h6v5M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
  word:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M8.5 11l1.5 6 2-4.5 2 4.5 1.5-6"/>'
 };
 const ic=(n,cls='')=>`<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]||''}</svg>`;
@@ -741,30 +760,36 @@ function itemName(it){return itemName0(it)+autChip(it)}
 function itemName0(it){if(it.tipo==='fluido')return`Soroterapia <span class="muted small">${esc(it.soro||'')}</span>`;if(it.tipo==='proc'||it.tipo==='alim')return esc(it.nome);return`${esc(it.nome)}${it.conc?` <span class="muted small mono">${num(it.conc,3)} ${esc(it.concUn)}</span>`:''}`}
 
 /* ---------- Render ---------- */
+const CAD_INT=[['med','pill','Medicamentos'],['proc','hand','Procedimentos'],['modelos','book','Descrições cirúrgicas'],['prot','clip','Protocolos de prescrição'],['boxes','grid','Boxes'],['escalas','thermo','Escalas de dor'],['descritivos','book','Outros descritivos'],['docs','file','Documentos']];
+const EST_TABS=[['geral','box','Estoque geral'],['setores','grid','Setores'],['pedidos','clip','Pedidos ao estoque'],['inventario','clip','Inventário'],['contagem','check','Contagem por setor']];
 function nav(){
-  const n=ativos().length,v=S.view,c=k=>v===k?'on':'';
+  const n=ativos().length,v=S.view,c=k=>v===k?'on':'',cad=t=>v==='cad'&&S.cadTab===t||(t==='prot'&&v==='prot');
+  const agN=S.agenda.filter(a=>a.data===today()&&!['cancelado','realizado'].includes(a.status)).length;
+  const cadOpen=CAD_INT.some(([t])=>cad(t));
   $('#nav').innerHTML=`
-   <div class="nav-h">Internação</div>
+   <a href="#inicio" class="${c('inicio')}">${ic('home')}Painel inicial</a>
+   <div class="nav-h">1 · Internação</div>
    <a href="#internados" class="${c('internados')||(v==='paciente'?'on':'')}">${ic('bed')}Animais internados${n?`<span class="cnt">${n}</span>`:''}</a>
    <a href="#mapa" class="${c('mapa')}">${ic('clock')}Mapa de execução do dia</a>
    <a href="#boxes" class="${c('boxes')}">${ic('grid')}Mapa de boxes</a>
-   <a href="#agenda" class="${c('agenda')}">${ic('clock')}Agenda${(n=>n?`<span class="cnt">${n}</span>`:'')(S.agenda.filter(a=>a.data===today()&&!['cancelado','realizado'].includes(a.status)).length)}</a>
    <a href="#plantao" class="${c('plantao')}">${ic('users')}Passagem de plantão</a>
    <a href="#historico" class="${c('historico')}">${ic('hist')}Histórico de internações</a>
-   <div class="nav-h">Cadastros</div>
-   <a href="#cad-tutores" class="${v==='cad'&&S.cadTab==='tutores'?'on':''}">${ic('user')}Tutores</a>
-   <a href="#cad-med" class="${v==='cad'&&S.cadTab==='med'?'on':''}">${ic('pill')}Medicamentos</a>
-   <a href="#cad-proc" class="${v==='cad'&&S.cadTab==='proc'?'on':''}">${ic('hand')}Procedimentos</a>
-   <a href="#cad-equipe" class="${v==='cad'&&S.cadTab==='equipe'?'on':''}">${ic('users')}Equipe</a>
-   <a href="#cad-modelos" class="${v==='cad'&&S.cadTab==='modelos'?'on':''}">${ic('book')}Descrições cirúrgicas</a>
-   <a href="#cad-prot" class="${(v==='cad'&&S.cadTab==='prot')||v==='prot'?'on':''}">${ic('clip')}Protocolos de prescrição</a>
-   <a href="#cad-boxes" class="${v==='cad'&&S.cadTab==='boxes'?'on':''}">${ic('grid')}Boxes</a>
-   <a href="#cad-escalas" class="${v==='cad'&&S.cadTab==='escalas'?'on':''}">${ic('thermo')}Escalas de dor</a>
-   <a href="#cad-descritivos" class="${v==='cad'&&S.cadTab==='descritivos'?'on':''}">${ic('book')}Outros descritivos</a>
-   <a href="#cad-docs" class="${v==='cad'&&S.cadTab==='docs'?'on':''}">${ic('file')}Documentos</a>
-   <a href="#cad-clinica" class="${v==='cad'&&S.cadTab==='clinica'?'on':''}">${ic('clip')}Clínica</a>`;
-  $('#sideFoot').textContent=S.noDb?'Modo leitura: sem conexão ao banco.':(S.canWrite?(S.master?'Você é o master: pode arquivar internações e excluir registros.':'Perfil equipe: registros não podem ser excluídos; arquivamento só pelo master.'):'Você tem acesso só de leitura.');
+   <details class="nav-g" ${cadOpen?'open':''}><summary>${ic('folder')}Cadastros da internação</summary>
+    ${CAD_INT.map(([t,i,l])=>`<a href="#cad-${t}" class="${cad(t)?'on':''}">${ic(i)}${l}</a>`).join('')}</details>
+   <div class="nav-h">2 · Equipe e cadastros</div>
+   <a href="#cad-equipe" class="${cad('equipe')?'on':''}">${ic('users')}Equipe e acessos</a>
+   <a href="#cad-tutores" class="${cad('tutores')?'on':''}">${ic('user')}Pacientes e tutores</a>
+   <a href="#cad-clinica" class="${cad('clinica')?'on':''}">${ic('build')}Clínica</a>
+   <div class="nav-h">3 · Agenda</div>
+   <a href="#agenda" class="${c('agenda')}">${ic('cal')}Agenda geral${agN?`<span class="cnt">${agN}</span>`:''}</a>
+   <div class="nav-h">4 · Estoque</div>
+   ${EST_TABS.map(([t,i,l])=>`<a href="#est-${t}" class="${v==='estoque'&&S.estTab===t?'on':''}">${ic(i)}${l}</a>`).join('')}
+   <div class="nav-h">5 · Exames · 6 · Relatórios</div>
+   <a href="#exames" class="${c('exames')}">${ic('flask')}Exames</a>
+   <a href="#relatorios" class="${c('relatorios')}">${ic('chart')}Relatórios</a>`;
+  $('#sideFoot').textContent=S.noDb?'Modo leitura: sem conexão ao banco.':(S.master?'Você é o master: tem acesso a tudo.':'');
 }
+
 function render(force){setTimeout(tutImport,0);setTimeout(lockFinal,0);
   if(!force&&S.dirty){S.pending=true;return}
   S.pending=false;nav();permClasses();
@@ -772,7 +797,11 @@ function render(force){setTimeout(tutImport,0);setTimeout(lockFinal,0);
   if(!S.ready){m.innerHTML=S.noDb?noDbView():`<div class="empty"><h3>Carregando prontuário…</h3></div>`;return}
   const sx=window.scrollX,sy=window.scrollY;const mapScroll=$('.map-wrap')?.scrollLeft;
   const ae=document.activeElement;const fid=ae&&ae.id&&$('#main').contains(ae)?ae.id:null;let selA=null;try{selA=ae.selectionStart}catch(_){}
-  if(S.view==='internados')m.innerHTML=viewInternados();
+  if(S.view==='inicio')m.innerHTML=viewInicio();
+  else if(S.view==='estoque')m.innerHTML=viewEmBreve('estoque');
+  else if(S.view==='exames')m.innerHTML=viewEmBreve('exames');
+  else if(S.view==='relatorios')m.innerHTML=viewEmBreve('relatorios');
+  else if(S.view==='internados')m.innerHTML=viewInternados();
   else if(S.view==='mapa')m.innerHTML=viewMapaGeral();
   else if(S.view==='historico')m.innerHTML=viewHistorico();
   else if(S.view==='cad')m.innerHTML=viewCad();
@@ -3921,6 +3950,30 @@ function modalIA(k){let L=[];const nome=IA_TIPOS[k];
     else for(const p of L){const its=p.itens.map(({semCadastro,...i})=>i);await S.db.collection('protocolos').doc().set({...p,itens:its,importadoIA:true,criadoEm:nowDT()})}
     closeModal();toast(L.length+' '+nome+' salvo(s) como rascunho')}catch(e){fail(e)}}}
 Object.assign(ACT,{iaImport(el){modalIA(el.dataset.k)}});
+function viewInicio(){
+  const n=ativos().length,agHoje=S.agenda.filter(a=>a.data===today()&&!['cancelado','realizado'].includes(a.status));
+  const boxesLiv=(S.boxes||[]).filter(b=>b.ativo!==false&&!ativos().some(p=>p.box===b.id)).length;
+  const h=new Date().getHours(),sau=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+  const nome=((S.equipe||[]).find(e=>e.id===lsGet('vp_resp',''))?.nome||'').split(/\s+/).filter(w=>!/^dra?\.?$/i.test(w))[0]||'';
+  const L=(href,t)=>`<a href="${href}">${t}</a>`;
+  const card=(num,icn,href,t,sub,body)=>`<section class="home-c"><a class="hh" href="${href}"><span class="hi">${ic(icn)}</span><span><h2>${num} · ${t}</h2><small>${sub}</small></span></a>${body}</section>`;
+  return`<div class="page-h"><div><div class="crumb">VetPlus</div><h1>${sau}${nome?', '+esc(nome):''}</h1><p class="sub">${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</p></div></div>
+  <div class="home-g">
+   ${card(1,'bed','#internados','Internação','Pacientes internados e rotina do dia',`<div class="st"><a href="#internados" style="text-decoration:none;color:inherit"><b>${n}</b><span>internados agora</span></a><a href="#boxes" style="text-decoration:none;color:inherit"><b>${boxesLiv}</b><span>boxes livres</span></a></div>
+     <div class="ls">${L('#internados','Animais internados')}${L('#mapa','Mapa de execução do dia')}${L('#boxes','Mapa de boxes')}${L('#plantao','Passagem de plantão')}${L('#historico','Histórico de internações')}
+     <span class="sub2">Cadastros da internação</span>${CAD_INT.map(([t,,l])=>L('#cad-'+t,l)).join('')}</div>`)}
+   ${card(2,'users','#cad-equipe','Equipe e cadastros','Quem acessa o quê, pacientes, tutores e a clínica',`<div class="ls">${L('#cad-equipe','Equipe e acessos')}${L('#cad-tutores','Pacientes e tutores')}${L('#cad-clinica','Clínica')}</div>`)}
+   ${card(3,'cal','#agenda','Agenda geral','Admissões, saídas, cirurgias e procedimentos',`<div class="st"><a href="#agenda" style="text-decoration:none;color:inherit"><b>${agHoje.length}</b><span>${agHoje.length===1?'atendimento hoje':'atendimentos hoje'}</span></a></div><div class="ls">${L('#agenda','Abrir agenda')}</div>`)}
+   ${card(4,'box','#est-geral','Estoque','Produtos, setores, pedidos e contagens',`<div class="ls">${EST_TABS.map(([t,,l])=>L('#est-'+t,l)).join('')}</div><span class="soon">Em construção</span>`)}
+   ${card(5,'flask','#exames','Exames','Solicitações e resultados',`<div class="ls">${L('#exames','Abrir exames')}</div><span class="soon">Em construção</span>`)}
+   ${card(6,'chart','#relatorios','Relatórios','Números da clínica e da internação',`<div class="ls">${L('#relatorios','Abrir relatórios')}</div><span class="soon">Em construção</span>`)}
+  </div>`}
+function viewEmBreve(k){
+  const T={estoque:['4 · Estoque',(EST_TABS.find(x=>x[0]===S.estTab)||EST_TABS[0])[2],'box','Aqui ficará o controle do estoque: produtos e quantidades, estoque por setor, pedidos dos setores ao estoque, inventário e contagem por setor.'],
+    exames:['5 · Exames','Exames','flask','Aqui ficarão os exames: solicitações, acompanhamento e resultados anexados ao paciente.'],
+    relatorios:['6 · Relatórios','Relatórios','chart','Aqui ficarão os relatórios da clínica e da internação.']}[k];
+  const tabs=k==='estoque'?`<div class="tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">${EST_TABS.map(([t,,l])=>`<a class="btn ${S.estTab===t?'pri':''}" href="#est-${t}">${l}</a>`).join('')}</div>`:'';
+  return`<div class="page-h"><div><div class="crumb">${T[0]}</div><h1>${T[1]}</h1></div></div>${tabs}${emptyBox(T[2],'Em construção',T[3]+' Esta área está sendo preparada.')}`}
 const PERM=k=>!!(S.master||(window.__vpPerm||{})[k]);
 const COL_PERM={medicamentos:'medicamentos',protocolos:'protocolos',modelosCirurgicos:'protocolos',modelosDoc:'protocolos',escalaImgs:'protocolos',procedimentos:'ajustes',equipe:'ajustes',boxes:'ajustes',config:'ajustes'};
 const colPermOk=p=>{const k=COL_PERM[String(p).split('/')[0]];return !k||PERM(k)};
@@ -3962,13 +4015,14 @@ document.addEventListener('change',async e=>{
 
 /* ---------- Rotas ---------- */
 function route(){
-  const h=(location.hash||'#internados').slice(1);$('#side').classList.remove('open');
+  const h=(location.hash||'#inicio').slice(1);$('#side').classList.remove('open');
   if(S.dirty){S.dirty=false}
   if(h.startsWith('p-')){const id=h.slice(2);if(S.pid!==id){S.pid=id;S.day=today();S.cirSel=null;subPaciente(id);S.anSel=null;S.tfSel=null;if(!['admissao','docs','prescricao','mapa','evolucao','comunicacao','semi','anestesia','cirurgia','transfusao','solic','alta','linha'].includes(S.tab))S.tab='prescricao'}S.view='paciente'}
   else if(h.startsWith('cad-')){S.view='cad';S.cadTab=h.slice(4)||'med'}
   else if(h.startsWith('prot-')){S.view='prot';S.protId=h.slice(5)}
-  else if(['internados','mapa','historico','boxes','plantao','agenda'].includes(h))S.view=h;
-  else S.view='internados';
+  else if(h.startsWith('est-')){S.view='estoque';S.estTab=h.slice(4)||'geral'}
+  else if(['inicio','internados','mapa','historico','boxes','plantao','agenda','exames','relatorios'].includes(h))S.view=h;
+  else S.view='inicio';
   if(S.view!=='paciente'&&S.pid){S.pid=null;S.unsubP.forEach(u=>u());S.unsubP=[]}
   render(true);window.scrollTo(0,0);
 }
