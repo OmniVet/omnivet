@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Documentos para leitura</title>
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#EDF3F3;--surface:#fff;--surface-2:#F5F9F9;--ink:#13303A;--ink-2:#4A656D;--ink-3:#7B9197;--line:#D5E3E3;--brand:#0A8F84;--brand-text:#077369;--brand-soft:#DAF1EE;--ok:#1B8F4E;--crit:#C9304A}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1D21;--surface:#16272C;--surface-2:#1B3036;--ink:#E4EEEF;--ink-2:#A9BEC2;--ink-3:#7D9599;--line:#2A4148;--brand:#22B3A6;--brand-text:#5ED3C8;--brand-soft:#173F3C}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}.top img{width:48px;height:48px;border-radius:10px;background:#fff;object-fit:contain}
+.top b{font-size:17px;display:block}.top small{color:var(--ink-2)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+h1{font-size:22px;margin:0 0 6px;line-height:1.25}h2{font-size:17px;margin:0;line-height:1.3}
+.muted{color:var(--ink-2);font-size:14.5px}
+details{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:10px}
+summary{cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:10px;font-weight:700;list-style:none}
+summary::-webkit-details-marker{display:none}summary .n{width:28px;height:28px;border-radius:50%;background:var(--brand-soft);color:var(--brand-text);display:grid;place-items:center;font-size:13px;flex:none}
+summary .ok{margin-left:auto;font-size:12px;color:var(--ok);font-weight:700}
+.txt{padding:0 16px 16px;white-space:pre-wrap;font-size:15px;color:var(--ink)}
+label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px;color:var(--ink-2)}
+input[type=text]{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.chk{flex-direction:row;align-items:flex-start;gap:10px;font-weight:500;color:var(--ink)}.chk input{width:20px;height:20px;margin-top:3px}
+button{font:inherit;font-weight:700;font-size:16px;border:0;border-radius:10px;padding:13px 16px;background:var(--brand);color:#fff;cursor:pointer;width:100%}
+button:disabled{opacity:.55}
+.done{background:var(--brand-soft);color:var(--brand-text);border-radius:12px;padding:14px 16px;font-weight:600}
+.err{color:var(--crit)}
+.form{display:flex;flex-direction:column;gap:14px}
+a{color:var(--brand-text)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="card">Carregando os documentos…</div></div>
+<script src="lib/firebase-app-compat.js"></script>
+<script src="lib/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+const CFG={apiKey:"AIzaSyDcyQ5tuDCi5J_D_XcHQqJve4kkxy779yE",authDomain:"prontuario-vetplus.firebaseapp.com",projectId:"prontuario-vetplus",storageBucket:"prontuario-vetplus.firebasestorage.app",messagingSenderId:"116841563518",appId:"1:116841563518:web:7b84815518c94d5fd95f2f"};
+firebase.initializeApp(CFG);const fs=firebase.firestore();
+const app=document.getElementById('app');
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const nowDT=()=>{const d=new Date();return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`};
+const fmt=s=>{if(!s)return'';const [d,t]=String(s).split('T');const [y,m,dd]=d.split('-');return`${dd}/${m}/${y}${t?' às '+t.slice(0,5):''}`};
+const tok=new URLSearchParams(location.search).get('t')||'';
+const msg=(t,b)=>{app.innerHTML=`<div class="card"><h1>${t}</h1><p class="muted">${b}</p></div>`};
+if(!/^[a-z0-9]{16,40}$/.test(tok)){msg('Link incompleto','Abra o link exatamente como chegou no seu e-mail.');return}
+const ref=fs.doc('convites/'+tok);
+ref.get().then(async snap=>{
+  if(!snap.exists){msg('Link não encontrado','Este link não existe mais. Peça um novo à clínica.');return}
+  const c=snap.data();
+  if(!c.abertoEm){try{await ref.update({abertoEm:nowDT(),navegador:navigator.userAgent.slice(0,140)})}catch(_){}}
+  const cl=c.clinica||{};const wpp=String(cl.whatsapp||cl.telefone||'').replace(/\D/g,'');
+  app.innerHTML=`<div class="top"><img src="icon-192.png" alt=""><div><b>${esc(cl.nome||'VetPlus')}</b><small>${esc(cl.endereco||'')}</small></div></div>
+   <div class="card"><h1>Olá${c.tutorNome?', '+esc(c.tutorNome):''}!</h1><p class="muted">Estes são os documentos de <b>${esc(c.paciente)}</b> para você ler com calma antes de vir à clínica. Toque em cada um para abrir. A assinatura será feita na clínica, no dia do atendimento.</p></div>
+   ${(c.docs||[]).map((d,i)=>`<details data-i="${i}"><summary><span class="n">${i+1}</span>${esc(d.nome)}<span class="ok" hidden>lido</span></summary><div class="txt">${esc(d.texto)}</div></details>`).join('')}
+   <div class="card" id="fim"></div>
+   ${wpp?`<p class="muted" style="text-align:center">Dúvidas? Fale com a clínica pelo <a href="https://wa.me/55${wpp.replace(/^55/,'')}" target="_blank" rel="noopener">WhatsApp</a>.</p>`:''}`;
+  document.querySelectorAll('details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)d.querySelector('.ok').hidden=false}));
+  const fim=document.getElementById('fim');
+  const done=(em,nome)=>{fim.innerHTML=`<div class="done">Leitura confirmada${nome?' por '+esc(nome):''} em ${fmt(em)}. Obrigado! A equipe da clínica já foi avisada.</div>`};
+  if(c.lidoEm){done(c.lidoEm,c.lidoNome);return}
+  fim.innerHTML=`<div class="form"><h2>Confirmar a leitura</h2>
+    <label>Seu nome completo<input type="text" id="nm" autocomplete="name"></label>
+    <label class="chk"><input type="checkbox" id="ck"> Li todos os documentos acima. Sei que a assinatura será feita na clínica e que posso tirar minhas dúvidas antes de assinar.</label>
+    <div class="err" id="er"></div><button id="go">Confirmar que li</button></div>`;
+  document.getElementById('go').onclick=async()=>{const nm=document.getElementById('nm').value.trim();const er=document.getElementById('er');
+    if(nm.split(/\s+/).length<2){er.textContent='Escreva seu nome completo.';return}if(!document.getElementById('ck').checked){er.textContent='Marque a caixa confirmando que leu.';return}
+    const b=document.getElementById('go');b.disabled=true;b.textContent='Enviando…';const em=nowDT();
+    try{await ref.update({lidoEm:em,lidoNome:nm});done(em,nm)}catch(e){b.disabled=false;b.textContent='Confirmar que li';er.textContent='Não foi possível confirmar. Verifique a internet e tente de novo.'}};
+}).catch(e=>{msg('Link vencido ou indisponível','Este link vale por 30 dias. Peça à clínica para enviar de novo.')});
+})();
+</script>
+</body>
+</html>

@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611131358"></script>
-<script src="lib/firebase-auth-compat.js?v=202611131358"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611131358"></script>
-<script src="fb.js?v=202611131358"></script>
+<script src="lib/firebase-app-compat.js?v=202611140650"></script>
+<script src="lib/firebase-auth-compat.js?v=202611140650"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611140650"></script>
+<script src="fb.js?v=202611140650"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -82,6 +82,8 @@ svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .home-c .ls{display:flex;flex-wrap:wrap;gap:6px}.home-c .ls a{font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:99px;text-decoration:none;color:var(--ink-2);background:var(--surface-2)}
 .home-c .ls a:hover{border-color:var(--brand);color:var(--brand-text)}.home-c .sub2{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;width:100%;margin-top:4px}
 .home-c .st{display:flex;gap:16px;flex-wrap:wrap}.home-c .st b{font-size:22px;font-family:var(--f-display);display:block;line-height:1.1}.home-c .st span{font-size:12px;color:var(--ink-3)}
+.pre-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;background:var(--surface)}
+.chk-card{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;background:var(--surface-2);font-size:14px;cursor:pointer}.chk-card input{margin-top:3px;width:18px;height:18px}
 .rub-box{display:flex;flex-direction:column;gap:10px;margin-top:10px}.rub{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 12px;background:var(--surface)}.rub img{height:56px;max-width:200px;object-fit:contain;background:#fff}
 .tl-ev{display:grid;grid-template-columns:52px 26px minmax(0,1fr);gap:8px;align-items:start;padding:7px 0;border-bottom:1px dashed var(--line-2)}.tl-ev:last-child{border-bottom:0}
 .tl-ev .hr{font-family:var(--f-mono,monospace);font-size:13px;color:var(--ink-2);padding-top:2px}.tl-ev .ti{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--ink-2)}.tl-ev .ti .i{width:15px;height:15px}
@@ -710,7 +712,7 @@ const CONF_KEYS=['medicacao','alimentacao','pertences','cuidados'];
 const FUNCOES=['Médico(a)-veterinário(a) · Internamento','Médico(a)-veterinário(a) · Plantonista','Médico(a)-veterinário(a) · Volante','Médico(a)-veterinário(a) · RT (responsável técnico)','Gestão / administrativo','Auxiliar veterinário','Estudante de veterinária'];
 const funcOpts=v=>[...FUNCOES,...(v&&!FUNCOES.includes(v)?[v]:[])].map(o=>`<option ${v===o?'selected':''}>${esc(o)}</option>`).join('');
 /* ---------- Estado ---------- */
-const S={agenda:[],agCfg:null,agDay:null,agView:'dia',agProf:'',tutores:[],tq:'',db:null,user:null,assets:null,downloads:null,prots:[],protId:null,protPeso:10,pAnest:[],anSel:null,pEvo:[],evoHoje:{},pMon:{},pTransf:[],tfSel:null,boxes:[],solic:[],notas:[],escImgs:{},notaDraft:{},turno:null,assin:[],modelosDoc:[],clinica:null,pInter:[],pComm:[],interRec:[],sample:null,evoSub:'aval',uid:null,canWrite:true,ready:false,noDb:false,
+const S={agenda:[],agCfg:null,agDay:null,agView:'dia',agProf:'',tutores:[],tq:'',db:null,user:null,assets:null,downloads:null,prots:[],protId:null,protPeso:10,pAnest:[],anSel:null,pEvo:[],evoHoje:{},pMon:{},pTransf:[],tfSel:null,boxes:[],solic:[],notas:[],escImgs:{},notaDraft:{},turno:null,assin:[],conv:[],modelosDoc:[],clinica:null,pInter:[],pComm:[],interRec:[],sample:null,evoSub:'aval',uid:null,canWrite:true,ready:false,noDb:false,
  view:'internados',pid:null,tab:'prescricao',day:today(),cadTab:'med',q:'',hq:'',
  intern:[],meds:[],procs:[],equipe:[],modelos:[],
  prescHoje:{},execHoje:{},pPresc:{},pExec:{},pCir:[],cirSel:null,
@@ -718,7 +720,8 @@ const S={agenda:[],agCfg:null,agDay:null,agView:'dia',agProf:'',tutores:[],tq:''
 
 const byId=(arr,id)=>arr.find(x=>x.id===id);
 const equipeNome=id=>{const e=byId(S.equipe,id);return e?e.nome:''};
-const ativos=()=>S.intern.filter(p=>p.status!=='alta').sort((a,b)=>{const o={critico:0,urgente:1,nao:2,estavel:3};return (o[a.urgencia]??2)-(o[b.urgencia]??2)||String(a.nome).localeCompare(b.nome)});
+const preAdms=()=>S.intern.filter(p=>p.status==='pre').sort((a,b)=>String(a.nome).localeCompare(b.nome));
+const ativos=()=>S.intern.filter(p=>p.status!=='alta'&&p.status!=='pre').sort((a,b)=>{const o={critico:0,urgente:1,nao:2,estavel:3};return (o[a.urgencia]??2)-(o[b.urgencia]??2)||String(a.nome).localeCompare(b.nome)});
 const curP=()=>byId(S.intern,S.pid);
 
 /* ---------- Agenda / cálculo ---------- */
@@ -865,7 +868,8 @@ function viewInternados(){
   return`<div class="crumb">Internação <span>› Animais internados</span></div>
    <div class="page-h"><div><h1>Animais internados</h1><div class="sub">${ativos().length} paciente(s) · ${fmtD(today())}</div></div></div>
    <div class="row" style="margin-bottom:18px"><label class="search"><span class="sr" hidden>Buscar</span>${ic('search')}<input class="inp" id="q" placeholder="Buscar paciente, tutor ou raça…" value="${esc(S.q)}"></label>
-   <button class="btn pri" data-act="novaInt" ${W()}>${ic('plus')}Nova internação</button></div>
+   <button class="btn" data-act="novaPre" ${W()}>${ic('cal')}Nova pré-admissão</button><button class="btn pri" data-act="novaInt" ${W()}>${ic('plus')}Nova internação</button></div>
+   ${preList()}
    ${list.length?`<div class="cards">${cards}</div>`:emptyBox('bed',S.q?'Nenhum paciente encontrado':'Nenhum animal internado','Use “Nova internação” para dar entrada em um paciente. Depois preencha a ficha de admissão e a prescrição do dia.')}`;
 }
 
@@ -960,7 +964,7 @@ function viewPaciente(){
     <div class="row"><button class="btn" data-act="comQuick" ${S.canWrite?'':'disabled'}>${ic('users')}Mensagem ao tutor</button><button class="btn" data-act="pdf">${ic('file')}Exportar PDF</button><button class="btn" data-act="editInt" ${S.canWrite?'':'disabled'}>${ic('edit')}Editar dados</button>${p.bloqueio?.ativo?(S.master?`<button class="btn blk-btn" data-act="blkOff">${ic('check')}Liberar (pagamento quitado)</button>`:''):`<button class="btn blk-btn-on" data-act="blkOn" ${S.canWrite?'':'disabled'}>${ic('flag')}Suspender por não pagamento</button>`}</div>
    </div>
    <nav class="tabs">${tabs.map(t=>`<a href="#" data-act="tab" data-t="${t[0]}" class="${S.tab===t[0]?'on':''}">${t[2]}${t[1]}</a>`).join('')}</nav>
-  </div>${blkBanner(p)}${defecBanner(p)}${p.status!=='alta'||(p.orientacoes||[]).length?orientBar(p):''}${body}`;
+  </div>${preBanner(p)}${blkBanner(p)}${defecBanner(p)}${p.status!=='alta'||(p.orientacoes||[]).length?orientBar(p):''}${body}`;
 }
 function dayNav(p){
   const d=S.day;const min=p.entrada?p.entrada.slice(0,10):null;const max=p.status==='alta'&&p.saida?p.saida.slice(0,10):addDays(today(),1);
@@ -1522,17 +1526,20 @@ function modalInt(p){
     ${isNew?`<label class="f spanall">Protocolo de prescrição (opcional)<select class="inp" id="intProt"><option value="">Nenhum, vou prescrever depois</option>${S.prots.filter(protOk).map(x=>`<option value="${x.id}">${esc(x.nome)} · ${(x.itens||[]).length} itens</option>`).join('')}</select><span class="muted small" style="font-weight:400">Depois de internar, abre a revisão do protocolo para ajustar doses e horários e lançar com o nome de quem prescreveu.</span></label>`:''}
    </div>
    <div class="f">Prioridade<div class="seg">${Object.entries(URG).map(([k,v])=>`<label><input type="radio" name="urgencia" value="${k}" ${p.urgencia===k?'checked':''} class="${k==='critico'?'bad':''}"><span>${v[0]}</span></label>`).join('')}</div></div>
-  </form><div class="modal-f">${p.id&&canDel()?`<button class="btn ghost danger" data-act="intDel" style="margin-right:auto">Excluir internação</button>`:''}<button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="intOk">${p.id?'Salvar':'Internar paciente'}</button></div>`,'wide');
+   ${p.id?'':`<label class="chk-card"><input type="checkbox" name="preAdm" id="preAdm" ${p.preAdm?'checked':''}><span><b>Pré-admissão</b> · o paciente ainda não chegou. Fica fora da lista de internados até você tocar em “Admitir agora”. Dá para mandar os termos por e-mail antes.</span></label>`}
+  </form><div class="modal-f">${p.id&&canDel()?`<button class="btn ghost danger" data-act="intDel" style="margin-right:auto">Excluir internação</button>`:''}<button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="intOk">${p.id?'Salvar':p.preAdm?'Criar pré-admissão':'Internar paciente'}</button></div>`,'wide');
+  if($('#preAdm'))$('#preAdm').onchange=e=>{$('#intOk').textContent=e.target.checked?'Criar pré-admissão':'Internar paciente'};
   tutPickWire();admWire();
   $('#intOk').onclick=async()=>{
-    const f=$('#fInt');const fd=Object.fromEntries(new FormData(f));if(!fd.nome.trim()){f.nome.focus();return}
+    const f=$('#fInt');const fd=Object.fromEntries(new FormData(f));if(!fd.nome.trim()){f.nome.focus();return}const pre=fd.preAdm==='on';delete fd.preAdm;
     fd.ufTutor=(fd.ufTutor||'').trim().toUpperCase();try{fd.tutorId=await tutorSync(fd)}catch(_){}
     fd.peso=fd.peso?parseFloat(fd.peso.replace(',','.')):null;fd.isolamento=fd.isolamentoSel==='1';delete fd.isolamentoSel;
     const prot=$('#intProt')?.value;
     if(prot&&!fd.peso){toast('Informe o peso para calcular os volumes do protocolo');f.peso.focus();return}
     try{
       if(p.id){await S.db.doc('internacoes/'+p.id).update(fd);toast('Dados salvos');closeModal();return}
-      const ref=S.db.collection('internacoes').doc();await ref.set({...fd,status:'internado',criadoEm:nowDT(),criadoPor:S.uid||null});
+      const ref=S.db.collection('internacoes').doc();await ref.set({...fd,status:pre?'pre':'internado',criadoEm:nowDT(),criadoPor:S.uid||null});
+      if(pre){if(S.agInternar){try{await S.db.doc('agenda/'+S.agInternar).update({internacaoId:ref.id})}catch(_){}S.agInternar=null}closeModal();S.tab='docs';location.hash='p-'+ref.id;toast('Pré-admissão criada. Agora monte o pacote de documentos e envie por e-mail.');return}
       if(S.agInternar){try{await S.db.doc('agenda/'+S.agInternar).update({internacaoId:ref.id,status:'realizado',realizadoEm:nowDT()})}catch(_){}S.agInternar=null}
       closeModal();S.tab=semiP(fd)?'semi':prot?'prescricao':'admissao';location.hash='p-'+ref.id;toast('Paciente internado');
       if(prot){const t0=Date.now();const w=()=>{if(curP()&&S.view==='paciente'){S.day=(fd.entrada||nowDT()).slice(0,10);render(true);modalAplicarProt(prot)}else if(Date.now()-t0<5000)setTimeout(w,150)};setTimeout(w,150)}
@@ -2771,10 +2778,58 @@ const docHTML=t=>String(t||'').split('\n').map(l=>!l.trim()?'':isHeadLine(l)?`<h
 async function logoPNG(){const id=S.clinica?.logo;if(!id)return null;if(S._logo&&S._logo.id===id)return S._logo;try{const r=await fetch('_blob/'+id);const bm=await createImageBitmap(await r.blob());const sc=Math.min(1,500/Math.max(bm.width,bm.height));const c=document.createElement('canvas');c.width=bm.width*sc;c.height=bm.height*sc;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(bm,0,0,c.width,c.height);S._logo={id,url:c.toDataURL('image/png'),w:c.width,h:c.height};return S._logo}catch(e){return null}}
 function drawLogo(doc,lg,x,y,h){if(!lg)return 0;const w=h*lg.w/lg.h;doc.addImage(lg.url,'PNG',x,y,w,h);return w}
 const PH=[['paciente','Nome do paciente'],['especie','Espécie'],['raca','Raça'],['sexo','Sexo'],['idade','Idade'],['peso','Peso'],['microchip','Microchip'],['tutor','Nome do tutor'],['cpf','CPF do tutor'],['endereco','Endereço do tutor'],['tutor_cidade','Cidade do tutor'],['tutor_estado','Estado (UF) do tutor'],['data_procedimento','Data do exame / procedimento'],['telefone','Telefone do tutor'],['email','E-mail do tutor'],['data','Data da assinatura'],['data_extenso','Data por extenso'],['cidade','Cidade da clínica'],['estado','Estado da clínica'],['rg','RG do tutor'],['clinica','Nome da clínica'],['cnpj','CNPJ da clínica'],['clinica_endereco','Endereço da clínica'],['clinica_telefone','Telefone da clínica'],['vet','Veterinário responsável'],['crmv','CRMV do veterinário'],['procedimento','Procedimento informado no pacote']];
+/* ===== pré-admissão */
+function preList(){const L=preAdms();if(!L.length)return'';
+  return`<div class="panel" style="margin-bottom:18px"><div class="panel-h"><h2>Pré-admissões</h2><span class="muted small">aguardando a chegada · ${L.length}</span></div><div class="panel-b" style="display:flex;flex-direction:column;gap:8px">
+  ${L.map(p=>{const ag=S.agenda.find(a=>a.internacaoId===p.id);return`<div class="pre-row"><div style="min-width:0;flex:1"><b>${esc(p.nome)}</b> <span class="muted small">${esc([p.especie,p.tutor].filter(Boolean).join(' · '))}</span>
+    <div class="row" style="gap:6px;margin-top:4px">${ag?`<span class="chip">${ic('cal')} ${esc(ag.tipo)} · ${fmtD(ag.data)} ${esc(ag.hora||'')}</span>`:''}${convChip(p.id)||'<span class="chip warn">Termos ainda não enviados</span>'}</div></div>
+    <a class="btn sm" href="#p-${p.id}" onclick="S.tab='docs'">${ic('file')}Termos</a><button class="btn sm pri" data-act="admitir" data-id="${p.id}" ${W()}>Admitir agora</button></div>`}).join('')}</div></div>`}
+function preBanner(p){return p.status!=='pre'?'':`<div class="banner info" style="margin-bottom:14px">${ic('cal')}<div><b>Pré-admissão</b> · o paciente ainda não chegou. ${convChip(p.id)}</div><span class="spacer"></span><button class="btn sm pri" data-act="admitir" data-id="${p.id}" ${W()}>Admitir agora</button></div>`}
+function convOf(pid){return S.conv.filter(c=>c.internacaoId===pid).sort((a,b)=>String(b.criadoEm).localeCompare(a.criadoEm))[0]}
+function convChip(pid){const c=convOf(pid);if(!c)return'';return c.lidoEm?`<span class="chip ok">${ic('check')}Termos lidos pelo tutor · ${fmtDT(c.lidoEm)}</span>`:c.abertoEm?`<span class="chip info">Termos abertos pelo tutor · ${fmtDT(c.abertoEm)}</span>`:c.enviadoEm?`<span class="chip">Termos enviados por e-mail · ${fmtDT(c.enviadoEm)}</span>`:''}
+function convFeed(s){const c=s.conviteId&&S.conv.find(x=>x.id===s.conviteId);if(!c)return'';
+  const it=(ok,t,em)=>`<li class="${ok?'done':''}"><span class="n">${ok?'✓':'·'}</span>${t}${em?` <span class="muted">${fmtDT(em)}</span>`:''}</li>`;
+  return`<div class="small" style="margin-top:8px"><b>Leitura antes da chegada</b> · ${esc(c.para||'')}<ol class="stp">${it(!!c.enviadoEm,'E-mail enviado',c.enviadoEm)}${it(!!c.abertoEm,'Tutor abriu',c.abertoEm)}${it(!!c.lidoEm,'Tutor confirmou a leitura'+(c.lidoNome?' ('+esc(c.lidoNome)+')':''),c.lidoEm)}</ol></div>`}
+const tokRnd=(n=24)=>{const a='abcdefghijkmnpqrstuvwxyz23456789';return[...crypto.getRandomValues(new Uint8Array(n))].map(x=>a[x%a.length]).join('')};
+const mailOn=()=>!!window.__vpMail;
+const mailHTML=(titulo,corpo,botao,link)=>{const cl=S.clinica||{};return`<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#13303A"><div style="background:#0A8F84;color:#fff;padding:18px 22px;border-radius:12px 12px 0 0;font-size:18px;font-weight:700">${esc(cl.nome||'VetPlus')}</div><div style="border:1px solid #D5E3E3;border-top:0;padding:22px;border-radius:0 0 12px 12px;font-size:15px;line-height:1.55"><h2 style="font-size:18px;margin:0 0 12px">${titulo}</h2>${corpo}${botao?`<p style="margin:22px 0"><a href="${link}" style="background:#0A8F84;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:700;display:inline-block">${botao}</a></p><p style="font-size:12.5px;color:#4A656D">Se o botão não abrir, copie este endereço no navegador:<br>${link}</p>`:''}<p style="font-size:12.5px;color:#4A656D;margin-top:22px">${esc([cl.razao||cl.nome,cl.telefone,cl.endereco].filter(Boolean).join(' · '))}</p></div></div>`};
+async function enviarConvite(sid){const s=S.assin.find(x=>x.id===sid);const p=s&&byId(S.intern,s.internacaoId);if(!s||!p)return;
+  const tu={...(tutorOf(p)||{}),...(s.tutor||{})};const em=String(tu.email||p.emailTutor||'').trim();
+  if(!mailOn()){toast('O envio automático de e-mail ainda não foi configurado. O master configura no menu da conta.');return}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){toast('Cadastre um e-mail válido do tutor (Editar dados ou cadastro do tutor).');return}
+  const cl=S.clinica||{};const ctx=phCtx(p,tu,s);const docs=s.docs.map(d=>({nome:d.nome,texto:d.texto||fillDoc(d.modelo,ctx)}));
+  const tok=s.conviteId||tokRnd();const link=new URL('termos.html?t='+tok,location.href).href;const pn=(tu.nome||p.tutor||'').split(' ')[0];
+  toast('Enviando e-mail…');
+  try{await S.db.doc('convites/'+tok).set({sigId:s.id,internacaoId:p.id,paciente:p.nome,especie:p.especie||'',tutorNome:pn,clinica:{nome:cl.nome||'VetPlus',telefone:cl.telefone||'',whatsapp:cl.whatsapp||'',endereco:[cl.endereco,cl.cidade].filter(Boolean).join(' · ')},docs,para:em,criadoEm:nowDT(),expiraEm:new Date(Date.now()+30*864e5),enviadoEm:null,abertoEm:null,lidoEm:null,lidoNome:null,criadoPor:lsGet('vp_resp','')||null});
+    await window.__vpMail({to:em,subject:`Documentos de ${p.nome} para leitura · ${cl.nome||'VetPlus'}`,
+      html:mailHTML(`Olá${pn?', '+esc(pn):''}!`,`<p>Preparamos ${docs.length>1?'os documentos':'o documento'} de <b>${esc(p.nome)}</b> para você ler com calma antes de vir à clínica:</p><ol>${docs.map(d=>`<li>${esc(d.nome)}</li>`).join('')}</ol><p>Toque no botão abaixo para ler. No final, confirme que leu. A assinatura será feita aqui na clínica, no dia do atendimento.</p>`,'Ler os documentos',link),
+      text:`Olá${pn?', '+pn:''}! Leia os documentos de ${p.nome} antes de vir à clínica: ${link}`});
+    await S.db.doc('convites/'+tok).update({enviadoEm:nowDT()});await S.db.doc('assinaturas/'+s.id).update({conviteId:tok,emailEnviadoEm:nowDT(),emailPara:em});
+    toast('E-mail enviado para '+em)}catch(e){toast('Não foi possível enviar: '+(e?.message||e?.code||'erro'))}}
+async function waitSig(sid,ok){for(let i=0;i<40;i++){const s=S.assin.find(x=>x.id===sid);if(s&&ok(s))return s;await new Promise(r=>setTimeout(r,100))}return S.assin.find(x=>x.id===sid)}
+function papelDepois(sid,cod){waitSig(sid,s=>!!s.assinadoEm&&(!cod||!!s.codEmailOk)).then(()=>{termoPapelPDF(sid);setTimeout(()=>modalSigPapel(sid),500)})}
+function posAssinatura(sid,email){if(email&&mailOn())modalCodigo(sid,email);else papelDepois(sid)}
+async function mandarCodigo(sid,email){const c=String(crypto.getRandomValues(new Uint32Array(1))[0]%1e6).padStart(6,'0');const cl=S.clinica||{};
+  await S.db.doc('assinaturas/'+sid).update({codEmail:{hash:await sha256(c+'|'+sid),exp:new Date(Date.now()+30*60e3).toISOString(),para:email,enviadoEm:nowDT()}});
+  await window.__vpMail({to:email,subject:`Código de confirmação: ${c.slice(0,3)}-${c.slice(3)} · ${cl.nome||'VetPlus'}`,
+    html:mailHTML('Seu código de confirmação',`<p>Informe este código à equipe da clínica para confirmar a sua assinatura digital:</p><p style="font-size:32px;font-weight:800;letter-spacing:4px;margin:16px 0;color:#0A8F84">${c.slice(0,3)}-${c.slice(3)}</p><p>O código vale por 30 minutos. Se você não está na clínica assinando documentos agora, ignore este e-mail.</p>`),
+    text:`Seu código de confirmação: ${c.slice(0,3)}-${c.slice(3)} (vale por 30 minutos).`})}
+function modalCodigo(sid,email){
+  openModal(`${H('Confirmar pelo e-mail do tutor')}<div class="modal-b">
+   <div class="banner info">${ic('lock')}<div>Enviamos um código de 6 números para <b>${esc(email)}</b>. Peça ao tutor para abrir o e-mail e dizer o código.</div></div>
+   <label class="f">Código que o tutor recebeu<input class="inp mono" id="cdIn" inputmode="numeric" autocomplete="one-time-code" placeholder="000-000" style="font-size:22px;letter-spacing:3px;text-align:center"></label>
+   <div class="muted small" id="cdSt">Enviando…</div>
+  </div><div class="modal-f"><button class="btn ghost" id="cdPular" style="margin-right:auto">Tutor sem acesso ao e-mail agora</button><button class="btn" id="cdRe">Reenviar código</button><button class="btn pri" id="cdOk">${ic('check')}Confirmar</button></div>`);
+  const st=$('#cdSt');const send=async()=>{st.textContent='Enviando…';try{await mandarCodigo(sid,email);st.textContent='Código enviado. Vale por 30 minutos.'}catch(e){st.textContent='Não foi possível enviar: '+(e?.message||'erro')+'. Você pode pular e seguir com o papel.'}};send();
+  $('#cdRe').onclick=send;$('#cdPular').onclick=()=>{closeModal();papelDepois(sid)};
+  $('#cdOk').onclick=async()=>{const v=$('#cdIn').value.replace(/\D/g,'');if(v.length!==6){toast('Digite os 6 números');return}const s=await waitSig(sid,x=>!!x.codEmail);const ce=s?.codEmail;
+    if(!ce||new Date(ce.exp)<new Date()){toast('O código venceu. Toque em Reenviar código.');return}
+    if(await sha256(v+'|'+sid)!==ce.hash){toast('Código não confere. Confira com o tutor.');return}
+    try{await S.db.doc('assinaturas/'+sid).update({codEmailOk:nowDT(),codEmailPor:lsGet('vp_resp','')||null});closeModal();toast('Identidade confirmada. Gerando o papel para assinatura.');papelDepois(sid,true)}catch(e){fail(e)}}}
 function sigSteps(s,st){if(st==='cancelado')return'';
   const steps=['Montar pacote','Revisar textos','Tutor assina',s.remoto?'Tutor aprova pelo WhatsApp':'Confirmar (papel ou WhatsApp)','Concluído'];
   const cur={pendente:1,pronto:2,assinado:3,aguardando:3,expirado:3,confirmado:5}[st]??1;
-  const next={pendente:'Toque em “Revisar e preparar” para conferir os textos com os dados do tutor.',pronto:'Toque em “Coletar assinatura aqui” (tutor presente) ou envie para aprovar pelo WhatsApp.',assinado:'Imprima o termo de confirmação, o tutor assina no papel, tire a foto e toque em “Anexar foto e concluir”.',aguardando:'Aguardando a mensagem do tutor. Quando chegar, toque em “Confirmar mensagem recebida”.',expirado:'O código venceu. Gere um novo código.',confirmado:s.fotoPapel?'':'Pronto. Se quiser reforçar, imprima para o tutor assinar também no papel e anexe a foto.'}[st]||'';
+  const next={pendente:'Toque em “Revisar e preparar” para conferir os textos com os dados do tutor.',pronto:'Toque em “Coletar assinatura aqui” (tutor presente) ou envie para aprovar pelo WhatsApp.',assinado:(s.codEmailOk||!(s.tutor?.email)?'':'Se o tutor tiver e-mail, toque em “Código por e-mail” para confirmar a identidade. ')+'Imprima o termo de confirmação, o tutor assina no papel, tire a foto e toque em “Anexar foto e concluir”.',aguardando:'Aguardando a mensagem do tutor. Quando chegar, toque em “Confirmar mensagem recebida”.',expirado:'O código venceu. Gere um novo código.',confirmado:s.fotoPapel?'':'Pronto. Se quiser reforçar, imprima para o tutor assinar também no papel e anexe a foto.'}[st]||'';
   return`<ol class="stp">${steps.map((t,i)=>`<li class="${i<cur?'done':i===cur?'cur':''}"><span class="n">${i<cur?'✓':i+1}</span>${t}</li>`).join('')}</ol>${next?`<div class="nextstep"><b>Próximo passo:</b> ${next}</div>`:''}`}
 const SIG_ST={pendente:['Montado · falta revisar os textos','warn'],pronto:['Pronto para assinar','info'],assinado:['Assinado · falta a foto do termo em papel','warn'],aguardando:['Aguardando confirmação do tutor','info'],confirmado:['Assinado e confirmado','ok'],expirado:['Código expirado','crit'],cancelado:['Cancelado','']};
 const sigStatus=s=>s.status==='aguardando'&&s.expiraEm&&Date.now()>new Date(s.expiraEm).getTime()?'expirado':s.status;
@@ -2796,14 +2851,15 @@ function tabDocs(p){const l=sigOf(p.id);const cl=S.clinica||{};
     return`<div class="sig"><div class="sig-h"><div style="min-width:0;flex:1"><div class="row" style="gap:6px"><b>${s.docs.length} documento(s)</b><span class="chip ${cls}">${s.remoto?(st==='confirmado'?'Aprovado pelo tutor (em casa, via WhatsApp)':st==='aguardando'?'Enviado ao tutor · aguardando aprovação':lbl):lbl}</span>${st==='aguardando'?`<span class="chip tnum">expira em ${Math.floor(left/36e5)}h${pad(Math.floor(left%36e5/6e4))}</span>`:''}${s.codigo&&st!=='pendente'?`<span class="chip mono">${esc(s.codigo)}</span>`:''}</div>
       <div class="muted small">Criado em ${fmtDT(s.criadoEm)}${s.criadoPor?' por '+esc(equipeNome(s.criadoPor)):''}${s.tutor?.nome?' · tutor '+esc(s.tutor.nome):''}${(s.emails||[]).length?` · <b style="color:var(--info)">enviado por e-mail em ${fmtDT(s.emails.at(-1).em)} para ${esc(s.emails.at(-1).para)}</b>`:''}${s.fotoPapel?' · termo em papel anexado':''}${s.enviadoEm?' · enviado em '+fmtDT(s.enviadoEm)+(s.enviadoPor?' por '+esc(equipeNome(s.enviadoPor)):''):''}${s.assinadoEm?' · assinado em '+fmtDT(s.assinadoEm):''}${s.confirmadoEm?' · confirmado em '+fmtDT(s.confirmadoEm):''}</div></div>
       <div class="row" style="gap:6px">${st==='pendente'?`<button class="btn pri sm" data-act="sigPrep" data-id="${s.id}" ${W()}>${ic('edit')}Revisar e preparar</button>`:''}
-       ${st==='pronto'?`<button class="btn pri sm" data-act="sigColetar" data-id="${s.id}" ${W()}>${ic('edit')}Coletar assinatura aqui</button><button class="btn sm" data-act="sigEmail" data-id="${s.id}" ${W()}>${ic('file')}Enviar por e-mail</button><button class="btn sm" data-act="sigRemoto" data-id="${s.id}" ${W()}>${ic('users')}Aprovar pelo WhatsApp</button><button class="btn sm ghost" data-act="sigPrep" data-id="${s.id}" ${W()}>Editar textos</button>`:''}
+       ${st==='pronto'?`<button class="btn pri sm" data-act="sigColetar" data-id="${s.id}" ${W()}>${ic('edit')}Coletar assinatura aqui</button><button class="btn sm" data-act="sigConvite" data-id="${s.id}" ${W()}>${ic('file')}${s.conviteId?'Reenviar':'Enviar'} para o tutor ler (e-mail)</button><button class="btn sm ghost" data-act="sigEmail" data-id="${s.id}" ${W()}>E-mail manual</button><button class="btn sm" data-act="sigRemoto" data-id="${s.id}" ${W()}>${ic('users')}Aprovar pelo WhatsApp</button><button class="btn sm ghost" data-act="sigPrep" data-id="${s.id}" ${W()}>Editar textos</button>`:''}
        ${st==='assinado'?`<button class="btn sm" data-act="sigTermo" data-id="${s.id}">${ic('file')}Imprimir termo de confirmação</button><button class="btn pri sm" data-act="sigPapel" data-id="${s.id}" ${W()}>${ic('cam')}Anexar foto e concluir</button>`:''}
        ${st==='aguardando'?`${s.remoto?`<button class="btn sm" data-act="remWa" data-id="${s.id}">Reenviar ao tutor</button>`:`<button class="btn sm" data-act="sigQR" data-id="${s.id}">QR e link do WhatsApp</button>`}<button class="btn pri sm" data-act="sigConfirmar" data-id="${s.id}" ${W()}>${ic('check')}Confirmar mensagem recebida</button>`:''}
+       ${st==='assinado'&&!s.codEmailOk&&s.tutor?.email?`<button class="btn sm" data-act="sigCodigo" data-id="${s.id}" ${W()}>${ic('lock')}Código por e-mail</button>`:''}
        ${st==='confirmado'&&!s.fotoPapel?`<button class="btn sm" data-act="sigTermo" data-id="${s.id}">${ic('file')}Imprimir para assinar no papel</button><button class="btn sm" data-act="sigPapel" data-id="${s.id}" ${W()}>${ic('cam')}Anexar foto do papel</button>`:''}
        ${st==='expirado'?`<button class="btn pri sm" data-act="sigRenovar" data-id="${s.id}" ${W()}>Gerar novo código</button>`:''}
        ${s.assinatura||s.remoto||st==='pronto'?`<button class="btn sm" data-act="sigPdf" data-id="${s.id}">${ic('file')}PDF</button>`:''}
        ${st!=='confirmado'?`<button class="btn sm ghost danger" data-act="sigCancel" data-id="${s.id}" ${W()} aria-label="Cancelar pacote">${ic('trash')}</button>`:''}</div></div>
-     ${sigSteps(s,st)}
+     ${sigSteps(s,st)}${convFeed(s)}${s.codEmailOk?`<div class="row" style="gap:6px;margin-top:6px"><span class="chip ok">${ic('check')}Identidade confirmada pelo código do e-mail · ${fmtDT(s.codEmailOk)}</span></div>`:''}
      <ol class="sig-docs">${s.docs.map((d,di)=>`<li><span>${esc(d.nome)}</span>${(st==='pendente'||st==='pronto')&&s.docs.length>1?`<button class="xbtn" data-act="sigDocRm" data-id="${s.id}" data-i="${di}" title="Tirar este documento do pacote" ${W()}>${ic('x')}</button>`:''}${d.aceitoEm?`<span class="muted small">aceito ${fmtDT(d.aceitoEm).slice(11)}</span>`:''}${d.hash?`<span class="mono muted small" title="${esc(d.hash)}">#${esc(d.hash.slice(0,10))}</span>`:''}</li>`).join('')}</ol></div>`}).join(''):emptyBox('file','Nenhum documento para este paciente','Monte um pacote com os termos de que o paciente precisa. O tutor lê e aceita cada um, assina uma vez só, e confirma tudo com um único código pelo WhatsApp dele.')}
    <div class="panel-b muted small" style="border-top:1px solid var(--line-2)"><b>Passo a passo:</b> monte o pacote › <b>Revisar e preparar</b> (os textos saem preenchidos com os dados do tutor e ficam travados) › se quiser, <b>Enviar por e-mail</b> para leitura prévia › no dia, <b>Coletar assinatura aqui</b>: o tutor só lê, marca “Li e concordo” e assina uma vez › imprima o <b>termo de confirmação</b>, o tutor assina o papel, tire a foto e toque em <b>Concluído</b>.<br><b>Em casa:</b> toque em “Enviar para assinar em casa”. O tutor recebe o PDF já preenchido pelo WhatsApp e aprova respondendo “ACEITO” com o código. A equipe confirma e o pacote aparece como aprovado. Sem custo: usa só o link oficial do WhatsApp.</div></div>`}
 
@@ -2877,7 +2933,7 @@ function tutorFlow(sid){const s=S.assin.find(x=>x.id===sid);const p=byId(S.inter
         const assinatura=padData();const hashPacote=await sha256(docs.map(d=>d.hash).join('|')+'|'+st.tutor.cpf+'|'+assinadoEm+'|'+codigo);
         await S.db.doc('assinaturas/'+sid).update({docs,tutor:st.tutor,assinatura,foto:st.foto||null,assinadoEm,codigo,codigoEm:assinadoEm,expiraEm:frozen?null:exp.toISOString(),status:frozen?'assinado':'aguardando',dispositivo:navigator.userAgent.slice(0,180),hashPacote});
         try{await S.db.doc('internacoes/'+p.id).update({emailTutor:p.emailTutor||st.tutor.email||'',cpf:p.cpf||st.tutor.cpf,tutor:p.tutor||st.tutor.nome,telefone:p.telefone||st.tutor.telefone})}catch(_){}
-        setTimeout(()=>frozen?modalSigPapel(sid):showQR(sid),150)}catch(e){$('#tfNext').disabled=false;fail(e)}};
+        setTimeout(()=>frozen?posAssinatura(sid,st.tutor.email):showQR(sid),150)}catch(e){$('#tfNext').disabled=false;fail(e)}};
   };draw();
 }
 let PAD=null;
@@ -3279,6 +3335,10 @@ ${raw}`;
   if($('#cDel'))$('#cDel').onclick=()=>confirmBox('Excluir este registro de comunicação?','Excluir',async()=>{try{await S.db.doc('comunicacoes/'+c.id).delete();toast('Registro excluído')}catch(e){fail(e)}});
 }
 Object.assign(ACT,{
+ novaPre(){modalInt({preAdm:true,especie:'Cão'})},
+ sigConvite(el){enviarConvite(el.dataset.id)},
+ sigCodigo(el){const s=S.assin.find(x=>x.id===el.dataset.id);if(s)modalCodigo(s.id,s.tutor?.email)},
+ admitir(el){const p=byId(S.intern,el.dataset.id);if(!p)return;confirmBox(`Admitir <b>${esc(p.nome)}</b> agora? A internação começa a contar a partir deste momento.`,'Admitir',async()=>{try{await S.db.doc('internacoes/'+p.id).update({status:'internado',entrada:nowDT(),admitidoEm:nowDT()});const ag=S.agenda.find(a=>a.internacaoId===p.id&&!['realizado','cancelado'].includes(a.status));if(ag)try{await S.db.doc('agenda/'+ag.id).update({status:'realizado',realizadoEm:nowDT()})}catch(_){}S.tab='admissao';location.hash='p-'+p.id;render(true);toast('Paciente admitido')}catch(e){fail(e)}},false)},
  rubColetar(){modalRubrica()},
  rubPapel(){altaPapelPDF()},
  async rubPapelOk(){const p=curP();confirmBox('Confirmar que o tutor assinou a via em papel da saída (com data e hora)?','Confirmar',async()=>{try{await S.db.doc('internacoes/'+p.id).update({alta:{rubPapel:{em:nowDT(),por:lsGet('vp_resp','')||null}}});toast('Via em papel registrada')}catch(e){fail(e)}},false)},
@@ -3821,7 +3881,7 @@ async function termoPapelPDF(sid){const s=S.assin.find(x=>x.id===sid);const p=by
   P(`Eu, ${tu.nome}, inscrito(a) no CPF ${cpfMask(tu.cpf)}, responsável pelo paciente ${p.nome} (${[p.especie,p.raca].filter(Boolean).join(', ')}${p.microchip?', microchip '+p.microchip:''}), declaro que li, compreendi e concordei com cada um dos documentos listados abaixo, apresentados em formato digital no tablet da ${cl.razao||cl.nome||'clínica'}, e que os assinei eletronicamente em ${fmtDT(s.assinadoEm)}.`);
   P('Reconheço como minha a assinatura eletrônica aposta nesses documentos e a sua validade jurídica (Medida Provisória nº 2.200-2/2001, art. 10, § 2º, e Lei nº 14.063/2020). Recebi as informações necessárias e tive a oportunidade de esclarecer minhas dúvidas.');
   y+=1;P('Documentos assinados:',true);s.docs.forEach((d,i)=>{doc.setFont('helvetica','normal');doc.setFontSize(9.6);doc.text(L(`${i+1}. ${d.nome}`),M+3,y);doc.setFont('courier','normal');doc.setFontSize(7.6);doc.setTextColor(110,135,140);doc.text(L(`integridade ${String(d.hash||'').slice(0,24)}…`),PW-M,y,{align:'right'});doc.setTextColor(20,48,58);y+=5.4});
-  y+=2;P(`Código do pacote: ${s.codigo||'—'}`);
+  y+=2;P(`Código do pacote: ${s.codigo||'—'}`);if(s.codEmailOk)P(`Identidade confirmada por código enviado ao e-mail ${s.codEmail?.para||''} e informado pelo tutor em ${fmtDT(s.codEmailOk)}.`);
   y+=4;P(`${cl.cidade||'_______'} – ${cl.estado||'__'}, ${dataExt(today())}.`);
   y+=22;doc.setDrawColor(120,140,145);doc.setLineWidth(.3);doc.line(M,y,M+78,y);doc.line(PW-M-78,y,PW-M,y);doc.setFontSize(8.6);doc.setFont('helvetica','bold');doc.text(L(tu.nome),M,y+4.5);doc.text(L('Profissional da clínica'),PW-M-78,y+4.5);doc.setFont('helvetica','normal');doc.text(L('CPF '+cpfMask(tu.cpf)),M,y+8.6);doc.text(L('Nome e função'),PW-M-78,y+8.6);
   docFooters(doc,K,[{t:'Termo de confirmação de assinatura eletrônica',s:1}],s.codigo?'Código '+s.codigo:'');
@@ -3896,7 +3956,7 @@ function agCard(a){const t=agTipo(a.tipo);const st=AG_ST[a.status||'agendado']||
    <div class="ag-b"><div class="row" style="gap:6px"><span class="ag-tipo">${esc(a.tipo)}</span>${st[1]||a.status==='agendado'?`<span class="chip ${st[1]}">${st[0]}</span>`:''}</div>
     <div><b>${esc(a.paciente||'—')}</b> <span class="muted small">${esc([a.especie,a.tutor?'tutor '+a.tutor:''].filter(Boolean).join(' · '))}</span>${p?` <a href="#p-${p.id}" class="chip brand" onclick="event.stopPropagation()">abrir prontuário</a>`:''}</div>
     <div class="small">${ic('user')} ${esc(equipeNome(a.prof)||'Sem profissional')}${a.obs?` · <span class="muted">${esc(a.obs)}</span>`:''}</div></div>
-   <div class="ag-a">${a.status!=='realizado'&&a.status!=='cancelado'?`<button class="btn sm" data-act="agSt" data-id="${a.id}" data-st="realizado" ${W()}>${ic('check')}Realizado</button>`:''}${/Admiss/i.test(a.tipo)&&!a.internacaoId&&a.status!=='cancelado'?`<button class="btn sm pri" data-act="agInternar" data-id="${a.id}" ${W()}>Internar</button>`:''}</div></div>`}
+   <div class="ag-a">${a.status!=='realizado'&&a.status!=='cancelado'?`<button class="btn sm" data-act="agSt" data-id="${a.id}" data-st="realizado" ${W()}>${ic('check')}Realizado</button>`:''}${/Admiss/i.test(a.tipo)&&!a.internacaoId&&a.status!=='cancelado'?`<button class="btn sm pri" data-act="agInternar" data-id="${a.id}" ${W()}>Internar</button>`:''}${!a.internacaoId&&!['cancelado','realizado'].includes(a.status)?`<button class="btn sm" data-act="agPre" data-id="${a.id}" ${W()}>${ic('file')}Pré-admissão e termos</button>`:''}${p&&p.status==='pre'?`<span class="chip info">Pré-admissão</span>${convChip(p.id)}`:''}</div></div>`}
 function viewAgenda(){const d=S.agDay||today();const v=S.agView||'dia';
   const head=`<div class="crumb">Internação <span>› Agenda</span></div>
    <div class="page-h"><div><h1>Agenda</h1><div class="sub">${v==='dia'?`${wd(d)}, ${fmtD(d)}${d===today()?' · hoje':''}`:`Semana de ${fmtD(agWeek(d)[0])} a ${fmtD(agWeek(d)[6])}`}</div></div>
@@ -3957,9 +4017,10 @@ Object.assign(ACT,{
  agNav(el){const n=+el.dataset.n*((S.agView||'dia')==='semana'?7:1);S.agDay=addDays(S.agDay||today(),n);render(true)},agHoje(){S.agDay=today();render(true)},
  agVer(el,e){e?.preventDefault?.();S.agView=el.dataset.v;render(true)},agDia(el){S.agDay=el.dataset.d;S.agView='dia';render(true)},
  async agSt(el,e){e?.stopPropagation?.();try{await S.db.doc('agenda/'+el.dataset.id).update({status:el.dataset.st,[el.dataset.st+'Em']:nowDT()});toast('Atualizado')}catch(err){fail(err)}},
+ agPre(el,e){S.agPre=true;try{ACT.agInternar(el,e)}finally{S.agPre=false}},
  agInternar(el,e){e?.stopPropagation?.();const a=byId(S.agenda,el.dataset.id);const prev=agPetList().find(p=>norm(p.nome)===norm(a.paciente)&&(!a.tutorId||p.tutorId===a.tutorId));
   const t=a.tutorId&&byId(S.tutores,a.tutorId);S.agInternar=a.id;
-  modalInt({nome:a.paciente,especie:a.especie||prev?.especie||'Cão',raca:prev?.raca,sexo:prev?.sexo,idade:prev?.idade,microchip:prev?.microchip,pelagem:prev?.pelagem,tutorId:a.tutorId||prev?.tutorId,tutor:t?.nome||a.tutor||prev?.tutor,cpf:t?.cpf||prev?.cpf,telefone:t?.telefone||prev?.telefone,endereco:t?.endereco||prev?.endereco,cidadeTutor:t?.cidade||prev?.cidadeTutor,ufTutor:t?.uf||prev?.ufTutor,rg:t?.rg||prev?.rg,emailTutor:t?.email||prev?.emailTutor,motivo:a.obs||''})},
+  modalInt({preAdm:!!S.agPre,nome:a.paciente,especie:a.especie||prev?.especie||'Cão',raca:prev?.raca,sexo:prev?.sexo,idade:prev?.idade,microchip:prev?.microchip,pelagem:prev?.pelagem,tutorId:a.tutorId||prev?.tutorId,tutor:t?.nome||a.tutor||prev?.tutor,cpf:t?.cpf||prev?.cpf,telefone:t?.telefone||prev?.telefone,endereco:t?.endereco||prev?.endereco,cidadeTutor:t?.cidade||prev?.cidadeTutor,ufTutor:t?.uf||prev?.ufTutor,rg:t?.rg||prev?.rg,emailTutor:t?.email||prev?.emailTutor,motivo:a.obs||''})},
  agDel(el){if(!S.master)return;const id=el.dataset.id;confirmBox('Excluir este agendamento?','Excluir',async()=>{try{await S.db.doc('agenda/'+id).delete();closeModal();toast('Agendamento excluído')}catch(e){fail(e)}})}});
 document.addEventListener('change',e=>{if(e.target.id==='agData'&&e.target.value){S.agDay=e.target.value;render(true)}if(e.target.id==='agProf'){S.agProf=e.target.value;render(true)}});
 
@@ -4200,6 +4261,7 @@ async function boot(){
   db.collection('modelosCirurgicos').onSnapshot(once(s=>{S.modelos=docs(s)}),onErr);
   db.collection('protocolos').onSnapshot(once(s=>{S.prots=docs(s)}),onErr);
   db.collection('assinaturas').onSnapshot(s=>{S.assin=docs(s);render()},onErr);
+  db.collection('convites').onSnapshot(s=>{S.conv=docs(s);render()},()=>{});
   db.collection('tutores').onSnapshot(s=>{S.tutores=docs(s);S.tutLoaded=true;tutImport();render()},onErr);
   db.collection('modelosDoc').onSnapshot(s=>{S.modelosDoc=docs(s);importDocs();render()},onErr);
   db.doc('config/clinica').onSnapshot(s=>{S.clinica=s.exists?s.data():null;brandRefresh();if(S.modelosDoc)importDocs();render()},onErr);

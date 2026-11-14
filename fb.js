@@ -27,7 +27,7 @@ const rid=()=>{const a='abcdefghijklmnopqrstuvwxyz0123456789';let s='';const r=c
 const appS=()=>{try{return typeof S!=='undefined'?S:null}catch(_){return null}};
 const appRender=()=>{try{if(typeof render==='function')render()}catch(_){}};
 
-let ME=null,USERS=[],IA=null,EQUIPE=[];
+let ME=null,USERS=[],IA=null,EQUIPE=[],MAIL=null;
 const PERMS=[['ajustes','Pode fazer ajustes nos cadastros do paciente, do tutor e demais informações'],['exportar','Pode exportar o histórico completo do paciente (PDF/Word)'],['protocolos','Pode ajustar, cadastrar ou excluir protocolos de tratamento, descrições cirúrgicas e documentos'],['excluir','Pode excluir registros (de qualquer pessoa) e históricos'],['medicamentos','Pode ajustar, cadastrar ou excluir medicamentos (concentrações, doses e apresentações)']];
 const permBoxes=(pm,dis)=>`<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:13px;color:var(--ink-2,#4A656D)">Permissões (pode marcar várias)</b>${PERMS.map(([k,l])=>`<label class="chk"><input type="checkbox" name="perm_${k}" ${pm&&pm[k]?'checked':''} ${dis?'disabled':''}> ${l}</label>`).join('')}<div class="note" style="padding:8px 10px">Todos os usuários sempre veem todos os dados do tutor e do pet, quem administrou cada medicamento e os registros do histórico, e todos lançam nas fichas dos pacientes. O master tem todas as permissões.</div></div>`;
 const permRead=f=>Object.fromEntries(PERMS.map(([k])=>[k,!!(f['perm_'+k]&&f['perm_'+k].checked)]));
@@ -123,6 +123,10 @@ window.__vpTranscribe=async blob=>{if(!IA||!IA.key)throw new Error('A IA ainda n
     if(!r.ok){let msg='';try{msg=(await r.json()).error.message}catch(_){}throw new Error('IA: '+(msg||r.status))}
     const j=await r.json();return(((j.candidates||[])[0]||{}).content||{parts:[]}).parts.filter(x=>!x.thought).map(x=>x.text||'').join('')}
   throw last||new Error('IA indisponível')};
+async function mailSend(cfg,payload){const r=await fetch(cfg.url,{method:'POST',body:JSON.stringify({secret:cfg.secret,nome:cfg.nome||'VetPlus',...payload}),redirect:'follow'});
+  let j=null;try{j=await r.json()}catch(_){throw new Error('O serviço de e-mail não respondeu corretamente. Confira a implantação do Apps Script (acesso: Qualquer pessoa).')}
+  if(!j.ok)throw new Error(j.erro==='segredo'?'Código secreto do e-mail não confere. Refaça a configuração.':'E-mail: '+(j.erro||'falhou'));return j}
+const mailFn=async({to,subject,html,text})=>{if(!MAIL||!MAIL.url)throw new Error('E-mail não configurado');return mailSend(MAIL,{to,subject,html,text})};
 sample.json=async(p,o)=>{const r=await sample(p,o);const m=r.text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);return m?JSON.parse(m[0]):null};
 
 /* ---------- window.claude ---------- */
@@ -221,11 +225,12 @@ function menu(){const m=ME.papel==='master';
     <button class="fb-btn sec" data-a="senha">Trocar minha senha</button>
     ${m?`<button class="fb-btn sec" data-a="users">Usuários e senhas da equipe</button>
     <button class="fb-btn sec" data-a="ia">Configurar IA (Gemini)</button>
+    <button class="fb-btn sec" data-a="mail">Configurar envio de e-mail</button>
     <button class="fb-btn sec" data-a="backup">Baixar cópia de segurança</button>
     <button class="fb-btn sec" data-a="import">Importar dados</button>`:''}
     <button class="fb-btn dan" data-a="sair">Sair</button></div>`);
   ov.querySelector('.menu').onclick=e=>{const a=e.target.closest('[data-a]')?.dataset.a;if(!a)return;
-    if(a==='sair')logout();if(a==='senha')trocaSenha();if(a==='users')usersPanel();if(a==='ia')iaPanel();if(a==='backup')backupPanel();if(a==='import')importPanel()}}
+    if(a==='sair')logout();if(a==='senha')trocaSenha();if(a==='users')usersPanel();if(a==='ia')iaPanel();if(a==='mail')mailPanel();if(a==='backup')backupPanel();if(a==='import')importPanel()}}
 
 function trocaSenha(){const ov=modal('Trocar minha senha',`<form id="fbTS" class="bd" style="padding:0">
    <label>Senha atual<input name="o" type="password" autocomplete="current-password" required></label>
@@ -281,6 +286,44 @@ function iaPanel(){const ov=modal('Configurar IA (Gemini)',`<div class="note">Co
   ov.querySelector('#fbIAt').onclick=async()=>{const old=IA;IA={key:f.key.value.trim(),modelo:f.modelo.value.trim()};er.className='fb-prog';er.textContent='Testando…';try{const r=await sample('Responda apenas: OK');er.className='fb-ok';er.textContent='Funcionou: '+r.text.slice(0,60)}catch(x){er.className='fb-err';er.textContent=x.message||'Falhou'}IA=old};
   f.onsubmit=async e=>{e.preventDefault();try{await fs.doc('config/ia').set({key:f.key.value.trim(),modelo:f.modelo.value.trim()||'gemini-flash-latest',em:nowISO(),por:ME.uid});close()}catch(x){er.className='fb-err';er.textContent='Não foi possível salvar.'}}}
 
+/* ---------- e-mail (master) ---------- */
+function gsCode(sec){return `// VetPlus · envio de e-mails do prontuário
+// Cole este código no Apps Script da conta atendimentovetplus@gmail.com e implante como App da Web.
+const SEGREDO = '${sec}';
+function doPost(e) {
+  try {
+    const d = JSON.parse(e.postData.contents);
+    if (d.secret !== SEGREDO) return saida({ ok: false, erro: 'segredo' });
+    if (d.ping) return saida({ ok: true, cota: MailApp.getRemainingDailyQuota() });
+    if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(d.to || '')) return saida({ ok: false, erro: 'e-mail inválido' });
+    MailApp.sendEmail({ to: d.to, subject: String(d.subject || '').slice(0, 200), htmlBody: d.html || '', body: d.text || '', name: d.nome || 'VetPlus' });
+    return saida({ ok: true, cota: MailApp.getRemainingDailyQuota() });
+  } catch (err) { return saida({ ok: false, erro: String(err) }); }
+}
+function doGet() { return saida({ ok: true, servico: 'VetPlus e-mail' }); }
+function saida(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+function autorizar() { MailApp.getRemainingDailyQuota(); }
+`}
+function mailPanel(){const sec=(MAIL&&MAIL.secret)||rid()+rid();
+  const ov=modal('Configurar envio de e-mail',`<div class="note">Os e-mails (termos para leitura e código de confirmação) saem da conta <b>atendimentovetplus@gmail.com</b>, de graça, até cerca de 100 por dia. Faça uma vez:</div>
+  <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.45">
+   <li>No computador, entre em <b>script.google.com</b> com a conta <b>atendimentovetplus@gmail.com</b> e clique em <b>Novo projeto</b>.</li>
+   <li>Apague o que estiver escrito, toque em <b>Copiar código</b> aqui embaixo e cole lá. Clique no disquete para salvar.</li>
+   <li>Clique em <b>Implantar</b> › <b>Nova implantação</b> › engrenagem › <b>App da Web</b>. Em "Executar como": <b>Eu</b>. Em "Quem pode acessar": <b>Qualquer pessoa</b>. Clique em <b>Implantar</b> e autorize com a conta.</li>
+   <li>Copie o <b>URL do app da Web</b> (termina em <i>/exec</i>), cole abaixo e toque em <b>Testar</b>.</li></ol>
+  <textarea readonly id="fbGs" style="font:12px/1.4 monospace;height:120px;border:1px solid var(--line,#D5E3E3);border-radius:8px;padding:8px">${esc(gsCode(sec))}</textarea>
+  <button class="fb-btn sec sm" id="fbGsCp" type="button">Copiar código</button>
+  <form id="fbML" style="display:flex;flex-direction:column;gap:12px"><label>URL do app da Web<input name="url" value="${esc(MAIL&&MAIL.url||'')}" placeholder="https://script.google.com/macros/s/…/exec" spellcheck="false"></label>
+  <label>Nome que aparece como remetente<input name="nome" value="${esc(MAIL&&MAIL.nome||'VetPlus Especialidades Veterinárias')}"></label>
+  <label>Enviar e-mail de teste para<input name="teste" type="email" placeholder="seu e-mail"></label>
+  <div class="fb-err" id="fbMLe"></div><div style="display:flex;gap:8px"><button type="button" class="fb-btn sec" id="fbMLt">Testar</button><button class="fb-btn" style="flex:1">Salvar</button></div></form>`);
+  ov.querySelector('#fbGsCp').onclick=()=>{const ta=ov.querySelector('#fbGs');ta.select();try{navigator.clipboard.writeText(ta.value)}catch(_){document.execCommand('copy')}ov.querySelector('#fbGsCp').textContent='Copiado!'};
+  const f=ov.querySelector('#fbML');const er=ov.querySelector('#fbMLe');
+  const cfg=()=>({url:f.url.value.trim(),secret:sec,nome:f.nome.value.trim()||'VetPlus'});
+  ov.querySelector('#fbMLt').onclick=async()=>{er.className='fb-prog';er.textContent='Testando…';try{const c=cfg();if(!/^https:\/\/script\.google\.com\//.test(c.url))throw new Error('Cole o URL que termina em /exec');
+    if(f.teste.value.trim()){await mailSend(c,{to:f.teste.value.trim(),subject:'Teste do prontuário VetPlus',html:'<p>Funcionou! Os e-mails do prontuário estão configurados.</p>',text:'Funcionou!'});er.className='fb-ok';er.textContent='E-mail de teste enviado. Confira a caixa de entrada.'}
+    else{const j=await mailSend(c,{ping:1});er.className='fb-ok';er.textContent='Conectado. Envios restantes hoje: '+j.cota}}catch(x){er.className='fb-err';er.textContent=x.message}};
+  f.onsubmit=async e=>{e.preventDefault();try{await fs.doc('config/email').set({...cfg(),em:nowISO(),por:ME.uid});close()}catch(x){er.className='fb-err';er.textContent='Não foi possível salvar.'}}}
 /* ---------- backup e importação (master) ---------- */
 function dl(name,obj){downloads.save({filename:name,data:new Blob([JSON.stringify(obj)],{type:'application/json'})})}
 function backupPanel(){const ov=modal('Cópia de segurança',`<div class="note">Baixa um arquivo com todos os dados do prontuário (pacientes, prescrições, evoluções, cadastros, usuários). Guarde em local seguro: ele contém dados pessoais dos tutores.</div>
@@ -323,6 +366,7 @@ function start(){injectCSS();
       try{if(ME.equipeId)localStorage.setItem('vp_resp',JSON.stringify(ME.equipeId))}catch(_){}
       ref.update({ultimoAcesso:nowISO()}).catch(()=>{});
       fs.collection('usuarios').onSnapshot(x=>{USERS=x.docs.map(d=>({id:d.id,...d.data()}));const me=USERS.find(z=>z.id===ME.uid);if(me&&me.ativo===false)logout();if(me&&me.papel!=='master'){window.__vpPerm=me.perm||{};appRender()}},()=>{});
+      fs.doc('config/email').onSnapshot(x=>{MAIL=x.exists?x.data():null;window.__vpMail=MAIL&&MAIL.url?mailFn:null;appRender()},()=>{});
       await new Promise(res=>{let first=true;fs.doc('config/ia').onSnapshot(x=>{IA=x.exists?x.data():null;const S_=appS();if(S_&&!first){S_.sample=IA&&IA.key?sample:null;appRender()}if(first){first=false;res()}},()=>{if(first){first=false;res()}})});
       if('serviceWorker' in navigator&&navigator.serviceWorker.controller==null){await Promise.race([new Promise(r=>navigator.serviceWorker.addEventListener('controllerchange',r,{once:true})),new Promise(r=>setTimeout(r,2500))])}
       paintAcct();hideGate();resolveReady()}
