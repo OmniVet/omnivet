@@ -127,6 +127,7 @@ async function mailSend(cfg,payload){const r=await fetch(cfg.url,{method:'POST',
   let j=null;try{j=await r.json()}catch(_){throw new Error('O serviço de e-mail não respondeu corretamente. Confira a implantação do Apps Script (acesso: Qualquer pessoa).')}
   if(!j.ok)throw new Error(j.erro==='segredo'?'Código secreto do e-mail não confere. Refaça a configuração.':'E-mail: '+(j.erro||'falhou'));return j}
 const mailFn=async({to,subject,html,text})=>{if(!MAIL||!MAIL.url)throw new Error('E-mail não configurado');return mailSend(MAIL,{to,subject,html,text})};
+const mailCheck=async({from,code})=>{if(!MAIL||!MAIL.url)throw new Error('E-mail não configurado');const j=await mailSend(MAIL,{check:code,from});if(j.achou===undefined)throw new Error('Atualize o código do Apps Script (menu da conta › Configurar envio de e-mail) para conferir as respostas.');return j};
 sample.json=async(p,o)=>{const r=await sample(p,o);const m=r.text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);return m?JSON.parse(m[0]):null};
 
 /* ---------- window.claude ---------- */
@@ -294,22 +295,37 @@ function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents);
     if (d.secret !== SEGREDO) return saida({ ok: false, erro: 'segredo' });
-    if (d.ping) return saida({ ok: true, cota: MailApp.getRemainingDailyQuota() });
+    if (d.ping) return saida({ ok: true, cota: MailApp.getRemainingDailyQuota(), conta: Session.getEffectiveUser().getEmail() });
+    if (d.check) return saida(procurarAceite(String(d.from || ''), String(d.check || '')));
     if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(d.to || '')) return saida({ ok: false, erro: 'e-mail inválido' });
     MailApp.sendEmail({ to: d.to, subject: String(d.subject || '').slice(0, 200), htmlBody: d.html || '', body: d.text || '', name: d.nome || 'VetPlus' });
     return saida({ ok: true, cota: MailApp.getRemainingDailyQuota() });
   } catch (err) { return saida({ ok: false, erro: String(err) }); }
 }
+// Procura na caixa da clínica a resposta do tutor com o código (ex.: ACEITO VP-123456)
+function procurarAceite(de, codigo) {
+  if (!/^[^@\\s]+@[^@\\s]+$/.test(de) || !/^VP-\\d{6}$/.test(codigo)) return { ok: false, erro: 'dados inválidos' };
+  const conversas = GmailApp.search('from:' + de + ' "' + codigo + '" newer_than:60d', 0, 10);
+  for (const c of conversas) for (const m of c.getMessages()) {
+    if (m.getFrom().toLowerCase().indexOf(de.toLowerCase()) < 0) continue;
+    const novo = m.getPlainBody().split(/\\n(?:>|Em .{0,120}escreveu:|On .{0,120}wrote:|-{4,}|_{4,})/)[0];
+    if (novo.toUpperCase().indexOf(codigo) < 0) continue;
+    m.star();
+    return { ok: true, achou: true, de: m.getFrom(), em: Utilities.formatDate(m.getDate(), 'America/Fortaleza', "yyyy-MM-dd'T'HH:mm"), assunto: m.getSubject(), trecho: novo.trim().slice(0, 400), id: m.getId(), link: 'https://mail.google.com/mail/u/0/#all/' + m.getId() };
+  }
+  return { ok: true, achou: false };
+}
 function doGet() { return saida({ ok: true, servico: 'VetPlus e-mail' }); }
 function saida(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
-function autorizar() { MailApp.getRemainingDailyQuota(); }
+function autorizar() { MailApp.getRemainingDailyQuota(); GmailApp.getInboxUnreadCount(); }
 `}
 function mailPanel(){const sec=(MAIL&&MAIL.secret)||rid()+rid();
-  const ov=modal('Configurar envio de e-mail',`<div class="note">Os e-mails (termos para leitura e código de confirmação) saem da conta <b>atendimentovetplus@gmail.com</b>, de graça, até cerca de 100 por dia. Faça uma vez:</div>
+  const ov=modal('Configurar envio de e-mail',`<div class="note">Os e-mails com os termos saem da conta <b>atendimentovetplus@gmail.com</b>, de graça, até cerca de 100 por dia. As respostas dos tutores (“ACEITO VP-…”) chegam nessa mesma caixa: o sistema as encontra sozinho e marca com estrela no Gmail. Faça uma vez:</div>
   <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.45">
    <li>No computador, entre em <b>script.google.com</b> com a conta <b>atendimentovetplus@gmail.com</b> e clique em <b>Novo projeto</b>.</li>
    <li>Apague o que estiver escrito, toque em <b>Copiar código</b> aqui embaixo e cole lá. Clique no disquete para salvar.</li>
-   <li>Clique em <b>Implantar</b> › <b>Nova implantação</b> › engrenagem › <b>App da Web</b>. Em "Executar como": <b>Eu</b>. Em "Quem pode acessar": <b>Qualquer pessoa</b>. Clique em <b>Implantar</b> e autorize com a conta.</li>
+   <li>Clique em <b>Implantar</b> › <b>Nova implantação</b> › engrenagem › <b>App da Web</b>. Em "Executar como": <b>Eu</b>. Em "Quem pode acessar": <b>Qualquer pessoa</b>. Clique em <b>Implantar</b> e autorize com a conta (permitir enviar e ler e-mails). Se o Google avisar “app não verificado”, clique em <b>Avançado</b> › <b>Acessar</b>.</li>
+   <li><i>Se já tinha feito antes:</i> cole o código novo, salve e vá em <b>Implantar › Gerenciar implantações › lápis › Versão: Nova versão › Implantar</b>. O endereço continua o mesmo.</li>
    <li>Copie o <b>URL do app da Web</b> (termina em <i>/exec</i>), cole abaixo e toque em <b>Testar</b>.</li></ol>
   <textarea readonly id="fbGs" style="font:12px/1.4 monospace;height:120px;border:1px solid var(--line,#D5E3E3);border-radius:8px;padding:8px">${esc(gsCode(sec))}</textarea>
   <button class="fb-btn sec sm" id="fbGsCp" type="button">Copiar código</button>
@@ -322,8 +338,8 @@ function mailPanel(){const sec=(MAIL&&MAIL.secret)||rid()+rid();
   const cfg=()=>({url:f.url.value.trim(),secret:sec,nome:f.nome.value.trim()||'VetPlus'});
   ov.querySelector('#fbMLt').onclick=async()=>{er.className='fb-prog';er.textContent='Testando…';try{const c=cfg();if(!/^https:\/\/script\.google\.com\//.test(c.url))throw new Error('Cole o URL que termina em /exec');
     if(f.teste.value.trim()){await mailSend(c,{to:f.teste.value.trim(),subject:'Teste do prontuário VetPlus',html:'<p>Funcionou! Os e-mails do prontuário estão configurados.</p>',text:'Funcionou!'});er.className='fb-ok';er.textContent='E-mail de teste enviado. Confira a caixa de entrada.'}
-    else{const j=await mailSend(c,{ping:1});er.className='fb-ok';er.textContent='Conectado. Envios restantes hoje: '+j.cota}}catch(x){er.className='fb-err';er.textContent=x.message}};
-  f.onsubmit=async e=>{e.preventDefault();try{await fs.doc('config/email').set({...cfg(),em:nowISO(),por:ME.uid});close()}catch(x){er.className='fb-err';er.textContent='Não foi possível salvar.'}}}
+    else{const j=await mailSend(c,{ping:1});c.conta=j.conta||null;er.className='fb-ok';er.textContent='Conectado'+(j.conta?' à conta '+j.conta:'')+'. Envios restantes hoje: '+j.cota}}catch(x){er.className='fb-err';er.textContent=x.message}};
+  f.onsubmit=async e=>{e.preventDefault();try{let conta=null;try{conta=(await mailSend(cfg(),{ping:1})).conta||null}catch(_){}await fs.doc('config/email').set({...cfg(),conta,em:nowISO(),por:ME.uid});close()}catch(x){er.className='fb-err';er.textContent='Não foi possível salvar.'}}}
 /* ---------- backup e importação (master) ---------- */
 function dl(name,obj){downloads.save({filename:name,data:new Blob([JSON.stringify(obj)],{type:'application/json'})})}
 function backupPanel(){const ov=modal('Cópia de segurança',`<div class="note">Baixa um arquivo com todos os dados do prontuário (pacientes, prescrições, evoluções, cadastros, usuários). Guarde em local seguro: ele contém dados pessoais dos tutores.</div>
@@ -366,7 +382,7 @@ function start(){injectCSS();
       try{if(ME.equipeId)localStorage.setItem('vp_resp',JSON.stringify(ME.equipeId))}catch(_){}
       ref.update({ultimoAcesso:nowISO()}).catch(()=>{});
       fs.collection('usuarios').onSnapshot(x=>{USERS=x.docs.map(d=>({id:d.id,...d.data()}));const me=USERS.find(z=>z.id===ME.uid);if(me&&me.ativo===false)logout();if(me&&me.papel!=='master'){window.__vpPerm=me.perm||{};appRender()}},()=>{});
-      fs.doc('config/email').onSnapshot(x=>{MAIL=x.exists?x.data():null;window.__vpMail=MAIL&&MAIL.url?mailFn:null;appRender()},()=>{});
+      fs.doc('config/email').onSnapshot(x=>{MAIL=x.exists?x.data():null;window.__vpMail=MAIL&&MAIL.url?mailFn:null;window.__vpMailCheck=MAIL&&MAIL.url?mailCheck:null;window.__vpMailFrom=MAIL&&MAIL.conta||null;appRender()},()=>{});
       await new Promise(res=>{let first=true;fs.doc('config/ia').onSnapshot(x=>{IA=x.exists?x.data():null;const S_=appS();if(S_&&!first){S_.sample=IA&&IA.key?sample:null;appRender()}if(first){first=false;res()}},()=>{if(first){first=false;res()}})});
       if('serviceWorker' in navigator&&navigator.serviceWorker.controller==null){await Promise.race([new Promise(r=>navigator.serviceWorker.addEventListener('controllerchange',r,{once:true})),new Promise(r=>setTimeout(r,2500))])}
       paintAcct();hideGate();resolveReady()}
