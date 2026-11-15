@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611141238"></script>
-<script src="lib/firebase-auth-compat.js?v=202611141238"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611141238"></script>
-<script src="fb.js?v=202611141238"></script>
+<script src="lib/firebase-app-compat.js?v=202611152051"></script>
+<script src="lib/firebase-auth-compat.js?v=202611152051"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611152051"></script>
+<script src="fb.js?v=202611152051"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -714,7 +714,7 @@ const CONF_KEYS=['medicacao','alimentacao','pertences','cuidados'];
 const FUNCOES=['Médico(a)-veterinário(a) · Internamento','Médico(a)-veterinário(a) · Plantonista','Médico(a)-veterinário(a) · Volante','Médico(a)-veterinário(a) · RT (responsável técnico)','Gestão / administrativo','Auxiliar veterinário','Estudante de veterinária'];
 const funcOpts=v=>[...FUNCOES,...(v&&!FUNCOES.includes(v)?[v]:[])].map(o=>`<option ${v===o?'selected':''}>${esc(o)}</option>`).join('');
 /* ---------- Estado ---------- */
-const S={agenda:[],agCfg:null,agDay:null,agView:'dia',agProf:'',tutores:[],tq:'',db:null,user:null,assets:null,downloads:null,prots:[],protId:null,protPeso:10,pAnest:[],anSel:null,pEvo:[],evoHoje:{},pMon:{},pTransf:[],tfSel:null,boxes:[],solic:[],notas:[],escImgs:{},notaDraft:{},turno:null,assin:[],conv:[],modelosDoc:[],clinica:null,pInter:[],pComm:[],interRec:[],sample:null,evoSub:'aval',uid:null,canWrite:true,ready:false,noDb:false,
+const S={agenda:[],agCfg:null,agDay:null,agView:'dia',agProf:'',tutores:[],tq:'',db:null,user:null,assets:null,downloads:null,prots:[],protId:null,protPeso:10,pAnest:[],anSel:null,pEvo:[],evoHoje:{},pMon:{},pTransf:[],tfSel:null,boxes:[],solic:[],notas:[],escImgs:{},notaDraft:{},turno:null,assin:[],conv:[],mSaida:[],saidaDocs:[],modelosDoc:[],clinica:null,pInter:[],pComm:[],interRec:[],sample:null,evoSub:'aval',uid:null,canWrite:true,ready:false,noDb:false,
  view:'internados',pid:null,tab:'prescricao',day:today(),cadTab:'med',q:'',hq:'',
  intern:[],meds:[],procs:[],equipe:[],modelos:[],
  prescHoje:{},execHoje:{},pPresc:{},pExec:{},pCir:[],cirSel:null,
@@ -780,7 +780,7 @@ function itemName(it){return itemName0(it)+autChip(it)}
 function itemName0(it){if(it.tipo==='fluido')return`Soroterapia <span class="muted small">${esc(it.soro||'')}</span>`;if(it.tipo==='proc'||it.tipo==='alim')return esc(it.nome);return`${esc(it.nome)}${it.conc?` <span class="muted small mono">${num(it.conc,3)} ${esc(it.concUn)}</span>`:''}`}
 
 /* ---------- Render ---------- */
-const CAD_INT=[['med','pill','Medicamentos'],['proc','hand','Procedimentos'],['modelos','book','Descrições cirúrgicas'],['prot','clip','Protocolos de prescrição'],['boxes','grid','Boxes'],['escalas','thermo','Escalas de dor'],['descritivos','book','Outros descritivos'],['docs','file','Documentos']];
+const CAD_INT=[['saida','file','Receitas, encaminhamentos e atestados'],['med','pill','Medicamentos'],['proc','hand','Procedimentos'],['modelos','book','Descrições cirúrgicas'],['prot','clip','Protocolos de prescrição'],['boxes','grid','Boxes'],['escalas','thermo','Escalas de dor'],['descritivos','book','Outros descritivos'],['docs','file','Documentos']];
 const EST_TABS=[['geral','box','Estoque geral'],['setores','grid','Setores'],['pedidos','clip','Pedidos ao estoque'],['inventario','clip','Inventário'],['contagem','check','Contagem por setor']];
 function nav(){
   const n=ativos().length,v=S.view,c=k=>v===k?'on':'',cad=t=>v==='cad'&&S.cadTab===t||(t==='prot'&&v==='prot');
@@ -909,9 +909,10 @@ function viewHistorico(){
 
 /* Cadastros */
 function viewCad(){
-  const t=S.cadTab;const tabs=[['tutores','Tutores'],['med','Medicamentos'],['proc','Procedimentos'],['prot','Protocolos'],['equipe','Equipe'],['modelos','Descrições cirúrgicas'],['boxes','Boxes'],['escalas','Escalas de dor'],['descritivos','Outros descritivos'],['docs','Documentos'],['clinica','Clínica']];
+  const t=S.cadTab;const tabs=[['tutores','Tutores'],['med','Medicamentos'],['proc','Procedimentos'],['prot','Protocolos'],['equipe','Equipe'],['modelos','Descrições cirúrgicas'],['boxes','Boxes'],['escalas','Escalas de dor'],['descritivos','Outros descritivos'],['docs','Documentos'],['saida','Receitas e atestados'],['clinica','Clínica']];
   let body='';
-  if(t==='med'){const l=[...S.meds].sort((a,b)=>a.nome.localeCompare(b.nome));
+  if(t==='saida')body=cadSaidaHTML();
+  else if(t==='med'){const l=[...S.meds].sort((a,b)=>a.nome.localeCompare(b.nome));
     body=`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Medicamento</th><th>Concentração</th><th>Via padrão</th><th>Dose padrão</th><th>Posologia / referência</th><th></th></tr></thead><tbody>${l.map(m=>`<tr><td class="nm">${esc(m.nome)}${m.extra?' <span class="chip aut" title="Não incluso no pacote/diária: aplicar só com autorização prévia do tutor">$ fora do pacote</span>':''}<div class="muted small">${esc(m.apresentacao||'')}</div></td><td class="mono">${m.conc!=null?num(m.conc,3)+' '+esc(m.concUn):'<span class="chip warn">conferir</span>'}</td><td>${esc(m.via||'—')}</td><td class="small tnum" style="white-space:nowrap">${m.dose!=null?`Cão ${num(m.dose,3)} ${esc(m.doseUn||'')}`:'—'}${m.doseGato!=null?`<br>Gato ${num(m.doseGato,3)} ${esc(m.doseUn||'')}`:''}</td><td class="small">${esc(m.ref||'—')}</td><td style="text-align:right;white-space:nowrap"><button class="btn sm ghost" data-act="cadEdit" data-k="med" data-id="${m.id}" ${W()}>${ic('edit')}</button><button class="btn sm ghost danger" data-act="cadDel" data-k="med" data-id="${m.id}" ${W()}>${ic('trash')}</button></td></tr>`).join('')||'<tr><td colspan="6" class="muted">Nenhum medicamento cadastrado.</td></tr>'}</tbody></table></div>`}
   if(t==='proc'){const l=[...S.procs].sort((a,b)=>a.nome.localeCompare(b.nome));
     body=`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Procedimento</th><th>Frequência padrão</th><th>Instruções</th><th></th></tr></thead><tbody>${l.map(m=>`<tr><td class="nm">${esc(m.nome)}</td><td>${freqLbl(m.freq||'24')}</td><td class="small">${esc(m.instrucoes||'—')}</td><td style="text-align:right;white-space:nowrap"><button class="btn sm ghost" data-act="cadEdit" data-k="proc" data-id="${m.id}" ${W()}>${ic('edit')}</button><button class="btn sm ghost danger" data-act="cadDel" data-k="proc" data-id="${m.id}" ${W()}>${ic('trash')}</button></td></tr>`).join('')||'<tr><td colspan="4" class="muted">Nenhum procedimento cadastrado.</td></tr>'}</tbody></table></div>`}
@@ -922,7 +923,7 @@ function viewCad(){
     body=l.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Protocolo</th><th>Itens</th><th>Quando usar</th><th></th></tr></thead><tbody>${l.map(m=>`<tr style="cursor:pointer" data-act="protOpen" data-id="${m.id}"><td class="nm">${esc(m.nome)} ${protOk(m)?'':'<span class="chip warn">Rascunho</span>'}</td><td class="small">${(m.itens||[]).map(i=>esc(i.tipo==='fluido'?'Fluidoterapia':i.nome)).join(', ')||'<span class="muted">vazio</span>'}</td><td class="small">${esc(m.descricao||'—')}</td><td style="text-align:right">${ic('right')}</td></tr>`).join('')}</tbody></table></div>`:emptyBox('clip','Nenhum protocolo','Crie receitas padrão, como a de castração, com dose por kg e horários fixos. Na internação, os volumes saem calculados pelo peso.')}
   if(t==='modelos'){const l=[...S.modelos].sort((a,b)=>String(a.categoria||'zz').localeCompare(String(b.categoria||'zz'))||a.nome.localeCompare(b.nome));
     body=`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Procedimento</th><th>Categoria</th><th>Texto</th><th></th></tr></thead><tbody>${l.map(m=>`<tr><td class="nm">${esc(m.nome)}</td><td><span class="chip">${esc(m.categoria||'Outros')}</span></td><td class="small" style="max-width:60ch">${esc(String(m.texto||'').slice(0,180))}${String(m.texto||'').length>180?'…':''}</td><td style="text-align:right;white-space:nowrap"><button class="btn sm ghost" data-act="cadEdit" data-k="modelos" data-id="${m.id}" ${W()}>${ic('edit')}</button><button class="btn sm ghost danger" data-act="cadDel" data-k="modelos" data-id="${m.id}" ${W()}>${ic('trash')}</button></td></tr>`).join('')||'<tr><td colspan="3" class="muted">Nenhum modelo cadastrado.</td></tr>'}</tbody></table></div>`}
-  const lbl={tutores:'tutor',med:'medicamento',proc:'procedimento',prot:'protocolo',equipe:'membro da equipe',modelos:'modelo',boxes:'box',escalas:'',descritivos:'',docs:'documento',clinica:''}[t];
+  const lbl={saida:'modelo',tutores:'tutor',med:'medicamento',proc:'procedimento',prot:'protocolo',equipe:'membro da equipe',modelos:'modelo',boxes:'box',escalas:'',descritivos:'',docs:'documento',clinica:''}[t];
   if(t==='docs')body=viewDocsCad();
   if(t==='tutores')body=viewTutores();
   if(t==='clinica')body=viewClinica();
@@ -930,8 +931,8 @@ function viewCad(){
   if(t==='escalas')body=viewEscalas();
   if(t==='descritivos')body=viewDescritivos();
   return`<div class="crumb">Cadastros <span>› ${tabs.find(x=>x[0]===t)[1]}</span></div>
-   <div class="page-h"><div><h1>${tabs.find(x=>x[0]===t)[1]}</h1><div class="sub">${t==='docs'?'Textos dos seus TCLE, termos e contratos. Use os campos automáticos para puxar dados do paciente e do tutor.':t==='clinica'?'Dados que aparecem nos documentos e o WhatsApp que recebe as confirmações dos tutores.':t==='boxes'?'Boxes da clínica por setor. O mapa de boxes mostra quem está em cada um.':t==='escalas'?'Imagens de referência das escalas de dor usadas na evolução.':t==='prot'?'Receitas padrão aplicadas na internação ou depois, na prescrição do dia.':t==='med'?'Concentrações usadas na clínica. Ao prescrever, a concentração entra sozinha e o volume é calculado pelo peso.':t==='modelos'?'Banco de descrições por procedimento. Na ficha cirúrgica, busque e inclua quantos precisar; dá para atualizar o texto padrão direto da ficha.':''}</div></div>
-   ${['med','prot','modelos'].includes(t)?`<span class="row" style="gap:8px"><button class="btn" data-act="iaImport" data-k="${t}" ${W()}>${ic('spark')}Importar com IA</button>`:''}${t==='equipe'&&S.master?`<button class='btn' type='button' data-allow onclick='window.__vpUsers&&window.__vpUsers()'>${ic('user')}Logins, senhas e permissões</button>`:''}${t==='escalas'||t==='clinica'||t==='descritivos'?'':`<button class="btn pri" data-act="${t==='prot'?'protNew':t==='docs'?'docNew':t==='tutores'?'tutNew':'cadEdit'}" data-k="${t}" ${W()}>${ic('plus')}Novo ${lbl}</button>`}${['med','prot','modelos'].includes(t)?'</span>':''}</div>
+   <div class="page-h"><div><h1>${tabs.find(x=>x[0]===t)[1]}</h1><div class="sub">${t==='docs'?'Textos dos seus TCLE, termos e contratos. Use os campos automáticos para puxar dados do paciente e do tutor.':t==='clinica'?'Dados que aparecem nos documentos e o WhatsApp que recebe as confirmações dos tutores.':t==='boxes'?'Boxes da clínica por setor. O mapa de boxes mostra quem está em cada um.':t==='escalas'?'Imagens de referência das escalas de dor usadas na evolução.':t==='prot'?'Receitas padrão aplicadas na internação ou depois, na prescrição do dia.':t==='med'?'Concentrações usadas na clínica. Ao prescrever, a concentração entra sozinha e o volume é calculado pelo peso.':t==='saida'?'Modelos de receita, encaminhamento e atestado. Na saída do paciente (ou em Documentos), escolha o modelo, ajuste, escolha o veterinário e imprima.':t==='modelos'?'Banco de descrições por procedimento. Na ficha cirúrgica, busque e inclua quantos precisar; dá para atualizar o texto padrão direto da ficha.':''}</div></div>
+   ${['med','prot','modelos'].includes(t)?`<span class="row" style="gap:8px"><button class="btn" data-act="iaImport" data-k="${t}" ${W()}>${ic('spark')}Importar com IA</button>`:''}${t==='equipe'&&S.master?`<button class='btn' type='button' data-allow onclick='window.__vpUsers&&window.__vpUsers()'>${ic('user')}Logins, senhas e permissões</button>`:''}${t==='escalas'||t==='clinica'||t==='descritivos'?'':`<button class="btn pri" data-act="${t==='saida'?'msNew':t==='prot'?'protNew':t==='docs'?'docNew':t==='tutores'?'tutNew':'cadEdit'}" data-k="${t}" ${W()}>${ic('plus')}Novo ${lbl}</button>`}${['med','prot','modelos'].includes(t)?'</span>':''}</div>
    <div class="subtabs">${tabs.map(x=>`<a href="#cad-${x[0]==='med'?'med':x[0]}" class="${x[0]===t?'on':''}">${x[1]}</a>`).join('')}</div>
    <div class="panel">${body}</div>`;
 }
@@ -1285,7 +1286,7 @@ const SAIDA={
  transferencia:{l:'Transferência hospitalar',c:'info',d:'Paciente segue para outra unidade, com encaminhamento.',txt:'Paciente transferido para outra unidade para continuidade do atendimento, acompanhado de encaminhamento com o resumo do caso.'},
  obito:{l:'Óbito',c:'crit',d:'Óbito ou eutanásia, com destino do corpo.',txt:''}};
 const OB_CAUSA={natural:'Óbito',eutanasia:'Eutanásia'};
-const OB_DEST={cremacao_ind:'Cremação individual',cremacao_col:'Cremação coletiva',entrega:'Entrega do corpo ao tutor',necropsia:'Encaminhado para necropsia',doacao:'Doação do corpo para ensino e pesquisa',outro:'Outro'};
+const OB_DEST={entrega:'Tutor retirou o corpo',cremacao_ind:'Cremação individual',cremacao_col:'Cremação coletiva',crematorio_tutor:'Tutor acionou crematório (empresa retira na clínica)',cemiterio:'Sepultamento em cemitério de animais',necropsia:'Encaminhado para necropsia',doacao:'Doação do corpo para ensino e pesquisa',outro:'Outro'};
 const CHK_VIVO=[['curativo','Curativo trocado antes da saída'],['medicacoes','Medicações do horário aplicadas antes da saída'],['receita','Receita entregue'],['pertences','Pertences entregues'],['laudos','Laudos e exames entregues'],['orientacoes','Orientações explicadas ao tutor']];
 const CHK_PEDIDO=[['termo','Termo de responsabilidade (alta a pedido) assinado']];
 const CHK_TRANSF=[['encaminhamento','Encaminhamento entregue'],['contato','Unidade de destino contatada antes da saída']];
@@ -1327,6 +1328,140 @@ async function altaPapelPDF(){const p=curP();const a={...(p.alta||{}),...($('#fA
   if(a.rubrica){y+=16;need(30);doc.setFontSize(8.4);doc.text(L(`Rubrica digital registrada em ${fmtDT(a.rubrica.em)} por ${a.rubrica.nome}:`),M,y);try{doc.addImage(a.rubrica.img,'PNG',M,y+2,50,18)}catch(_){}}
   docFooters(doc,K,[{t:'Saída hospitalar · '+p.nome,s:1}],'');
   await S.downloads.save({filename:`Saida_${String(p.nome).replace(/[^\w-]+/g,'_')}.pdf`,data:doc.output('blob')});toast('PDF pronto para imprimir')}
+/* ===== Receitas, encaminhamentos e atestados */
+const MS_TIPOS={receita:'Receita',encaminhamento:'Encaminhamento',atestado:'Atestado'};
+const MS_PH='{{paciente}} {{especie}} {{raca}} {{sexo}} {{idade}} {{peso}} {{tutor}} {{cpf}} {{data_extenso}} {{cidade}} {{vet}} {{crmv}} {{data_obito}} {{hora_obito}} {{causa_obito}} {{destino_corpo}} {{retirado_por}} {{motivo}} {{resumo}}';
+const MS_SEED=[
+ {id:'rec-castracao',tipo:'receita',nome:'Castração · orientações pós-operatórias (exemplo)',faixa:'',texto:`USO VETERINÁRIO
+
+[Medicação 1] ____ · dar ____ por via oral, a cada ____ horas, por ____ dias.
+[Medicação 2] ____ · dar ____ por via oral, a cada ____ horas, por ____ dias.
+
+ORIENTAÇÕES
+• Manter a roupinha cirúrgica ou o colar elizabetano até a retirada dos pontos. Não deixar lamber ou morder a ferida.
+• Limpar a ferida 2 vezes ao dia com soro fisiológico e gaze. Não usar pomadas sem orientação.
+• Repouso: evitar pulos, corridas e banho até a retirada dos pontos.
+• Oferecer água à vontade e a alimentação de costume, em pequenas porções no primeiro dia.
+• Retorno para avaliação e retirada dos pontos em 10 dias.
+• Procure a clínica antes se houver sangramento, secreção, inchaço, apatia, vômitos ou falta de apetite.`},
+ {id:'enc-sem-alta',tipo:'encaminhamento',nome:'Saída sem alta médica · hospitalização',texto:`ENCAMINHAMENTO
+
+O paciente {{paciente}} ({{especie}}, {{raca}}, {{peso}}) esteve internado nesta clínica e está saindo SEM ALTA MÉDICA, por decisão do(a) responsável, {{tutor}}, que assinou o termo de retirada sem alta médica.
+
+Motivo da internação: {{motivo}}
+Resumo do quadro e das condutas: {{resumo}}
+
+O paciente ainda necessita de cuidados hospitalares. Recomendamos que continue a internação/hospitalização em outro serviço veterinário o mais rápido possível, levando este encaminhamento.
+
+Em caso de piora (prostração, dificuldade para respirar, convulsões, sangramentos, vômitos persistentes, falta de apetite ou de urina), procure imediatamente um serviço veterinário de emergência ou retorne a esta clínica.
+
+Colocamo-nos à disposição do colega para informações adicionais.`},
+ {id:'enc-pedido',tipo:'encaminhamento',nome:'Retirada a pedido / com supervisão',texto:`ENCAMINHAMENTO E ORIENTAÇÕES
+
+O paciente {{paciente}} ({{especie}}, {{raca}}, {{peso}}) foi retirado a pedido do(a) responsável, {{tutor}}, antes da alta médica, ciente dos riscos e mediante termo assinado.
+
+Resumo do quadro: {{resumo}}
+
+Recomendações:
+• Manter o paciente em observação contínua (supervisão) em casa e seguir as medicações prescritas.
+• Retornar para reavaliação o mais breve possível.
+• Em caso de piora ou de qualquer mudança no quadro, procure imediatamente um serviço veterinário de emergência ou retorne a esta clínica.`},
+ {id:'enc-especialista',tipo:'encaminhamento',nome:'Encaminhamento a colega / especialista',texto:`ENCAMINHAMENTO
+
+Prezado(a) colega,
+
+Encaminho o paciente {{paciente}} ({{especie}}, {{raca}}, {{sexo}}, {{idade}}, {{peso}}), de responsabilidade de {{tutor}}, para avaliação e conduta.
+
+Motivo do encaminhamento: ____
+Histórico e condutas realizadas: {{resumo}}
+Medicações em uso: ____
+
+Agradeço a atenção e coloco-me à disposição.`},
+ {id:'at-saude',tipo:'atestado',nome:'Atestado de saúde',texto:`ATESTADO DE SAÚDE
+
+Atesto, para os devidos fins, que examinei nesta data o animal {{paciente}}, da espécie {{especie}}, raça {{raca}}, sexo {{sexo}}, idade {{idade}}, pesando {{peso}}, de responsabilidade de {{tutor}} (CPF {{cpf}}), e que no momento do exame clínico o animal não apresentava sinais clínicos de doenças infectocontagiosas ou parasitárias, encontrando-se em boas condições de saúde.
+
+Finalidade: ____
+
+Este atestado tem validade de ____ dias a partir desta data.
+
+{{cidade}}, {{data_extenso}}.`},
+ {id:'at-obito',tipo:'atestado',nome:'Atestado de óbito',texto:`ATESTADO DE ÓBITO
+
+Atesto, para os devidos fins, que o animal {{paciente}}, da espécie {{especie}}, raça {{raca}}, sexo {{sexo}}, idade {{idade}}, de responsabilidade de {{tutor}} (CPF {{cpf}}), veio a óbito em {{data_obito}}, às {{hora_obito}}.
+
+Causa do óbito: {{causa_obito}}
+
+Destino do corpo: {{destino_corpo}}
+Corpo entregue / retirado por: {{retirado_por}}
+
+{{cidade}}, {{data_extenso}}.`}];
+async function msSeed(){try{for(const m of MS_SEED){const{id,...d}=m;await S.db.doc('modelosSaida/'+id).set({...d,ativo:true,criadoEm:nowDT()})}}catch(_){}}
+function cadSaidaHTML(){const L=[...S.mSaida].sort((a,b)=>(a.tipo+a.nome).localeCompare(b.tipo+b.nome));
+  return Object.entries(MS_TIPOS).map(([k,l])=>{const it=L.filter(m=>m.tipo===k);return`<div class="panel-h"><h2>${l}s</h2><span class="muted small">${it.length}</span></div><div class="tbl-wrap"><table class="tbl"><tbody>${it.map(m=>`<tr><td class="nm">${esc(m.nome)}${m.faixa?` <span class="chip">${esc(m.faixa)}</span>`:''}${m.ativo===false?' <span class="chip">inativo</span>':''}<div class="muted small">${esc(String(m.texto||'').replace(/\s+/g,' ').slice(0,140))}…</div></td><td style="text-align:right;white-space:nowrap"><button class="btn sm ghost" data-act="msEdit" data-id="${m.id}">${ic('edit')}</button><button class="btn sm ghost danger" data-act="msDel" data-id="${m.id}">${ic('trash')}</button></td></tr>`).join('')||`<tr><td class="muted">Nenhum modelo.</td></tr>`}</tbody></table></div>`}).join('')}
+function modalMS(m){m=m||{tipo:'receita',ativo:true};
+  openModal(`${H(m.id?'Editar modelo':'Novo modelo')}<form class="modal-b" id="fMS" onsubmit="return false">
+   <div class="grid g3"><label class="f">Tipo<select class="inp" name="tipo">${Object.entries(MS_TIPOS).map(([k,l])=>`<option value="${k}" ${m.tipo===k?'selected':''}>${l}</option>`).join('')}</select></label>
+   <label class="f span2">Nome do modelo<input class="inp" name="nome" value="${esc(m.nome||'')}" placeholder="Ex.: Castração cão até 5 kg"></label>
+   <label class="f">Faixa de peso (opcional)<input class="inp" name="faixa" value="${esc(m.faixa||'')}" placeholder="Ex.: até 5 kg"></label>
+   <label class="f">Peso mínimo (kg)<input class="inp tnum" name="pMin" inputmode="decimal" value="${esc(m.pMin??'')}"></label><label class="f">Peso máximo (kg)<input class="inp tnum" name="pMax" inputmode="decimal" value="${esc(m.pMax??'')}"></label>
+   <label class="f spanall">Texto<textarea class="inp" name="texto" rows="16">${esc(m.texto||'')}</textarea></label></div>
+   <div class="muted small">Campos automáticos: ${esc(MS_PH)}. O cabeçalho com os dados do paciente e do tutor e a assinatura do veterinário entram sozinhos.</div>
+   <label class="chk"><input type="checkbox" name="ativo" ${m.ativo!==false?'checked':''}><span>Ativo</span></label>
+  </form><div class="modal-f"><button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="msOk">Salvar</button></div>`,'wide');
+  $('#msOk').onclick=async()=>{const fd=formData('#fMS');if(!String(fd.nome||'').trim())return toast('Dê um nome ao modelo');
+    const d={tipo:fd.tipo,nome:fd.nome.trim(),faixa:fd.faixa||'',pMin:nv(fd.pMin),pMax:nv(fd.pMax),texto:fd.texto||'',ativo:!!fd.ativo};
+    try{if(m.id)await S.db.doc('modelosSaida/'+m.id).update(d);else await S.db.collection('modelosSaida').add({...d,criadoEm:nowDT()});closeModal();toast('Modelo salvo')}catch(e){fail(e)}}}
+const vetOpts=sel=>S.equipe.filter(e=>e.ativo!==false||e.id===sel).map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${esc(e.nome)}${(e.crmv||e.registro)?' · CRMV '+esc(e.crmv||e.registro):''}</option>`).join('');
+function sdCtx(p,extra){const tu=tutorOf(p)||{nome:p.tutor,cpf:p.cpf,telefone:p.telefone,email:p.emailTutor};const a=p.alta||{};const ob=a.obito||{};const v=byId(S.equipe,extra.vet);
+  return{...phCtx(p,tu,{}),vet:v?.nome||'',crmv:v?.crmv||v?.registro||'',motivo:p.motivo||'',resumo:a.resumo||'',
+    data_obito:extra.dataObito?fmtD(extra.dataObito):(a.dataHora?fmtD(a.dataHora.slice(0,10)):''),hora_obito:extra.horaObito||ob.hora||'',causa_obito:extra.causaObito||ob.causaProvavel||(ob.causa==='eutanasia'?'Eutanásia, com autorização do responsável':''),
+    destino_corpo:extra.destino?(OB_DEST[extra.destino]||extra.destino):(OB_DEST[ob.destino]||''),retirado_por:extra.retirado||ob.retirado||''}}
+function modalSD(tipo,doc){const p=curP();if(!p)return;doc=doc||{};const peso=nv(p.peso);
+  const ms=S.mSaida.filter(m=>m.tipo===tipo&&m.ativo!==false).sort((a,b)=>{const ok=m=>peso!=null&&(m.pMin==null||peso>=m.pMin)&&(m.pMax==null||peso<=m.pMax)&&(m.pMin!=null||m.pMax!=null);return(ok(b)-ok(a))||a.nome.localeCompare(b.nome)});
+  const ob=(p.alta||{}).obito||{};const obito=tipo==='atestado';
+  openModal(`${H((doc.id?'Editar ':'Nova ')+(MS_TIPOS[tipo]||'').toLowerCase()+' · '+esc(p.nome))}<form class="modal-b" id="fSD" onsubmit="return false">
+   <div class="grid g3"><label class="f span2">Modelo<select class="inp" id="sdMod"><option value="">— escolha —</option>${ms.map(m=>`<option value="${m.id}" ${doc.modeloId===m.id?'selected':''}>${esc(m.nome)}${m.faixa?' · '+esc(m.faixa):''}</option>`).join('')}</select></label>
+   <label class="f">Médico(a) veterinário(a)<select class="inp" name="vet" id="sdVet">${vetOpts(doc.vet||(p.alta||{}).responsavel||lsGet('vp_resp',''))}</select></label></div>
+   ${peso!=null?`<div class="muted small">Peso do paciente: ${num(peso,2)} kg. Os modelos da faixa de peso aparecem primeiro.</div>`:''}
+   <div class="grid g4" id="sdOb" ${obito?'':'hidden'}>
+    <label class="f">Data do óbito<input class="inp" type="date" name="dataObito" value="${esc(doc.extra?.dataObito||((p.alta||{}).dataHora||'').slice(0,10))}"></label>
+    <label class="f">Hora do óbito<input class="inp" type="time" name="horaObito" value="${esc(doc.extra?.horaObito||ob.hora||'')}"></label>
+    <label class="f span2">Causa do óbito<input class="inp" name="causaObito" value="${esc(doc.extra?.causaObito||ob.causaProvavel||(ob.causa==='eutanasia'?'Eutanásia, com autorização do responsável':''))}"></label>
+    <label class="f span2">Destino do corpo<select class="inp" name="destino">${Object.entries(OB_DEST).map(([k,v])=>`<option value="${k}" ${(doc.extra?.destino||ob.destino)===k?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label class="f span2">Entregue / retirado por<input class="inp" name="retirado" value="${esc(doc.extra?.retirado||ob.retirado||'')}" placeholder="Tutor, crematório, cemitério…"></label>
+   </div>
+   <label class="f">Título<input class="inp" name="titulo" id="sdTit" value="${esc(doc.titulo||'')}"></label>
+   <label class="f">Texto (pode ajustar à vontade)<textarea class="inp" name="texto" id="sdTxt" rows="16">${esc(doc.texto||'')}</textarea></label>
+  </form><div class="modal-f"><button class="btn" data-act="close">Cancelar</button><button class="btn" id="sdSave">Salvar</button><button class="btn pri" id="sdPrint">${ic('file')}Salvar e imprimir</button></div>`,'wide');
+  const f=$('#fSD');const fill=()=>{const m=byId(S.mSaida,$('#sdMod').value);if(!m)return;const fd=formData('#fSD');$('#sdTit').value=m.nome.replace(/\s*\(exemplo\)\s*/i,'');$('#sdTxt').value=fillPH(m.texto,sdCtx(p,fd))};
+  let edited=!!doc.id;$('#sdTxt').addEventListener('input',()=>edited=true);
+  $('#sdMod').onchange=()=>{if(edited&&$('#sdTxt').value.trim()&&!confirm('Trocar o texto pelo do modelo escolhido?'))return;edited=false;fill()};
+  if(!doc.id&&ms.length&&!doc.texto){$('#sdMod').value=ms[0].id;fill()}
+  $$('#sdOb input,#sdOb select,#sdVet').forEach(x=>x.addEventListener('change',()=>{if(!edited)fill()}));
+  const save=async pr=>{const fd=formData('#fSD');if(!fd.texto.trim())return toast('Escreva o texto');if(!fd.vet)return toast('Escolha o(a) veterinário(a)');
+    const d={internacaoId:p.id,tipo,modeloId:$('#sdMod').value||null,titulo:fd.titulo||MS_TIPOS[tipo],texto:fd.texto,vet:fd.vet,extra:obito?{dataObito:fd.dataObito,horaObito:fd.horaObito,causaObito:fd.causaObito,destino:fd.destino,retirado:fd.retirado}:null,em:doc.em||nowDT(),atualizadoEm:nowDT()};
+    try{let id=doc.id;if(id)await S.db.doc('saidaDocs/'+id).update(d);else id=(await S.db.collection('saidaDocs').add(d)).id;closeModal();toast('Salvo');if(pr)sdPDF({...d,id})}catch(e){fail(e)}};
+  $('#sdSave').onclick=()=>save(false);$('#sdPrint').onclick=()=>save(true)}
+async function sdPDF(d){const p=byId(S.intern,d.internacaoId);if(!p)return;
+  try{await loadScript(JSPDF)}catch(e){toast('Não foi possível carregar o gerador de PDF');return}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const PW=210,M=18;const cl=S.clinica||{};const lg=await logoPNG();
+  const L=t=>String(t??'').replace(/[–—]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/…/g,'...').replace(/•/g,'-').replace(/[^\x00-\xFF]/g,'');const K={lg,cl,L,PW,M};
+  const tu=tutorOf(p)||{nome:p.tutor,cpf:p.cpf,telefone:p.telefone};const IDF=docHeader(phCtx(p,tu,{})).split('\n').slice(1).filter(Boolean);
+  let y=drawDocHeader(doc,K,d.titulo||MS_TIPOS[d.tipo],IDF);y+=2;
+  doc.setFont('helvetica','normal');doc.setFontSize(10.5);doc.setTextColor(20,48,58);
+  for(const par of String(d.texto).split('\n')){const ls=par.trim()?doc.splitTextToSize(L(par),PW-2*M):[''];for(const ln of ls){if(y>262){doc.addPage();y=20}
+    const bold=/^[A-ZÁÉÍÓÚÃÕÇ0-9 ,.\/()-]{6,}$/.test(par.trim());doc.setFont('helvetica',bold?'bold':'normal');doc.text(ln,M,y);y+=par.trim()?5:3}}
+  const v=byId(S.equipe,d.vet);if(y>240){doc.addPage();y=30}y=Math.max(y+18,232);
+  doc.setDrawColor(120,140,145);doc.setLineWidth(.3);doc.line(PW/2-40,y,PW/2+40,y);doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.text(L(v?.nome||'Médico(a) veterinário(a)'),PW/2,y+5,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8.8);doc.text(L(`Médico(a) veterinário(a)${(v?.crmv||v?.registro)?' · CRMV '+(v.crmv||v.registro):''}`),PW/2,y+9.5,{align:'center'});
+  doc.text(L(`${cl.cidade||''}${cl.cidade?', ':''}${fmtD((d.em||nowDT()).slice(0,10))}`),PW/2,y+14,{align:'center'});
+  docFooters(doc,K,[{t:(d.titulo||'')+' · '+p.nome,s:1}],'');
+  await S.downloads.save({filename:`${String(d.titulo||'documento').replace(/[^\w-]+/g,'_')}_${String(p.nome).replace(/[^\w-]+/g,'_')}.pdf`,data:doc.output('blob')})}
+function sdPanel(p){const L=S.saidaDocs.filter(d=>d.internacaoId===p.id).sort((a,b)=>String(b.em).localeCompare(a.em));
+  return`<div class="panel" style="margin-top:16px"><div class="panel-h"><h2>Receitas, encaminhamentos e atestados</h2><span class="spacer"></span>
+   <button class="btn sm" data-act="sdNew" data-t="receita" ${W()}>${ic('pill')}Receita</button><button class="btn sm" data-act="sdNew" data-t="encaminhamento" ${W()}>${ic('file')}Encaminhamento</button><button class="btn sm" data-act="sdNew" data-t="atestado" ${W()}>${ic('edit')}Atestado</button></div>
+   <div class="panel-b">${L.length?L.map(d=>`<div class="pre-row"><div style="flex:1;min-width:0"><b>${esc(d.titulo)}</b> <span class="chip">${MS_TIPOS[d.tipo]||''}</span><div class="muted small">${fmtDT(d.em)} · ${esc(equipeNome(d.vet)||'')}</div></div><button class="btn sm" data-act="sdPrint" data-id="${d.id}">${ic('file')}Imprimir</button><button class="btn sm ghost" data-act="sdEdit" data-id="${d.id}" ${W()}>${ic('edit')}</button><button class="btn sm ghost danger" data-act="sdDel" data-id="${d.id}">${ic('trash')}</button></div>`).join(''):'<div class="muted small">Nenhum documento ainda. Escolha um modelo, ajuste o texto, selecione o(a) veterinário(a) e imprima.</div>'}</div></div>`}
 function tabAlta(p){
   const a=p.alta||{};const adm=p.admissao||{};const qv=adm.q||{};const cf=a.conf||{};const ck=a.check||{};const pr=a.params||{};const ob=a.obito||{};const tr=a.transf||{};
   const tipo=a.tipo||'alta';
@@ -1416,7 +1551,7 @@ ${ob.protocolo?`<input type="hidden" name="ob_protocolo" value="${esc(ob.protoco
     </div>
    </div>
    <div class="savebar"><span class="dirty-ind small muted" hidden><span class="dirty-dot"></span> Alterações não salvas</span><span class="spacer"></span><button class="btn" type="button" data-act="saveAlta" ${W()}>Salvar rascunho</button>${p.status!=='alta'&&!p.saidaRegistrada?`<button class="btn pri" type="button" data-act="darAlta" ${W()}>${ic('door')}Registrar saída</button>`:''}${p.status!=='alta'&&p.saidaRegistrada&&S.master?`<button class="btn pri" type="button" data-act="arquivar">${ic('check')}Arquivar internação</button>`:''}</div>
-  </form>`;
+  </form>${sdPanel(p)}`;
 }
 function saidaToggle(){
   const f=$('#fAlta');if(!f)return;const t=(f.querySelector('[name=tipo]:checked')||{}).value||'alta';const causa=$('#obCausa')?.value||'natural';
@@ -2897,7 +3032,7 @@ function tabDocs(p){const l=sigOf(p.id);const cl=S.clinica||{};
        ${st!=='confirmado'?`<button class="btn sm ghost danger" data-act="sigCancel" data-id="${s.id}" ${W()} aria-label="Cancelar pacote">${ic('trash')}</button>`:''}</div></div>
      ${sigSteps(s,st)}${convFeed(s)}${s.codEmailOk?`<div class="row" style="gap:6px;margin-top:6px"><span class="chip ok">${ic('check')}Identidade confirmada pelo código do e-mail · ${fmtDT(s.codEmailOk)}</span></div>`:''}
      <ol class="sig-docs">${s.docs.map((d,di)=>`<li><span>${esc(d.nome)}</span>${(st==='pendente'||st==='pronto')&&s.docs.length>1?`<button class="xbtn" data-act="sigDocRm" data-id="${s.id}" data-i="${di}" title="Tirar este documento do pacote" ${W()}>${ic('x')}</button>`:''}${d.aceitoEm?`<span class="muted small">aceito ${fmtDT(d.aceitoEm).slice(11)}</span>`:''}${d.hash?`<span class="mono muted small" title="${esc(d.hash)}">#${esc(d.hash.slice(0,10))}</span>`:''}</li>`).join('')}</ol></div>`}).join(''):emptyBox('file','Nenhum documento para este paciente','Monte um pacote com os termos de que o paciente precisa. O tutor lê e aceita cada um, assina uma vez só, e confirma tudo com um único código pelo WhatsApp dele.')}
-   <div class="panel-b muted small" style="border-top:1px solid var(--line-2)"><b>Passo a passo:</b> monte o pacote › <b>Revisar e preparar</b> (os textos saem preenchidos com os dados do tutor e ficam travados) › se quiser, <b>Enviar por e-mail</b> para leitura prévia › no dia, <b>Coletar assinatura aqui</b>: o tutor só lê, marca “Li e concordo” e assina uma vez › imprima o <b>termo de confirmação</b>, o tutor assina o papel, tire a foto e toque em <b>Concluído</b>.<br><b>Em casa:</b> toque em “Enviar para assinar em casa”. O tutor recebe o PDF já preenchido pelo WhatsApp e aprova respondendo “ACEITO” com o código. A equipe confirma e o pacote aparece como aprovado. Sem custo: usa só o link oficial do WhatsApp.</div></div>`}
+   <div class="panel-b muted small" style="border-top:1px solid var(--line-2)"><b>Passo a passo:</b> monte o pacote › <b>Revisar e preparar</b> (os textos saem preenchidos com os dados do tutor e ficam travados) › se quiser, <b>Enviar por e-mail</b> para leitura prévia › no dia, <b>Coletar assinatura aqui</b>: o tutor só lê, marca “Li e concordo” e assina uma vez › imprima o <b>termo de confirmação</b>, o tutor assina o papel, tire a foto e toque em <b>Concluído</b>.<br><b>Em casa:</b> toque em “Enviar para assinar em casa”. O tutor recebe o PDF já preenchido pelo WhatsApp e aprova respondendo “ACEITO” com o código. A equipe confirma e o pacote aparece como aprovado. Sem custo: usa só o link oficial do WhatsApp.</div></div>${sdPanel(p)}`}
 
 /* Montar pacote */
 function modalSigNew(){const p=curP();const ms=S.modelosDoc.filter(m=>m.ativo!==false&&!m.impresso).sort((a,b)=>DOC_CATS.indexOf(a.categoria)-DOC_CATS.indexOf(b.categoria)||String(a.codigo||'zz').localeCompare(String(b.codigo||'zz'),'pt',{numeric:true})||a.nome.localeCompare(b.nome));
@@ -3371,6 +3506,10 @@ ${raw}`;
   if($('#cDel'))$('#cDel').onclick=()=>confirmBox('Excluir este registro de comunicação?','Excluir',async()=>{try{await S.db.doc('comunicacoes/'+c.id).delete();toast('Registro excluído')}catch(e){fail(e)}});
 }
 Object.assign(ACT,{
+ msNew(){modalMS()},msEdit(el){modalMS(byId(S.mSaida,el.dataset.id))},
+ msDel(el){const m=byId(S.mSaida,el.dataset.id);confirmBox(`Excluir o modelo <b>${esc(m?.nome)}</b>?`,'Excluir',async()=>{try{await S.db.doc('modelosSaida/'+m.id).delete();toast('Modelo excluído')}catch(e){fail(e)}})},
+ sdNew(el){modalSD(el.dataset.t)},sdEdit(el){const d=byId(S.saidaDocs,el.dataset.id);if(d)modalSD(d.tipo,d)},sdPrint(el){const d=byId(S.saidaDocs,el.dataset.id);if(d)sdPDF(d)},
+ sdDel(el){const d=byId(S.saidaDocs,el.dataset.id);confirmBox(`Excluir <b>${esc(d?.titulo)}</b>?`,'Excluir',async()=>{try{await S.db.doc('saidaDocs/'+d.id).delete();toast('Excluído')}catch(e){fail(e)}})},
  convComp(el){compEnvioPDF(el.dataset.id)},
  convCheck(el){convCheck(S.conv.find(x=>x.id===el.dataset.id),true)},
  novaPre(){modalInt({preAdm:true,especie:'Cão'})},
@@ -3430,10 +3569,11 @@ const EUT_UN=['mg/kg','µg/kg','mL/kg','mEq/kg','mg (dose total)','mL (volume to
 const EUT_PROG=['','Reservado','Desfavorável','Grave','Infausto'];
 const EUT_ACOMP=['','Sim, acompanhou todo o procedimento','Esteve presente somente na sedação','Despediu-se antes do procedimento','Não esteve presente'];
 const EUT_SIN=[['c_bat','ausência de batimentos cardíacos à auscultação'],['c_resp','ausência de movimentos respiratórios'],['c_corneal','ausência de reflexo corneal'],['c_pupila','pupilas em midríase e não responsivas à luz'],['c_pulso','ausência de pulso periférico']];
-const EUT_PH=['paciente','especie','raca','peso','tutor','data','hora','motivo','diagnostico','prognostico','acompanhamento','protocolo','hora_constatacao','constatado_por','sinais','destino','vet','crmv','auxiliar','clinica'];
+const EUT_PH=['parametros_pre','comportamento_pre','comportamento_anestesia','comportamento_final','paciente','especie','raca','peso','tutor','data','hora','motivo','diagnostico','prognostico','acompanhamento','protocolo','hora_constatacao','constatado_por','sinais','destino','vet','crmv','auxiliar','clinica'];
 const EUT_MODELO=`Paciente {{paciente}}, {{especie}}, {{raca}}, pesando {{peso}} kg, foi submetido(a) à eutanásia em {{data}}, às {{hora}}, por indicação clínica: {{motivo}}. Diagnóstico: {{diagnostico}}. Prognóstico: {{prognostico}}.
 O procedimento foi autorizado pelo(a) tutor(a) {{tutor}}, mediante Termo de Consentimento Livre e Esclarecido assinado. Acompanhamento do tutor: {{acompanhamento}}.
-Protocolo realizado: {{protocolo}}. O fármaco final foi administrado somente após a confirmação de plano anestésico profundo.
+Parâmetros antes do procedimento: {{parametros_pre}}. Estado e comportamento antes dos anestésicos: {{comportamento_pre}}.
+Protocolo realizado: {{protocolo}}. Após os anestésicos: {{comportamento_anestesia}}. O fármaco final foi administrado somente após a confirmação de plano anestésico profundo. Após o fármaco final: {{comportamento_final}}.
 O óbito foi constatado às {{hora_constatacao}} por {{constatado_por}}, mediante {{sinais}}.
 Destino do corpo: {{destino}}.
 Procedimento realizado por {{vet}} (CRMV {{crmv}}), com auxílio de {{auxiliar}}, conforme a Resolução CFMV nº 1.000/2012.`;
@@ -3481,6 +3621,18 @@ function eutForm(p,u){const eq=sel=>`<option value="">—</option>`+S.equipe.fil
   <div style="overflow-x:auto"><table class="tbl eut-t"><thead><tr><th>Etapa</th><th>Fármaco</th><th>Concentração</th><th>Dose</th><th>Volume (mL)</th><th>Via</th><th>Horário</th><th></th></tr></thead><tbody id="eutRows">${rows.map(eutRow).join('')}</tbody></table></div>
   <div class="row" style="margin-top:8px"><button class="btn sm" type="button" data-act="eutAdd" ${W()}>${ic('plus')}Adicionar fármaco</button></div>
   <div class="chks" style="margin-top:10px">${ck('c_plano','Plano anestésico profundo confirmado antes do fármaco final (sem reflexo palpebral e interdigital)')}</div>
+  <div class="sec-t">Parâmetros e comportamento do paciente</div>
+  <div class="grid g6">
+   <label class="f">FC (bpm)<input class="inp tnum" name="eu_preFC" inputmode="numeric" value="${esc(u.preFC||'')}"></label>
+   <label class="f">FR (mpm)<input class="inp tnum" name="eu_preFR" inputmode="numeric" value="${esc(u.preFR||'')}"></label>
+   <label class="f">Temp. (°C)<input class="inp tnum" name="eu_preT" inputmode="decimal" value="${esc(u.preT||'')}"></label>
+   <label class="f">PAS (mmHg)<input class="inp tnum" name="eu_prePA" inputmode="numeric" value="${esc(u.prePA||'')}"></label>
+   <label class="f">SpO₂ (%)<input class="inp tnum" name="eu_preSpO2" inputmode="numeric" value="${esc(u.preSpO2||'')}"></label>
+   <label class="f">Mucosas / TPC<input class="inp" name="eu_preMuc" value="${esc(u.preMuc||'')}"></label>
+   <label class="f spanall">Antes dos anestésicos: estado e comportamento<textarea class="inp" name="eu_preComp" rows="2" placeholder="Ex.: prostrado, em decúbito lateral, responsivo a estímulos, dor intensa…">${esc(u.preComp||'')}</textarea></label>
+   <label class="f spanall">Após os anestésicos: como o paciente se comportou<textarea class="inp" name="eu_posAnest" rows="2" placeholder="Ex.: perda de consciência em cerca de 1 min, sem excitação, sem reflexo palpebral e interdigital, plano anestésico profundo…">${esc(u.posAnest||'')}</textarea></label>
+   <label class="f spanall">Após o fármaco final (cloreto de potássio)<textarea class="inp" name="eu_posFinal" rows="2" placeholder="Ex.: parada cardiorrespiratória em cerca de 1 min, sem reações…">${esc(u.posFinal||'')}</textarea></label>
+  </div>
   <div class="sec-t">4. Constatação do óbito</div>
   <div class="grid g4">
    <label class="f">Horário da constatação<input class="inp" type="time" name="eu_horaConst" value="${esc(u.horaConst||'')}"></label>
@@ -3507,8 +3659,11 @@ function eutGerar(){const p=curP();const fd=formData('#fAlta');const g=k=>fd['eu
   const dh=fd.dataHora||nowDT();const final=rows.filter(r=>r.etapa==='Fármaco final'&&r.hora).at(-1);
   const ctx={paciente:p.nome,especie:p.especie,raca:p.raca,peso:eutPeso()?num(eutPeso(),2):'',tutor:p.tutor,data:fmtD(dh.slice(0,10)),hora:fd.ob_hora||final?.hora||dh.slice(11,16),
     motivo:g('motivo'),diagnostico:g('diagnostico'),prognostico:g('prognostico'),acompanhamento:g('acompanhou').toLowerCase(),protocolo:eutProtoTxt(rows),
+    parametros_pre:[g('preFC')&&'FC '+g('preFC')+' bpm',g('preFR')&&'FR '+g('preFR')+' mpm',g('preT')&&'T '+g('preT')+' °C',g('prePA')&&'PAS '+g('prePA')+' mmHg',g('preSpO2')&&'SpO2 '+g('preSpO2')+'%',g('preMuc')&&'mucosas/TPC '+g('preMuc')].filter(Boolean).join(', '),
+    comportamento_pre:g('preComp'),comportamento_anestesia:g('posAnest'),comportamento_final:g('posFinal'),
     hora_constatacao:g('horaConst'),constatado_por:equipeNome(g('constPor')),sinais:sinT,destino:OB_DEST[fd.ob_destino]||'',vet:equipeNome(g('vet')),crmv:eutCrmv(g('vet')),auxiliar:equipeNome(g('aux')),clinica:S.clinica?.nome||''};
-  const t=(S.clinica?.eutModelo||EUT_MODELO).replace(/\{\{(\w+)\}\}/g,(m,k)=>{const x=ctx[k];return x==null||x===''||x==='—'?v:String(x)});
+  let mod=S.clinica?.eutModelo||EUT_MODELO;if(!/comportamento_anestesia/.test(mod))mod+='\nParâmetros antes do procedimento: {{parametros_pre}}. Antes dos anestésicos: {{comportamento_pre}}. Após os anestésicos: {{comportamento_anestesia}}. Após o fármaco final: {{comportamento_final}}.';
+  const t=mod.replace(/\{\{(\w+)\}\}/g,(m,k)=>{const x=ctx[k];return x==null||x===''||x==='—'?v:String(x)});
   const ta=$('#euDesc');ta.value=t;markDirty('#fAlta')}
 Object.assign(ACT,{
  eutAdd(){$('#eutRows').insertAdjacentHTML('beforeend',eutRow({etapa:'Fármaco final'}));markDirty('#fAlta')},
@@ -4203,9 +4358,9 @@ function viewEmBreve(k){
   const tabs=k==='estoque'?`<div class="tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">${EST_TABS.map(([t,,l])=>`<a class="btn ${S.estTab===t?'pri':''}" href="#est-${t}">${l}</a>`).join('')}</div>`:'';
   return`<div class="page-h"><div><div class="crumb">${T[0]}</div><h1>${T[1]}</h1></div></div>${tabs}${emptyBox(T[2],'Em construção',T[3]+' Esta área está sendo preparada.')}`}
 const PERM=k=>!!(S.master||(window.__vpPerm||{})[k]);
-const COL_PERM={medicamentos:'medicamentos',protocolos:'protocolos',modelosCirurgicos:'protocolos',modelosDoc:'protocolos',escalaImgs:'protocolos',procedimentos:'ajustes',equipe:'ajustes',boxes:'ajustes',config:'ajustes'};
+const COL_PERM={medicamentos:'medicamentos',protocolos:'protocolos',modelosCirurgicos:'protocolos',modelosDoc:'protocolos',modelosSaida:'protocolos',escalaImgs:'protocolos',procedimentos:'ajustes',equipe:'ajustes',boxes:'ajustes',config:'ajustes'};
 const colPermOk=p=>{const k=COL_PERM[String(p).split('/')[0]];return !k||PERM(k)};
-const TAB_PERM={med:'medicamentos',prot:'protocolos',modelos:'protocolos',docs:'protocolos',descritivos:'protocolos',escalas:'protocolos',proc:'ajustes',equipe:'ajustes',boxes:'ajustes',clinica:'ajustes',tutores:'ajustes'};
+const TAB_PERM={med:'medicamentos',prot:'protocolos',modelos:'protocolos',docs:'protocolos',descritivos:'protocolos',saida:'protocolos',escalas:'protocolos',proc:'ajustes',equipe:'ajustes',boxes:'ajustes',clinica:'ajustes',tutores:'ajustes'};
 function cadRO(){if(S.master)return false;if(S.view==='prot')return !PERM('protocolos');if(S.view==='cad'){const k=TAB_PERM[S.cadTab];return !!k&&!PERM(k)}return false}
 function permClasses(){const b=document.body.classList;b.toggle('cad-ro',cadRO());b.toggle('no-ajustes',!PERM('ajustes'));b.toggle('no-exportar',!PERM('exportar'));b.toggle('not-master',!PERM('excluir'))}
 function confirmDiscard(go){confirmBox('Há alterações não salvas nesta ficha. Sair e descartar?','Descartar',()=>{S.dirty=false;go()});return false}
@@ -4300,6 +4455,8 @@ async function boot(){
   db.collection('protocolos').onSnapshot(once(s=>{S.prots=docs(s)}),onErr);
   db.collection('assinaturas').onSnapshot(s=>{S.assin=docs(s);render()},onErr);
   db.collection('convites').onSnapshot(s=>{S.conv=docs(s);render()},()=>{});
+  db.collection('modelosSaida').onSnapshot(s=>{S.mSaida=docs(s);if(!s.size&&S.master&&!S._msSeed){S._msSeed=1;msSeed()}render()},()=>{});
+  db.collection('saidaDocs').onSnapshot(s=>{S.saidaDocs=docs(s);render()},()=>{});
   db.collection('tutores').onSnapshot(s=>{S.tutores=docs(s);S.tutLoaded=true;tutImport();render()},onErr);
   db.collection('modelosDoc').onSnapshot(s=>{S.modelosDoc=docs(s);importDocs();render()},onErr);
   db.doc('config/clinica').onSnapshot(s=>{S.clinica=s.exists?s.data():null;brandRefresh();if(S.modelosDoc)importDocs();render()},onErr);
