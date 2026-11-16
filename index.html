@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611152051"></script>
-<script src="lib/firebase-auth-compat.js?v=202611152051"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611152051"></script>
-<script src="fb.js?v=202611152051"></script>
+<script src="lib/firebase-app-compat.js?v=202611152341"></script>
+<script src="lib/firebase-auth-compat.js?v=202611152341"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611152341"></script>
+<script src="fb.js?v=202611152341"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -82,6 +82,9 @@ svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .home-c .ls{display:flex;flex-wrap:wrap;gap:6px}.home-c .ls a{font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:99px;text-decoration:none;color:var(--ink-2);background:var(--surface-2)}
 .home-c .ls a:hover{border-color:var(--brand);color:var(--brand-text)}.home-c .sub2{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;width:100%;margin-top:4px}
 .home-c .st{display:flex;gap:16px;flex-wrap:wrap}.home-c .st b{font-size:22px;font-family:var(--f-display);display:block;line-height:1.1}.home-c .st span{font-size:12px;color:var(--ink-3)}
+.rec-list{display:flex;flex-direction:column;gap:10px}.rec-it{border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;background:var(--surface);display:flex;flex-direction:column;gap:8px}.rec-it.off{opacity:.6;background:var(--surface-2)}
+.rec-g{display:flex;flex-wrap:wrap;gap:8px}.rec-g label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;font-weight:600;color:var(--ink-3)}.rec-g .inp{min-height:34px;padding:5px 8px;font-size:13.5px}.rec-g .w2{flex:1;min-width:160px}.rec-g .w3{flex:1 1 100%}
+.rec-pos{font-size:13.5px;background:var(--brand-soft);color:var(--brand-text);border-radius:6px;padding:6px 10px}
 .comp{border:1px solid var(--brand);border-radius:var(--r-sm);background:var(--brand-soft);padding:10px 12px;margin-top:10px;display:flex;flex-direction:column;gap:6px}.comp b .i{width:15px;height:15px;vertical-align:-2px;margin-right:6px}
 .pre-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;background:var(--surface)}
 .chk-card{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;background:var(--surface-2);font-size:14px;cursor:pointer}.chk-card input{margin-top:3px;width:18px;height:18px}
@@ -1331,7 +1334,7 @@ async function altaPapelPDF(){const p=curP();const a={...(p.alta||{}),...($('#fA
 /* ===== Receitas, encaminhamentos e atestados */
 const MS_TIPOS={receita:'Receita',encaminhamento:'Encaminhamento',atestado:'Atestado'};
 const MS_PH='{{paciente}} {{especie}} {{raca}} {{sexo}} {{idade}} {{peso}} {{tutor}} {{cpf}} {{data_extenso}} {{cidade}} {{vet}} {{crmv}} {{data_obito}} {{hora_obito}} {{causa_obito}} {{destino_corpo}} {{retirado_por}} {{motivo}} {{resumo}}';
-const MS_SEED=[
+const MS_SEED0=[
  {id:'rec-castracao',tipo:'receita',nome:'Castração · orientações pós-operatórias (exemplo)',faixa:'',texto:`USO VETERINÁRIO
 
 [Medicação 1] ____ · dar ____ por via oral, a cada ____ horas, por ____ dias.
@@ -1396,10 +1399,121 @@ Destino do corpo: {{destino_corpo}}
 Corpo entregue / retirado por: {{retirado_por}}
 
 {{cidade}}, {{data_extenso}}.`}];
-async function msSeed(){try{for(const m of MS_SEED){const{id,...d}=m;await S.db.doc('modelosSaida/'+id).set({...d,ativo:true,criadoEm:nowDT()})}}catch(_){}}
+/* ===== Receita estruturada por peso */
+const REC_ORIG=['Farmácia humana','Uso veterinário','Farmácia de manipulação'];
+const REC_FORMA={gotas:'gota(s)',mL:'mL',comprimido:'comprimido(s)',capsula:'cápsula(s)',sache:'sachê(s)',aplicacao:'aplicação(ões)'};
+const REC_FREQ=[[6,'a cada 6 horas (4 vezes ao dia)'],[8,'a cada 8 horas (3 vezes ao dia)'],[12,'a cada 12 horas (2 vezes ao dia)'],[24,'a cada 24 horas (1 vez ao dia)'],[48,'a cada 48 horas (dia sim, dia não)']];
+const REC_ORIENT=`ORIENTAÇÕES
+• Manter o colar elizabetano e/ou a roupinha pós-operatória até a retirada dos pontos. Não deixar lamber ou morder a ferida.
+• Limpar a ferida conforme orientado. Não usar pomadas sem orientação.
+• Evitar exercícios, pulos, corridas e banho até a retirada dos pontos.
+• O paciente deve se alimentar normalmente; oferecer água à vontade.
+• Em caso de mudança de comportamento, apatia, vômitos, falta de apetite, sangramento, secreção ou inchaço na ferida, trazer o paciente à clínica.
+• Retorno para avaliação e retirada dos pontos em 10 dias.`;
+const RI=(o)=>({on:true,modo:'peso',via:'oral',freq:12,dias:5,gotasMl:20,qtd:'1 caixa',origem:'Farmácia humana',controle:false,obs:'',...o});
+const REC_SEED=[
+ {id:'rec-posop-liq',tipo:'receita',nome:'Pós-operatório cirúrgico · medicação líquida',estrut:true,orientacoes:REC_ORIENT,itens:[
+  RI({nome:'Dipirona',apres:'500 mg/mL (gotas)',conc:500,concUn:'mg/mL',dose:25,doseUn:'mg/kg',forma:'gotas',freq:12,dias:5,qtd:'1 frasco'}),
+  RI({nome:'Meloxicam suspensão oral (Ourofino)',apres:'conferir concentração na bula',modo:'peso',dose:0.1,doseUn:'mL/kg',forma:'mL',freq:24,dias:5,origem:'Uso veterinário',qtd:'1 frasco',obs:'Conferir a dose na bula do produto.'}),
+  RI({on:false,nome:'Prednisolona (alternativa ao meloxicam)',apres:'3 mg/mL (solução oral)',conc:3,concUn:'mg/mL',dose:0.5,doseUn:'mg/kg',forma:'mL',freq:24,dias:5,qtd:'1 frasco'}),
+  RI({nome:'Amoxicilina + clavulanato de potássio',apres:'250 mg + 62,5 mg / 5 mL (suspensão oral)',conc:50,concUn:'mg/mL',dose:20,doseUn:'mg/kg',forma:'mL',freq:12,dias:10,qtd:'1 frasco',controle:true,obs:'Manter o produto na geladeira para conservar.'}),
+  RI({nome:'Tramadol',apres:'100 mg/mL (gotas)',conc:100,concUn:'mg/mL',dose:3,doseUn:'mg/kg',forma:'mL',freq:8,dias:7,qtd:'1 frasco',controle:true}),
+  RI({on:false,nome:'Omeprazol PET (Gaviz®, Gastroblock® ou Petprazol®)',apres:'comprimido',modo:'fixo',fixo:'1 comprimido',freq:12,dias:10,origem:'Uso veterinário',qtd:'1 caixa',obs:'Usar em caso de vômitos.'})]},
+ {id:'rec-posop-comp',tipo:'receita',nome:'Pós-operatório cirúrgico · comprimidos',estrut:true,orientacoes:REC_ORIENT,itens:[
+  RI({nome:'Dipirona',apres:'500 mg (comprimido)',conc:500,concUn:'mg/comprimido',dose:25,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:5}),
+  RI({nome:'Meloxicam',apres:'0,5 mg (comprimido)',conc:0.5,concUn:'mg/comprimido',dose:0.1,doseUn:'mg/kg',forma:'comprimido',freq:24,dias:5,origem:'Uso veterinário'}),
+  RI({on:false,nome:'Prednisolona (alternativa ao meloxicam)',apres:'5 mg (comprimido)',conc:5,concUn:'mg/comprimido',dose:0.5,doseUn:'mg/kg',forma:'comprimido',freq:24,dias:5}),
+  RI({nome:'Amoxicilina + clavulanato de potássio',apres:'250 mg (comprimido)',conc:250,concUn:'mg/comprimido',dose:20,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:10,controle:true}),
+  RI({nome:'Tramadol',apres:'50 mg (comprimido)',conc:50,concUn:'mg/comprimido',dose:3,doseUn:'mg/kg',forma:'comprimido',freq:8,dias:7,controle:true}),
+  RI({on:false,nome:'Omeprazol PET (Gaviz®, Gastroblock® ou Petprazol®)',apres:'comprimido',modo:'fixo',fixo:'1 comprimido',freq:12,dias:10,origem:'Uso veterinário',obs:'Usar em caso de vômitos.'})]}];
+const r2=(x,st)=>Math.round(x/st)*st;
+function recQtd(it,peso){if(it.modo==='fixo')return it.fixo||'';if(!peso||it.dose==null||it.dose==='')return'';const d=nv(it.dose),c=nv(it.conc);
+  let mL=null,mg=null;if(it.doseUn==='mL/kg')mL=d*peso;else if(it.doseUn==='gotas/kg'){const g=Math.max(1,Math.round(d*peso));return g+' gota(s)'}else mg=d*peso;
+  if(it.forma==='comprimido'||it.forma==='capsula'){if(mg==null||!c)return'';const q=r2(mg/c,it.forma==='capsula'?1:.25);const fr={0.25:'¼',0.5:'½',0.75:'¾'}[q%1]||'';return(q<1?fr:Math.floor(q)+(fr?' e '+fr:''))+(q<=1?' '+(it.forma==='capsula'?'cápsula':'comprimido'):' '+(it.forma==='capsula'?'cápsulas':'comprimidos'))}
+  if(mL==null){if(!c)return'';mL=mg/c}
+  if(it.forma==='gotas'){const g=Math.max(1,Math.round(mL*(nv(it.gotasMl)||20)));return g+(g===1?' gota':' gotas')}
+  return num(mL<1?r2(mL,.05):r2(mL,.1),2)+' mL'}
+function recPoso(it,peso){const q=recQtd(it,peso);const fr=(REC_FREQ.find(f=>f[0]===Number(it.freq))||[0,''])[1];
+  return`Dar ${q||'____'}, via ${it.via||'oral'}, ${fr||'____'}, durante ${it.dias||'____'} dia(s).${it.obs?' '+it.obs:''}`}
+function recItemTxt(it,peso,n){return`${n}) ${it.nome}${it.apres?' '+it.apres:''} ........ ${it.qtd||''}${it.origem?' · '+it.origem:''}\n   ${recPoso(it,peso)}`}
+function recRow(it,i,peso){const o=(l,v)=>l.map(([k,t])=>`<option value="${k}" ${String(k)===String(v)?'selected':''}>${t}</option>`).join('');
+  return`<div class="rec-it ${it.on?'':'off'}" data-i="${i}">
+   <div class="row" style="gap:8px;align-items:center"><label class="chk" style="margin:0"><input type="checkbox" data-r="on" ${it.on?'checked':''}><span></span></label><input class="inp" data-r="nome" value="${esc(it.nome||'')}" placeholder="Medicamento" style="flex:2;min-width:160px"><input class="inp" data-r="apres" value="${esc(it.apres||'')}" placeholder="Apresentação (ex.: 500 mg/mL gotas)" style="flex:2;min-width:160px"><button type="button" class="xbtn" data-rdel="${i}" aria-label="Remover">${ic('x')}</button></div>
+   <div class="rec-g">
+    <label>Cálculo<select class="inp" data-r="modo">${o([['peso','Pelo peso'],['fixo','Quantidade fixa']],it.modo)}</select></label>
+    ${it.modo==='fixo'?`<label class="w2">Dar por vez<input class="inp" data-r="fixo" value="${esc(it.fixo||'')}" placeholder="1 comprimido"></label>`:`
+    <label>Dose<div class="row" style="gap:4px;flex-wrap:nowrap"><input class="inp tnum" data-r="dose" inputmode="decimal" value="${esc(it.dose??'')}" style="width:64px"><select class="inp" data-r="doseUn">${o([['mg/kg','mg/kg'],['mL/kg','mL/kg'],['gotas/kg','gotas/kg']],it.doseUn)}</select></div></label>
+    <label>Concentração<div class="row" style="gap:4px;flex-wrap:nowrap"><input class="inp tnum" data-r="conc" inputmode="decimal" value="${esc(it.conc??'')}" style="width:64px"><select class="inp" data-r="concUn">${o([['mg/mL','mg/mL'],['mg/comprimido','mg/comp.']],it.concUn)}</select></div></label>
+    <label>Dar em<select class="inp" data-r="forma">${o(Object.entries(REC_FORMA).slice(0,4),it.forma)}</select></label>`}
+    <label>Frequência<select class="inp" data-r="freq">${o(REC_FREQ.map(([h])=>[h,'a cada '+h+'h']),it.freq)}</select></label>
+    <label>Dias<input class="inp tnum" data-r="dias" inputmode="numeric" value="${esc(it.dias??'')}" style="width:60px"></label>
+    <label>Quantidade<input class="inp" data-r="qtd" value="${esc(it.qtd||'')}" placeholder="1 caixa"></label>
+    <label>Onde comprar<select class="inp" data-r="origem">${o(REC_ORIG.map(x=>[x,x]),it.origem)}</select></label>
+    <label class="chk" style="align-self:end"><input type="checkbox" data-r="controle" ${it.controle?'checked':''}><span>Controle especial</span></label>
+    <label class="w3">Observação<input class="inp" data-r="obs" value="${esc(it.obs||'')}" placeholder="Ex.: manter na geladeira"></label>
+   </div>
+   <div class="rec-pos">${esc(recPoso(it,peso))}</div></div>`}
+function recRead(box){return $$('.rec-it',box).map(el=>{const it={};$$('[data-r]',el).forEach(x=>{const k=x.dataset.r;it[k]=x.type==='checkbox'?x.checked:x.value});
+  for(const k of ['dose','conc','dias','freq'])if(it[k]!==undefined)it[k]=it[k]===''?null:nv(it[k]);if(!it.modo)it.modo='peso';return RI(it)})}
+function recWire(box,itens,pesoFn,onCh){const draw=()=>{box.innerHTML=itens.map((it,i)=>recRow(it,i,pesoFn())).join('')+`<button type="button" class="btn sm" data-radd>${ic('plus')}Adicionar medicamento</button>`};
+  box.addEventListener('input',()=>{itens=recRead(box);$$('.rec-it',box).forEach((el,i)=>{el.querySelector('.rec-pos').textContent=recPoso(itens[i],pesoFn());el.classList.toggle('off',!itens[i].on)});onCh&&onCh(itens)});
+  box.addEventListener('change',e=>{if(e.target.dataset.r==='modo'){itens=recRead(box);draw()}});
+  box.addEventListener('click',e=>{const d=e.target.closest('[data-rdel]');if(d){itens=recRead(box);itens.splice(+d.dataset.rdel,1);draw();onCh&&onCh(itens)}if(e.target.closest('[data-radd]')){itens=[...recRead(box),RI({nome:''})];draw()}});
+  draw();return{get:()=>recRead(box),redraw:()=>{itens=recRead(box);draw()}}}
+function modalRec(doc,modeloId){const p=curP();if(!p)return;doc=doc||{};
+  const ms=S.mSaida.filter(m=>m.tipo==='receita'&&m.ativo!==false&&m.estrut);
+  const m0=byId(S.mSaida,modeloId||doc.modeloId)||ms[0];
+  let itens=doc.itens||(m0?.itens||[]).map(x=>({...x}));
+  openModal(`${H((doc.id?'Editar':'Nova')+' receita · '+esc(p.nome))}<form class="modal-b" id="fRec" onsubmit="return false">
+   <div class="grid g4"><label class="f span2">Modelo<select class="inp" id="rcMod">${ms.map(m=>`<option value="${m.id}" ${m0&&m.id===m0.id?'selected':''}>${esc(m.nome)}</option>`).join('')}</select></label>
+    <label class="f">Peso (kg)<input class="inp tnum" id="rcPeso" inputmode="decimal" value="${esc(doc.peso??(nv(p.peso)!=null?String(nv(p.peso)).replace('.',','):''))}"></label>
+    <label class="f">Médico(a) veterinário(a)<select class="inp" id="rcVet">${vetOpts(doc.vet||(p.alta||{}).responsavel||lsGet('vp_resp',''))}</select></label></div>
+   <div class="muted small">Marque os medicamentos que entram nesta receita. As quantidades são calculadas pelo peso; dá para ajustar qualquer campo. Os marcados como <b>controle especial</b> saem em receituário próprio, com 1ª via (farmácia) e 2ª via (tutor).</div>
+   <div id="rcItens" class="rec-list"></div>
+   <label class="f">Orientações<textarea class="inp" id="rcOri" rows="8">${esc(doc.orientacoes??m0?.orientacoes??'')}</textarea></label>
+  </form><div class="modal-f"><button class="btn" data-act="close">Cancelar</button><button class="btn" id="rcSave">Salvar</button><button class="btn pri" id="rcPrint">${ic('file')}Salvar e imprimir</button></div>`,'wide');
+  const peso=()=>nv($('#rcPeso').value);const R=recWire($('#rcItens'),itens,peso);
+  $('#rcPeso').addEventListener('input',()=>R.redraw());
+  $('#rcMod').onchange=()=>{const m=byId(S.mSaida,$('#rcMod').value);if(!m)return;if(!confirm('Carregar os medicamentos e orientações do modelo escolhido?'))return;closeModal();modalRec({...doc,itens:null,orientacoes:undefined,peso:$('#rcPeso').value,vet:$('#rcVet').value},m.id)};
+  const save=async pr=>{const its=R.get();if(!its.some(x=>x.on))return toast('Marque pelo menos um medicamento');if(!$('#rcVet').value)return toast('Escolha o(a) veterinário(a)');
+    const pz=peso();const d={internacaoId:p.id,tipo:'receita',estrut:true,modeloId:$('#rcMod').value||null,titulo:'Receita',peso:pz,itens:its,orientacoes:$('#rcOri').value,
+      texto:its.filter(x=>x.on).map((x,i)=>recItemTxt(x,pz,i+1)).join('\n\n')+'\n\n'+$('#rcOri').value,vet:$('#rcVet').value,em:doc.em||nowDT(),atualizadoEm:nowDT()};
+    try{let id=doc.id;if(id)await S.db.doc('saidaDocs/'+id).update(d);else id=(await S.db.collection('saidaDocs').add(d)).id;closeModal();toast('Receita salva');if(pr)recPDF({...d,id})}catch(e){fail(e)}};
+  $('#rcSave').onclick=()=>save(false);$('#rcPrint').onclick=()=>save(true)}
+async function recPDF(d){const p=byId(S.intern,d.internacaoId);if(!p)return;
+  try{await loadScript(JSPDF)}catch(e){toast('Não foi possível carregar o gerador de PDF');return}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const PW=210,M=18;const cl=S.clinica||{};const lg=await logoPNG();
+  const L=t=>String(t??'').replace(/[–—]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/…/g,'...').replace(/•/g,'-').replace(/[¼]/g,'1/4').replace(/[½]/g,'1/2').replace(/[¾]/g,'3/4').replace(/[^\x00-\xFF]/g,'');const K={lg,cl,L,PW,M};
+  const tu=tutorOf(p)||{nome:p.tutor,cpf:p.cpf,telefone:p.telefone,endereco:p.endereco};const IDF=docHeader(phCtx(d.peso?{...p,peso:d.peso}:p,tu,{})).split('\n').slice(1).filter(Boolean);
+  const v=byId(S.equipe,d.vet);const crmv=v?.crmv||v?.registro||'';const dt=fmtD((d.em||nowDT()).slice(0,10));
+  const on=(d.itens||[]).filter(x=>x.on);const simples=on.filter(x=>!x.controle);const ctrl=on.filter(x=>x.controle);let y;
+  const ink=()=>doc.setTextColor(20,48,58);
+  const para=(t,sz,b)=>{doc.setFont('helvetica',b?'bold':'normal');doc.setFontSize(sz||10.5);ink();for(const ln of doc.splitTextToSize(L(t),PW-2*M)){if(y>262){doc.addPage();y=20}doc.text(ln,M,y);y+=(sz||10.5)*.47}};
+  const item=(it,n)=>{if(y>250){doc.addPage();y=20}doc.setFont('helvetica','bold');doc.setFontSize(11);ink();const left=L(`${n}) ${it.nome}${it.apres?' '+it.apres:''}`);const right=L([it.qtd,it.origem].filter(Boolean).join(' · '));
+    const lw=doc.splitTextToSize(left,PW-2*M-58);doc.text(lw,M,y);doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.text(right,PW-M,y,{align:'right'});y+=lw.length*5.2;
+    doc.setFontSize(10.5);for(const ln of doc.splitTextToSize(L(recPoso(it,d.peso)),PW-2*M-6)){doc.text(ln,M+6,y);y+=5}y+=3};
+  const sign=()=>{y=Math.max(y+14,236);if(y>262){doc.addPage();y=240}doc.setDrawColor(120,140,145);doc.setLineWidth(.3);doc.line(PW/2-40,y,PW/2+40,y);doc.setFont('helvetica','bold');doc.setFontSize(9.5);ink();doc.text(L(v?.nome||'Médico(a) veterinário(a)'),PW/2,y+5,{align:'center'});doc.setFont('helvetica','normal');doc.setFontSize(8.8);doc.text(L('Médico(a) veterinário(a)'+(crmv?' · CRMV '+crmv:'')),PW/2,y+9.5,{align:'center'});doc.text(L(`${cl.cidade||''}${cl.cidade?', ':''}${dt}`),PW/2,y+14,{align:'center'})};
+  const sec=[];
+  if(simples.length||d.orientacoes){y=drawDocHeader(doc,K,'Receita',IDF);y+=3;para('USO VETERINÁRIO',10,true);y+=3;simples.forEach((it,i)=>item(it,i+1));
+    if(ctrl.length){y+=1;para('Medicamentos de controle especial em receituário próprio: '+ctrl.map(x=>x.nome).join(', ')+'.',9.5)}
+    if(d.orientacoes){y+=4;for(const ln of String(d.orientacoes).split('\n'))para(ln,10,/^[A-ZÁÉÍÓÚÇÃÕ ]{6,}$/.test(ln.trim()))}sign();sec.push({t:'Receita · '+p.nome,s:doc.getNumberOfPages()})}
+  for(const it of ctrl)for(const via of ['1ª via · Farmácia','2ª via · Paciente / Tutor']){if(sec.length||y!==undefined)doc.addPage();y=16;
+    doc.setFont('helvetica','bold');doc.setFontSize(13);ink();doc.text(L('RECEITUÁRIO DE CONTROLE ESPECIAL'),PW/2,y,{align:'center'});y+=6;doc.setFontSize(10);doc.setTextColor(7,115,105);doc.text(L(via),PW/2,y,{align:'center'});y+=6;ink();
+    doc.setDrawColor(150,170,175);doc.setLineWidth(.3);doc.rect(M,y,PW-2*M,30);doc.setFontSize(8.6);doc.setFont('helvetica','bold');doc.text(L('IDENTIFICAÇÃO DO EMITENTE'),M+3,y+5);doc.setFont('helvetica','normal');
+    [`Nome: ${v?.nome||''}`,`CRMV: ${crmv}`,`Endereço: ${cl.endereco||''} · ${cl.cidade||''}/${cl.estado||''}`,`Telefone: ${cl.telefone||''} · ${cl.razao||cl.nome||''}${cl.cnpj?' · CNPJ '+cl.cnpj:''}`].forEach((t,i)=>doc.text(L(t),M+3,y+10+i*4.6));y+=35;
+    doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text(L('Tutor(a) / responsável:'),M,y);doc.setFont('helvetica','normal');doc.text(L(`${tu.nome||p.tutor||''}${tu.cpf?' · CPF '+cpfMask(tu.cpf):''}`),M+40,y);y+=5;
+    doc.setFont('helvetica','bold');doc.text(L('Endereço:'),M,y);doc.setFont('helvetica','normal');doc.text(L(tu.endereco||p.endereco||'____________________________________'),M+40,y);y+=5;
+    doc.setFont('helvetica','bold');doc.text(L('Paciente:'),M,y);doc.setFont('helvetica','normal');doc.text(L(`${p.nome} · ${p.especie||''} · ${p.raca||''} · ${p.sexo||''} · ${p.idade||''} · ${d.peso?num(d.peso,2)+' kg':''}`),M+40,y);y+=9;
+    para('Prescrição:',10,true);y+=2;item(it,1);
+    sign();y=246+16;doc.setDrawColor(150,170,175);const bw=(PW-2*M-6)/2;doc.rect(M,y,bw,22);doc.rect(M+bw+6,y,bw,22);doc.setFontSize(7.8);doc.setFont('helvetica','bold');doc.text(L('IDENTIFICAÇÃO DO COMPRADOR'),M+2,y+4);doc.text(L('IDENTIFICAÇÃO DO FORNECEDOR'),M+bw+8,y+4);doc.setFont('helvetica','normal');
+    ['Nome:','RG:','Endereço:','Telefone:'].forEach((t,i)=>doc.text(t,M+2,y+9+i*3.6));['Data: ____/____/______','Assinatura do farmacêutico:'].forEach((t,i)=>doc.text(L(t),M+bw+8,y+9+i*5));
+    sec.push({t:`Controle especial · ${it.nome} · ${via}`,s:doc.getNumberOfPages()})}
+  docFooters(doc,K,sec.map((x,i)=>({t:x.t,s:(i?sec[i-1].s+1:1)})),'');
+  await S.downloads.save({filename:`Receita_${String(p.nome).replace(/[^\w-]+/g,'_')}.pdf`,data:doc.output('blob')});toast(ctrl.length?`Receita pronta: ${ctrl.length} medicamento(s) de controle especial em receituário próprio (2 vias cada)`:'Receita pronta')}
+async function msSeed(){try{const has=new Set(S.mSaida.map(m=>m.id));if(has.has('rec-castracao'))try{await S.db.doc('modelosSaida/rec-castracao').delete()}catch(_){}for(const m of [...REC_SEED,...MS_SEED0]){if(m.id==='rec-castracao'||has.has(m.id))continue;const{id,...d}=m;await S.db.doc('modelosSaida/'+id).set({...d,ativo:true,criadoEm:nowDT()})}}catch(_){}}
 function cadSaidaHTML(){const L=[...S.mSaida].sort((a,b)=>(a.tipo+a.nome).localeCompare(b.tipo+b.nome));
-  return Object.entries(MS_TIPOS).map(([k,l])=>{const it=L.filter(m=>m.tipo===k);return`<div class="panel-h"><h2>${l}s</h2><span class="muted small">${it.length}</span></div><div class="tbl-wrap"><table class="tbl"><tbody>${it.map(m=>`<tr><td class="nm">${esc(m.nome)}${m.faixa?` <span class="chip">${esc(m.faixa)}</span>`:''}${m.ativo===false?' <span class="chip">inativo</span>':''}<div class="muted small">${esc(String(m.texto||'').replace(/\s+/g,' ').slice(0,140))}…</div></td><td style="text-align:right;white-space:nowrap"><button class="btn sm ghost" data-act="msEdit" data-id="${m.id}">${ic('edit')}</button><button class="btn sm ghost danger" data-act="msDel" data-id="${m.id}">${ic('trash')}</button></td></tr>`).join('')||`<tr><td class="muted">Nenhum modelo.</td></tr>`}</tbody></table></div>`}).join('')}
-function modalMS(m){m=m||{tipo:'receita',ativo:true};
+  return Object.entries(MS_TIPOS).map(([k,l])=>{const it=L.filter(m=>m.tipo===k);return`<div class="panel-h"><h2>${l}s</h2><span class="muted small">${it.length}</span></div><div class="tbl-wrap"><table class="tbl"><tbody>${it.map(m=>`<tr><td class="nm">${esc(m.nome)}${m.faixa?` <span class="chip">${esc(m.faixa)}</span>`:''}${m.ativo===false?' <span class="chip">inativo</span>':''}<div class="muted small">${m.estrut?esc((m.itens||[]).map(x=>x.nome+(x.on?'':' (opcional)')).join(' · ')):esc(String(m.texto||'').replace(/\s+/g,' ').slice(0,140))+'…'}</div></td><td style="text-align:right;white-space:nowrap"><button class="btn sm ghost" data-act="msEdit" data-id="${m.id}">${ic('edit')}</button><button class="btn sm ghost danger" data-act="msDel" data-id="${m.id}">${ic('trash')}</button></td></tr>`).join('')||`<tr><td class="muted">Nenhum modelo.</td></tr>`}</tbody></table></div>`}).join('')}
+function modalMS(m){m=m||{tipo:'receita',ativo:true,estrut:true,itens:[RI({nome:''})],orientacoes:REC_ORIENT};if(m.estrut)return modalMSRec(m);
   openModal(`${H(m.id?'Editar modelo':'Novo modelo')}<form class="modal-b" id="fMS" onsubmit="return false">
    <div class="grid g3"><label class="f">Tipo<select class="inp" name="tipo">${Object.entries(MS_TIPOS).map(([k,l])=>`<option value="${k}" ${m.tipo===k?'selected':''}>${l}</option>`).join('')}</select></label>
    <label class="f span2">Nome do modelo<input class="inp" name="nome" value="${esc(m.nome||'')}" placeholder="Ex.: Castração cão até 5 kg"></label>
@@ -1411,6 +1525,17 @@ function modalMS(m){m=m||{tipo:'receita',ativo:true};
   </form><div class="modal-f"><button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="msOk">Salvar</button></div>`,'wide');
   $('#msOk').onclick=async()=>{const fd=formData('#fMS');if(!String(fd.nome||'').trim())return toast('Dê um nome ao modelo');
     const d={tipo:fd.tipo,nome:fd.nome.trim(),faixa:fd.faixa||'',pMin:nv(fd.pMin),pMax:nv(fd.pMax),texto:fd.texto||'',ativo:!!fd.ativo};
+    try{if(m.id)await S.db.doc('modelosSaida/'+m.id).update(d);else await S.db.collection('modelosSaida').add({...d,criadoEm:nowDT()});closeModal();toast('Modelo salvo')}catch(e){fail(e)}}}
+function modalMSRec(m){
+  openModal(`${H(m.id?'Editar modelo de receita':'Novo modelo de receita')}<form class="modal-b" id="fMR" onsubmit="return false">
+   <div class="grid g3"><label class="f span2">Nome do modelo<input class="inp" id="mrNome" value="${esc(m.nome||'')}" placeholder="Ex.: Pós-operatório cirúrgico · líquido"></label><label class="f">Peso de exemplo (kg)<input class="inp tnum" id="mrPeso" value="5" inputmode="decimal"></label></div>
+   <div class="muted small">Cadastre os medicamentos com dose por kg; a quantidade de cada dose é calculada pelo peso do paciente na hora de fazer a receita. Desmarque os que ficam como opção (ex.: prednisolona, omeprazol) — eles aparecem na receita para você marcar quando precisar.</div>
+   <div id="mrItens" class="rec-list"></div>
+   <label class="f">Orientações<textarea class="inp" id="mrOri" rows="8">${esc(m.orientacoes||'')}</textarea></label>
+   <label class="chk"><input type="checkbox" id="mrAt" ${m.ativo!==false?'checked':''}><span>Ativo</span></label>
+  </form><div class="modal-f"><button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="mrOk">Salvar</button></div>`,'wide');
+  const R=recWire($('#mrItens'),(m.itens||[]).map(x=>({...x})),()=>nv($('#mrPeso').value));$('#mrPeso').addEventListener('input',()=>R.redraw());
+  $('#mrOk').onclick=async()=>{const nome=$('#mrNome').value.trim();if(!nome)return toast('Dê um nome ao modelo');const d={tipo:'receita',estrut:true,nome,itens:R.get(),orientacoes:$('#mrOri').value,ativo:$('#mrAt').checked,texto:''};
     try{if(m.id)await S.db.doc('modelosSaida/'+m.id).update(d);else await S.db.collection('modelosSaida').add({...d,criadoEm:nowDT()});closeModal();toast('Modelo salvo')}catch(e){fail(e)}}}
 const vetOpts=sel=>S.equipe.filter(e=>e.ativo!==false||e.id===sel).map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${esc(e.nome)}${(e.crmv||e.registro)?' · CRMV '+esc(e.crmv||e.registro):''}</option>`).join('');
 function sdCtx(p,extra){const tu=tutorOf(p)||{nome:p.tutor,cpf:p.cpf,telefone:p.telefone,email:p.emailTutor};const a=p.alta||{};const ob=a.obito||{};const v=byId(S.equipe,extra.vet);
@@ -1461,7 +1586,7 @@ async function sdPDF(d){const p=byId(S.intern,d.internacaoId);if(!p)return;
 function sdPanel(p){const L=S.saidaDocs.filter(d=>d.internacaoId===p.id).sort((a,b)=>String(b.em).localeCompare(a.em));
   return`<div class="panel" style="margin-top:16px"><div class="panel-h"><h2>Receitas, encaminhamentos e atestados</h2><span class="spacer"></span>
    <button class="btn sm" data-act="sdNew" data-t="receita" ${W()}>${ic('pill')}Receita</button><button class="btn sm" data-act="sdNew" data-t="encaminhamento" ${W()}>${ic('file')}Encaminhamento</button><button class="btn sm" data-act="sdNew" data-t="atestado" ${W()}>${ic('edit')}Atestado</button></div>
-   <div class="panel-b">${L.length?L.map(d=>`<div class="pre-row"><div style="flex:1;min-width:0"><b>${esc(d.titulo)}</b> <span class="chip">${MS_TIPOS[d.tipo]||''}</span><div class="muted small">${fmtDT(d.em)} · ${esc(equipeNome(d.vet)||'')}</div></div><button class="btn sm" data-act="sdPrint" data-id="${d.id}">${ic('file')}Imprimir</button><button class="btn sm ghost" data-act="sdEdit" data-id="${d.id}" ${W()}>${ic('edit')}</button><button class="btn sm ghost danger" data-act="sdDel" data-id="${d.id}">${ic('trash')}</button></div>`).join(''):'<div class="muted small">Nenhum documento ainda. Escolha um modelo, ajuste o texto, selecione o(a) veterinário(a) e imprima.</div>'}</div></div>`}
+   <div class="panel-b">${L.length?L.map(d=>`<div class="pre-row"><div style="flex:1;min-width:0"><b>${esc(d.titulo)}</b> <span class="chip">${MS_TIPOS[d.tipo]||''}</span><div class="muted small">${fmtDT(d.em)} · ${esc(equipeNome(d.vet)||'')}${d.estrut?` · ${(d.itens||[]).filter(x=>x.on).length} medicamento(s)${(d.itens||[]).some(x=>x.on&&x.controle)?' · inclui controle especial':''}`:''}</div></div><button class="btn sm" data-act="sdPrint" data-id="${d.id}">${ic('file')}Imprimir</button><button class="btn sm ghost" data-act="sdEdit" data-id="${d.id}" ${W()}>${ic('edit')}</button><button class="btn sm ghost danger" data-act="sdDel" data-id="${d.id}">${ic('trash')}</button></div>`).join(''):'<div class="muted small">Nenhum documento ainda. Escolha um modelo, ajuste o texto, selecione o(a) veterinário(a) e imprima.</div>'}</div></div>`}
 function tabAlta(p){
   const a=p.alta||{};const adm=p.admissao||{};const qv=adm.q||{};const cf=a.conf||{};const ck=a.check||{};const pr=a.params||{};const ob=a.obito||{};const tr=a.transf||{};
   const tipo=a.tipo||'alta';
@@ -3508,7 +3633,7 @@ ${raw}`;
 Object.assign(ACT,{
  msNew(){modalMS()},msEdit(el){modalMS(byId(S.mSaida,el.dataset.id))},
  msDel(el){const m=byId(S.mSaida,el.dataset.id);confirmBox(`Excluir o modelo <b>${esc(m?.nome)}</b>?`,'Excluir',async()=>{try{await S.db.doc('modelosSaida/'+m.id).delete();toast('Modelo excluído')}catch(e){fail(e)}})},
- sdNew(el){modalSD(el.dataset.t)},sdEdit(el){const d=byId(S.saidaDocs,el.dataset.id);if(d)modalSD(d.tipo,d)},sdPrint(el){const d=byId(S.saidaDocs,el.dataset.id);if(d)sdPDF(d)},
+ sdNew(el){el.dataset.t==='receita'&&S.mSaida.some(m=>m.estrut&&m.tipo==='receita')?modalRec():modalSD(el.dataset.t)},sdEdit(el){const d=byId(S.saidaDocs,el.dataset.id);if(d)d.estrut?modalRec(d):modalSD(d.tipo,d)},sdPrint(el){const d=byId(S.saidaDocs,el.dataset.id);if(d)d.estrut?recPDF(d):sdPDF(d)},
  sdDel(el){const d=byId(S.saidaDocs,el.dataset.id);confirmBox(`Excluir <b>${esc(d?.titulo)}</b>?`,'Excluir',async()=>{try{await S.db.doc('saidaDocs/'+d.id).delete();toast('Excluído')}catch(e){fail(e)}})},
  convComp(el){compEnvioPDF(el.dataset.id)},
  convCheck(el){convCheck(S.conv.find(x=>x.id===el.dataset.id),true)},
@@ -4455,7 +4580,7 @@ async function boot(){
   db.collection('protocolos').onSnapshot(once(s=>{S.prots=docs(s)}),onErr);
   db.collection('assinaturas').onSnapshot(s=>{S.assin=docs(s);render()},onErr);
   db.collection('convites').onSnapshot(s=>{S.conv=docs(s);render()},()=>{});
-  db.collection('modelosSaida').onSnapshot(s=>{S.mSaida=docs(s);if(!s.size&&S.master&&!S._msSeed){S._msSeed=1;msSeed()}render()},()=>{});
+  db.collection('modelosSaida').onSnapshot(s=>{S.mSaida=docs(s);if(S.master&&!S._msSeed&&!S.mSaida.some(m=>m.estrut)){S._msSeed=1;msSeed()}render()},()=>{});
   db.collection('saidaDocs').onSnapshot(s=>{S.saidaDocs=docs(s);render()},()=>{});
   db.collection('tutores').onSnapshot(s=>{S.tutores=docs(s);S.tutLoaded=true;tutImport();render()},onErr);
   db.collection('modelosDoc').onSnapshot(s=>{S.modelosDoc=docs(s);importDocs();render()},onErr);
