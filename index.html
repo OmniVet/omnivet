@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611160851"></script>
-<script src="lib/firebase-auth-compat.js?v=202611160851"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611160851"></script>
-<script src="fb.js?v=202611160851"></script>
+<script src="lib/firebase-app-compat.js?v=202611160921"></script>
+<script src="lib/firebase-auth-compat.js?v=202611160921"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611160921"></script>
+<script src="fb.js?v=202611160921"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -3692,7 +3692,7 @@ function modalDocPrint(){const p=curP();const ms=S.modelosDoc.filter(m=>m.ativo!
     const K={lg,cl,L,PW,M};const sp=splitIdent(txt);const head=()=>{y=drawDocHeader(doc,K,m.nome,sp.ident)};
     head();doc.setFontSize(10);doc.setTextColor(20,48,58);
     for(const blk of L(sp.body).split('\n')){const hd=isHeadLine(blk);doc.setFont('helvetica',hd?'bold':'normal');if(hd)y+=1.5;for(const ln of (blk.trim()?doc.splitTextToSize(blk,PW-2*M):[''])){if(y>BOT){doc.addPage();head();doc.setFont('helvetica',hd?'bold':'normal');doc.setFontSize(10);doc.setTextColor(20,48,58)}doc.text(ln,M,y);y+=4.8}y+=1.2}
-    if(!m.impresso){if(y>BOT-30){doc.addPage();head()}y+=16;doc.setDrawColor(120,140,145);doc.line(M,y,M+90,y);doc.setFontSize(9);doc.text(L('Assinatura do responsável: '+(tutor.nome||'')),M,y+5);doc.text(L('CPF: '+cpfMask(tutor.cpf)),M,y+9.5)}
+    if(!m.impresso){y+=8;y=blocoAssin(doc,L,M,PW,y,()=>{doc.addPage();head();return y})}
     docFooters(doc,K,[{t:m.nome,s:1}],m.codigo||'');
     try{await S.downloads.save({filename:`${(m.codigo||'Doc')}_${String(p.nome).replace(/[^\w-]+/g,'_')}.pdf`,data:doc.output('blob')});closeModal();toast('PDF salvo')}catch(e){if(e?.code!=='declined')toast('Não foi possível salvar o PDF')}};
 }
@@ -4100,6 +4100,13 @@ Object.assign(ACT,{sigRemoto(el){modalSigRemoto(el.dataset.id)},remPdf(el){sigPD
 /* ===== Documentos: identificação, cabeçalho e rodapé dos PDFs */
 function splitIdent(t){const ls=String(t||'').split('\n');if((ls[0]||'').trim()==='IDENTIFICAÇÃO'){let j=1;while(j<ls.length&&ls[j].trim()!==''&&/^(Paciente|Tutor\(a\)|Endereço|Telefone|Data do documento|RG|E-mail)/.test(ls[j].trim()))j++;return{ident:ls.slice(1,j),body:ls.slice(ls[j]?.trim()===''?j+1:j).join('\n')}}return{ident:null,body:String(t||'')}}
 function docHTML2(t){const sp=splitIdent(t);return(sp.ident?`<div class="doc-id"><b>Identificação</b>${sp.ident.map(l=>`<div>${esc(l)}</div>`).join('')}</div>`:'')+docHTML(sp.body)}
+function blocoAssin(doc,L,M,PW,y,newPage){const cl=S.clinica||{};const local=`${String(cl.cidade||'Fortaleza').toUpperCase()}-${String(cl.estado||'CE').toUpperCase()}`;
+  const W=PW-2*M;const bloco=(tit,quem)=>{if(y>222){y=newPage()||24}
+    doc.setDrawColor(150,170,175);doc.setLineWidth(.3);doc.roundedRect(M,y,W,46,2,2);doc.setFont('helvetica','bold');doc.setFontSize(8.2);doc.setTextColor(7,115,105);doc.text(L(tit),M+4,y+5.5);doc.setTextColor(20,48,58);
+    const lin=(lb,yy,x2)=>{doc.setFont('helvetica','bold');doc.setFontSize(8.6);doc.text(L(lb),M+4,yy);const x=M+4+doc.getTextWidth(L(lb))+2;doc.setLineWidth(.25);doc.line(x,yy+.6,x2||M+W-4,yy+.6)};
+    lin(`${quem} (nome completo)`,y+14);lin(`CPF DO ${quem}`,y+22,M+W/2+20);lin('DATA DA ASSINATURA DO TERMO',y+30,M+W/2+20);lin('ASSINATURA',y+39);
+    doc.setFont('helvetica','bold');doc.setFontSize(8.6);doc.text(L(local),M+W-4,y+30,{align:'right'});y+=52};
+  bloco('RESPONSÁVEL PELO ANIMAL','RESPONSÁVEL PELO ANIMAL');bloco('REPRESENTANTE DA CLÍNICA (EMISSOR E TESTEMUNHA)','REPRESENTANTE PELA CLÍNICA');return y}
 function drawDocHeader(doc,K,title,ident){const{lg,cl,L,PW,M}=K;const lw=drawLogo(doc,lg,M,5,11);const x0=M+(lw?lw+3:0);
   doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(7,115,105);doc.text(L((cl.razao||cl.nome||'').toUpperCase()),x0,9.5);
   doc.setFont('helvetica','normal');doc.setFontSize(7.3);doc.setTextColor(110,135,140);doc.text(L([cl.cnpj&&'CNPJ '+cl.cnpj,cl.endereco,[cl.cidade,cl.estado].filter(Boolean).join('/'),cl.telefone].filter(Boolean).join('  ·  ')),x0,14);
@@ -4219,7 +4226,7 @@ async function termoPapelPDF(sid){const s=S.assin.find(x=>x.id===sid);const p=by
   y+=1;P('Documentos assinados:',true);s.docs.forEach((d,i)=>{doc.setFont('helvetica','normal');doc.setFontSize(9.6);doc.text(L(`${i+1}. ${d.nome}`),M+3,y);doc.setFont('courier','normal');doc.setFontSize(7.6);doc.setTextColor(110,135,140);doc.text(L(`integridade ${String(d.hash||'').slice(0,24)}…`),PW-M,y,{align:'right'});doc.setTextColor(20,48,58);y+=5.4});
   y+=2;P(`Código do pacote: ${s.codigo||'—'}`);if((s.envios||[]).length)P(`Documentos enviados previamente por e-mail para ${s.envios.at(-1).para} em ${fmtDT(s.envios.at(-1).em)} (código ${s.envios.at(-1).codigo}); comprovante arquivado no e-mail da clínica.`);if(s.emailAceite)P(`Aceite enviado pelo tutor por e-mail (${s.emailAceite.de}) em ${fmtDT((s.emailAceite.em||'').slice(0,16))}, respondendo com o código ${s.codigoEmail||''}. A mensagem está guardada na caixa de e-mail da clínica.`);if(s.codEmailOk)P(`Identidade confirmada por código enviado ao e-mail ${s.codEmail?.para||''} e informado pelo tutor em ${fmtDT(s.codEmailOk)}.`);
   y+=4;P(`${cl.cidade||'_______'} – ${cl.estado||'__'}, ${dataExt(today())}.`);
-  y+=22;doc.setDrawColor(120,140,145);doc.setLineWidth(.3);doc.line(M,y,M+78,y);doc.line(PW-M-78,y,PW-M,y);doc.setFontSize(8.6);doc.setFont('helvetica','bold');doc.text(L(tu.nome),M,y+4.5);doc.text(L('Profissional da clínica'),PW-M-78,y+4.5);doc.setFont('helvetica','normal');doc.text(L('CPF '+cpfMask(tu.cpf)),M,y+8.6);doc.text(L('Nome e função'),PW-M-78,y+8.6);
+  y+=8;y=blocoAssin(doc,L,M,PW,y,()=>{doc.addPage();return 20});
   docFooters(doc,K,[{t:'Termo de confirmação de assinatura eletrônica',s:1}],s.codigo?'Código '+s.codigo:'');
   try{await S.downloads.save({filename:`Termo_confirmacao_${String(p.nome).replace(/[^\w-]+/g,'_')}_${today()}.pdf`,data:doc.output('blob')});toast('Termo salvo. Imprima e colha a assinatura.')}catch(e){if(e?.code!=='declined')toast('Não foi possível salvar o PDF')}}
 function modalSigPapel(sid){const s=S.assin.find(x=>x.id===sid);const p=byId(S.intern,s?.internacaoId);if(!s||!p)return;let foto=s.fotoPapel?.id||null;
