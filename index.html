@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611160921"></script>
-<script src="lib/firebase-auth-compat.js?v=202611160921"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611160921"></script>
-<script src="fb.js?v=202611160921"></script>
+<script src="lib/firebase-app-compat.js?v=202611160946"></script>
+<script src="lib/firebase-auth-compat.js?v=202611160946"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611160946"></script>
+<script src="fb.js?v=202611160946"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -2374,7 +2374,7 @@ async function exportPDF(mode){if(!PERM('exportar')){toast('Você não tem permi
 }
 
 /* ---------- Ações ---------- */
-function fail(e){console.error(e);const c=e&&e.code;if(c==='ficha_finalizada'){toast('Ficha finalizada: ninguém pode alterar. Só o master pode reabrir.');return}if(c==='master_only'){toast('Você só pode excluir o que você mesmo lançou.');return}if(c==='sem_perm'){toast('Você não tem permissão para alterar isso. Fale com o master.');return}if(c==='bloqueio_fin'){toast('Bloqueado: medicações suspensas por não pagamento do tutor. Só o master libera após a quitação.');return}toast(c==='invalid_argument'?'Você não tem permissão para alterar este prontuário.':c==='quota_exceeded'?'O banco atingiu o limite. Remova registros antigos.':'Não foi possível salvar. Tente de novo.')}
+function fail(e){console.error(e);const c=e&&e.code;if(c==='ficha_finalizada'){toast('Ficha finalizada: ninguém pode alterar. Só o master pode reabrir.');return}if(c==='master_only'){toast('Você só pode excluir o que você mesmo lançou.');return}if(c==='sem_perm'){toast('Você não tem permissão para alterar isso. Fale com o master.');return}if(c==='edit_autor'){toast('Só quem fez este registro (ou o master) pode alterá-lo.');return}if(c==='edit_prazo'){toast('O prazo para alterar este registro terminou (até o dia seguinte ao lançamento). Fale com o master.');return}if(c==='bloqueio_fin'){toast('Bloqueado: medicações suspensas por não pagamento do tutor. Só o master libera após a quitação.');return}toast(c==='invalid_argument'?'Você não tem permissão para alterar este prontuário.':c==='quota_exceeded'?'O banco atingiu o limite. Remova registros antigos.':'Não foi possível salvar. Tente de novo.')}
 function formData(sel){return Object.fromEntries(new FormData($(sel)))}
 async function savePresc(patch){const p=curP();try{await S.db.doc(`prescricoes/${p.id}_${S.day}`).update({...patch,editadoEm:nowDT()})}catch(e){fail(e)}}
 async function createPresc(day,base){const p=curP();const src=base?JSON.parse(JSON.stringify(base)):{itens:[],obs:''};
@@ -4373,8 +4373,15 @@ const AUTH_COLS=['evolucoes','transfusoes','solicitacoes','prescricoes','interco
 const own=r=>r&&r.criadoUid&&S.uid&&r.criadoUid===S.uid?'own':'';
 async function finGuard(r,d){const col=String(r.path).split('/')[0];if(!FIN_COLS.includes(col))return;let x=null;try{const g=await r.get();x=g.exists?g.data():null}catch(_){}
   if(x?.finalizada&&!(S.master&&d&&d.finalizada===false))throw{code:'ficha_finalizada'}}
-async function authStamp(r,d){const col=String(r.path).split('/')[0];if(!AUTH_COLS.includes(col)||!d)return d;let x=null;try{const g=await r.get();x=g.exists?g.data():null}catch(_){}
-  return{...d,criadoUid:x?(x.criadoUid??null):(d.criadoUid||S.uid||null)}}
+const EDIT_COLS=['evolucoes','intercorrencias','comunicacoes','transfusoes','solicitacoes','cirurgias','anestesias','saidaDocs'];
+const novoStamp=()=>({criadoUid:S.uid||null,criadoTs:new Date(),criadoDia:today()});
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const diaDe=x=>x.criadoDia||(x.criadoTs?.toDate?ymd(x.criadoTs.toDate()):'')||x.data||String(x.criadoEm||x.em||'').slice(0,10);
+function podeEditar(x){if(S.master||!x)return true;if(x.criadoUid!==S.uid)return false;const d=diaDe(x);return !!d&&today()<=addDays(d,1)}
+async function editGuard(r,d){const col=String(r.path).split('/')[0];if(S.master||!EDIT_COLS.includes(col))return null;let x=null;try{const g=await r.get();x=g.exists?g.data():null}catch(_){}
+  if(!x)return null;if(x.criadoUid!==S.uid)throw{code:'edit_autor'};if(!podeEditar(x))throw{code:'edit_prazo'};return x}
+async function authStamp(r,d){const col=String(r.path).split('/')[0];if(!(AUTH_COLS.includes(col)||EDIT_COLS.includes(col))||!d)return d;let x=null;try{const g=await r.get();x=g.exists?g.data():null}catch(_){}
+  return x?{...d,criadoUid:x.criadoUid??null,...(x.criadoTs?{criadoTs:x.criadoTs}:{}),...(x.criadoDia?{criadoDia:x.criadoDia}:{})}:{...d,...novoStamp(),criadoUid:d.criadoUid||S.uid||null}}
 function finBanner(r,k){if(!r?.finalizada)return'';return`<div class="banner ok fin-ban">${ic('check')}<div><b>Ficha finalizada</b> por ${esc(equipeNome(r.finalizadaPor)||'—')} em ${fmtDT(r.finalizadaEm)}. Ninguém pode mais alterar.${S.master?'':' Só o master pode reabrir.'}</div>${S.master?`<span class="spacer"></span><button type="button" class="btn sm" data-act="finReabrir" data-k="${k}" data-allow>Reabrir para edição</button>`:''}</div>`}
 function finBar(k,r){if(r?.finalizada)return`<span class="chip ok">${ic('check')}Finalizada</span>`;
   return`<span class="chip warn">Rascunho</span><button class="btn" type="button" data-act="${k==='cir'?'cirSave':'anSave'}" ${W()}>Salvar rascunho</button><button class="btn pri" type="button" data-act="finOpen" data-k="${k}" ${W()}>${ic('check')}Finalizar e salvar</button>`}
@@ -4584,10 +4591,10 @@ async function boot(){
   S.user=user;try{S.master=user?!!(await user.isOwner()):false}catch(_){S.master=false}document.body.classList.toggle('not-master',!S.master);
   S._rawdb=db;
   const wrapRef=r=>({id:r.id,path:r.path,get:()=>r.get(),
-   set:async(d,o)=>{if(!colPermOk(r.path))throw{code:'sem_perm'};await blkGuard(r.path,d);await finGuard(r,d);d=await authStamp(r,d);return o?r.set(d,o):r.set(d)},
-   update:async d=>{if(!colPermOk(r.path))throw{code:'sem_perm'};await blkGuard(r.path,d);await finGuard(r,d);if(!S.master&&d&&'criadoUid' in d){d={...d};delete d.criadoUid}return r.update(d)},
+   set:async(d,o)=>{if(!colPermOk(r.path))throw{code:'sem_perm'};await blkGuard(r.path,d);await finGuard(r,d);await editGuard(r,d);d=await authStamp(r,d);return o?r.set(d,o):r.set(d)},
+   update:async d=>{if(!colPermOk(r.path))throw{code:'sem_perm'};await blkGuard(r.path,d);await finGuard(r,d);await editGuard(r,d);if(d&&('criadoUid' in d||'criadoTs' in d||'criadoDia' in d)){d={...d};delete d.criadoUid;delete d.criadoTs;delete d.criadoDia}return r.update(d)},
    delete:async()=>{if(!colPermOk(r.path))throw{code:'sem_perm'};if(S.master||PERM('excluir'))return r.delete();try{const g=await r.get();const x=g.exists?g.data():null;if(x&&x.criadoUid&&x.criadoUid===S.uid&&!x.finalizada)return r.delete()}catch(_){}throw{code:'master_only'}},onSnapshot:(a,b)=>r.onSnapshot(a,b),collection:c=>r.collection(c),acquire:o=>r.acquire(o)});
-  const wrapCol=(c,p)=>new Proxy(c,{get(t,k){if(k==='doc')return(...a)=>wrapRef(t.doc(...a));if(k==='add')return async d=>{if(!colPermOk(p))throw{code:'sem_perm'};await blkGuard(p+'/_',d);return t.add(d)};const v=t[k];return typeof v==='function'?v.bind(t):v}});
+  const wrapCol=(c,p)=>new Proxy(c,{get(t,k){if(k==='doc')return(...a)=>wrapRef(t.doc(...a));if(k==='add')return async d=>{if(!colPermOk(p))throw{code:'sem_perm'};await blkGuard(p+'/_',d);const col=String(p).split('/')[0];if(d&&(AUTH_COLS.includes(col)||EDIT_COLS.includes(col)))d={...d,...novoStamp()};return t.add(d)};const v=t[k];return typeof v==='function'?v.bind(t):v}});
   S.db={doc:p=>wrapRef(db.doc(p)),collection:p=>wrapCol(db.collection(p),p)};
   try{S.uid=user?await user.id():null}catch(e){}
   try{const c=user?await user.can('data.write'):null;if(c===false)S.canWrite=false}catch(e){}
