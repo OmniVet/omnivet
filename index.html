@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611160946"></script>
-<script src="lib/firebase-auth-compat.js?v=202611160946"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611160946"></script>
-<script src="fb.js?v=202611160946"></script>
+<script src="lib/firebase-app-compat.js?v=202611160950"></script>
+<script src="lib/firebase-auth-compat.js?v=202611160950"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611160950"></script>
+<script src="fb.js?v=202611160950"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -1727,8 +1727,8 @@ function linhaEventos(p){const E=[];const add=(t,tipo,icn,tit,ds)=>{if(t)E.push(
       if(m.s==='ok')add(t,it?.tipo==='proc'?'':'med',it?.tipo==='fluido'?'drop':it?.tipo==='proc'?'hand':it?.tipo==='alim'?'bowl':'pill',nm+(it?.tipo==='med'&&it.volume!=null?` · ${num(it.volume)} mL ${it.via||''}`:''),[quem&&'por '+quem,m.interc&&m.interc!=='Nenhuma'?m.interc:'',m.obs].filter(Boolean).join(' · '));
       else if(m.s==='nao')add(t,'bad','x','Não realizado: '+nm,[m.motivo,m.obs,quem].filter(Boolean).join(' · '))}}
   for(const e of S.pEvo)add(e.data+'T'+(e.hora||'00:00'),'','thermo','Parâmetros / evolução',[e.estado,e.temp&&e.temp+' °C',e.fc&&'FC '+e.fc,e.fr&&'FR '+e.fr,e.dor,equipeNome(e.avaliador)].filter(Boolean).join(' · '));
-  for(const a of S.pAnest)add(a.data,'cir','anes','Anestesia',[a.procedimento,equipeNome(a.anestesista)].filter(Boolean).join(' · '));
-  for(const c of S.pCir)add(c.data,'cir','scalp','Cirurgia: '+(c.titulo||'procedimento'),equipeNome(c.cirurgiao));
+  for(const a of S.pAnest){add(a.data,'cir','anes','Anestesia',[a.procedimento,equipeNome(a.anestesista)].filter(Boolean).join(' · '));for(const x of a.reaberturas||[])add(x.em,'','edit','Ficha de anestesia editada',equipeNome(x.por)||'')}
+  for(const c of S.pCir){add(c.data,'cir','scalp','Cirurgia: '+(c.titulo||'procedimento'),equipeNome(c.cirurgiao));for(const x of c.reaberturas||[])add(x.em,'','edit','Ficha de cirurgia editada',equipeNome(x.por)||'')}
   for(const x of S.pTransf)add(x.data+'T'+(x.inicio||'00:00'),'cir','drop','Transfusão',x.componente||'');
   for(const x of S.pInter)add(x.data+'T'+(x.inicio||'00:00'),'bad','flag','Intercorrência: '+(x.tipo||''),x.descricao||'');
   for(const x of S.pComm)add(x.em,'','users','Comunicação com o tutor ('+(x.canal||'')+')',equipeNome(x.autor)||'');
@@ -4372,7 +4372,7 @@ const FIN_COLS=['cirurgias','anestesias'];
 const AUTH_COLS=['evolucoes','transfusoes','solicitacoes','prescricoes','intercorrencias','comunicacoes','cirurgias','anestesias','plantao','assinaturas','agenda','monitor'];
 const own=r=>r&&r.criadoUid&&S.uid&&r.criadoUid===S.uid?'own':'';
 async function finGuard(r,d){const col=String(r.path).split('/')[0];if(!FIN_COLS.includes(col))return;let x=null;try{const g=await r.get();x=g.exists?g.data():null}catch(_){}
-  if(x?.finalizada&&!(S.master&&d&&d.finalizada===false))throw{code:'ficha_finalizada'}}
+  if(x?.finalizada&&!((S.master||podeEditar(x))&&d&&d.finalizada===false))throw{code:'ficha_finalizada'}}
 const EDIT_COLS=['evolucoes','intercorrencias','comunicacoes','transfusoes','solicitacoes','cirurgias','anestesias','saidaDocs'];
 const novoStamp=()=>({criadoUid:S.uid||null,criadoTs:new Date(),criadoDia:today()});
 const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -4382,7 +4382,9 @@ async function editGuard(r,d){const col=String(r.path).split('/')[0];if(S.master
   if(!x)return null;if(x.criadoUid!==S.uid)throw{code:'edit_autor'};if(!podeEditar(x))throw{code:'edit_prazo'};return x}
 async function authStamp(r,d){const col=String(r.path).split('/')[0];if(!(AUTH_COLS.includes(col)||EDIT_COLS.includes(col))||!d)return d;let x=null;try{const g=await r.get();x=g.exists?g.data():null}catch(_){}
   return x?{...d,criadoUid:x.criadoUid??null,...(x.criadoTs?{criadoTs:x.criadoTs}:{}),...(x.criadoDia?{criadoDia:x.criadoDia}:{})}:{...d,...novoStamp(),criadoUid:d.criadoUid||S.uid||null}}
-function finBanner(r,k){if(!r?.finalizada)return'';return`<div class="banner ok fin-ban">${ic('check')}<div><b>Ficha finalizada</b> por ${esc(equipeNome(r.finalizadaPor)||'—')} em ${fmtDT(r.finalizadaEm)}. Ninguém pode mais alterar.${S.master?'':' Só o master pode reabrir.'}</div>${S.master?`<span class="spacer"></span><button type="button" class="btn sm" data-act="finReabrir" data-k="${k}" data-allow>Reabrir para edição</button>`:''}</div>`}
+function edLog(r){const L=r?.reaberturas||[];if(!L.length)return'';return`<div class="muted small" style="margin-top:4px">${L.map(x=>`Editada em ${fmtDT(x.em)} por ${esc(equipeNome(x.por)||(x.uid===S.uid?'você':'')||'—')}`).join(' · ')}</div>`}
+function finBanner(r,k){const pode=S.master||podeEditar(r);if(!r?.finalizada)return r?.reaberturas?.length?`<div class="banner warn fin-ban">${ic('edit')}<div><b>Ficha em edição</b>. Ao terminar, toque em “Finalizar e salvar”.${edLog(r)}</div></div>`:'';
+  return`<div class="banner ok fin-ban">${ic('check')}<div><b>Ficha finalizada</b> por ${esc(equipeNome(r.finalizadaPor)||'—')} em ${fmtDT(r.finalizadaEm)}. ${pode&&!S.master?'Você fez esta ficha e pode editá-la até o dia seguinte ao lançamento.':'Quem fez a ficha pode editá-la até o dia seguinte; depois, só o master.'}${edLog(r)}</div>${pode?`<span class="spacer"></span><button type="button" class="btn sm" data-act="finReabrir" data-k="${k}" data-allow>${ic('edit')}Editar ficha</button>`:''}</div>`}
 function finBar(k,r){if(r?.finalizada)return`<span class="chip ok">${ic('check')}Finalizada</span>`;
   return`<span class="chip warn">Rascunho</span><button class="btn" type="button" data-act="${k==='cir'?'cirSave':'anSave'}" ${W()}>Salvar rascunho</button><button class="btn pri" type="button" data-act="finOpen" data-k="${k}" ${W()}>${ic('check')}Finalizar e salvar</button>`}
 function lockFinal(){$$('form[data-fin]').forEach(f=>{f.querySelectorAll('input,select,textarea,button').forEach(x=>{if(x.matches('[data-allow],[data-act=fotoView],[data-act=axView],[data-act=finReabrir],[data-act=close],.fin-del')&&!(x.matches('.fin-del')&&!S.master))return;x.disabled=true});
@@ -4403,9 +4405,9 @@ Object.assign(ACT,{
  finOpen(el){modalFin(el.dataset.k)},
  async anSave(){try{await anWrite();toast('Rascunho da ficha anestésica salvo')}catch(e){fail(e)}},
  async cirSave(){try{await cirWrite();toast('Rascunho da ficha cirúrgica salvo')}catch(e){fail(e)}},
- finReabrir(el){if(!S.master)return;const k=el.dataset.k;const id=k==='cir'?S.cirSel:S.anSel;const col=k==='cir'?'cirurgias':'anestesias';
-  confirmBox('Reabrir esta ficha para edição? Fica registrado que o master reabriu.','Reabrir',async()=>{const r=(k==='cir'?S.pCir:S.pAnest).find(x=>x.id===id);
-   try{await S.db.doc(col+'/'+id).update({finalizada:false,reaberturas:[...(r?.reaberturas||[]),{em:nowDT(),uid:S.uid||null,antes:{por:r?.finalizadaPor||null,em:r?.finalizadaEm||null}}]});toast('Ficha reaberta')}catch(e){fail(e)}},false)}});
+ finReabrir(el){const k=el.dataset.k;const id=k==='cir'?S.cirSel:S.anSel;const col=k==='cir'?'cirurgias':'anestesias';const r0=(k==='cir'?S.pCir:S.pAnest).find(x=>x.id===id);if(!(S.master||podeEditar(r0))){toast('Só quem fez a ficha (até o dia seguinte) ou o master pode editar.');return}
+  confirmBox('Editar esta ficha? Fica registrado na ficha quando e por quem a edição foi feita.','Editar',async()=>{const r=(k==='cir'?S.pCir:S.pAnest).find(x=>x.id===id);
+   try{await S.db.doc(col+'/'+id).update({finalizada:false,reaberturas:[...(r?.reaberturas||[]),{em:nowDT(),uid:S.uid||null,por:lsGet('vp_resp','')||null,antes:{por:r?.finalizadaPor||null,em:r?.finalizadaEm||null}}]});toast('Ficha aberta para edição')}catch(e){fail(e)}},false)}});
 
 /* ===== Plano do protocolo: critério de alta, tempo médio, exames sugeridos */
 const exTipo=t=>/ultrass|\bUS\b|radiogr|\bRX\b|raio|ecocard|tomogr|eletrocard|\bECG\b|endosc/i.test(t)?'Exame de imagem':'Exame laboratorial';
