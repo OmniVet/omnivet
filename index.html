@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="VetPlus">
-<script src="lib/firebase-app-compat.js?v=202611152341"></script>
-<script src="lib/firebase-auth-compat.js?v=202611152341"></script>
-<script src="lib/firebase-firestore-compat.js?v=202611152341"></script>
-<script src="fb.js?v=202611152341"></script>
+<script src="lib/firebase-app-compat.js?v=202611160851"></script>
+<script src="lib/firebase-auth-compat.js?v=202611160851"></script>
+<script src="lib/firebase-firestore-compat.js?v=202611160851"></script>
+<script src="fb.js?v=202611160851"></script>
 <title>Internação VetPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -1402,30 +1402,38 @@ Corpo entregue / retirado por: {{retirado_por}}
 /* ===== Receita estruturada por peso */
 const REC_ORIG=['Farmácia humana','Uso veterinário','Farmácia de manipulação'];
 const REC_FORMA={gotas:'gota(s)',mL:'mL',comprimido:'comprimido(s)',capsula:'cápsula(s)',sache:'sachê(s)',aplicacao:'aplicação(ões)'};
-const REC_FREQ=[[6,'a cada 6 horas (4 vezes ao dia)'],[8,'a cada 8 horas (3 vezes ao dia)'],[12,'a cada 12 horas (2 vezes ao dia)'],[24,'a cada 24 horas (1 vez ao dia)'],[48,'a cada 48 horas (dia sim, dia não)']];
-const REC_ORIENT=`ORIENTAÇÕES
-• Manter o colar elizabetano e/ou a roupinha pós-operatória até a retirada dos pontos. Não deixar lamber ou morder a ferida.
-• Limpar a ferida conforme orientado. Não usar pomadas sem orientação.
-• Evitar exercícios, pulos, corridas e banho até a retirada dos pontos.
-• O paciente deve se alimentar normalmente; oferecer água à vontade.
-• Em caso de mudança de comportamento, apatia, vômitos, falta de apetite, sangramento, secreção ou inchaço na ferida, trazer o paciente à clínica.
-• Retorno para avaliação e retirada dos pontos em 10 dias.`;
-const RI=(o)=>({on:true,modo:'peso',via:'oral',freq:12,dias:5,gotasMl:20,qtd:'1 caixa',origem:'Farmácia humana',controle:false,obs:'',...o});
+const REC_FREQ=[[6,'4x ao dia'],[8,'3x ao dia'],[12,'2x ao dia'],[24,'1x ao dia'],[48,'a cada 48 horas']];
+const REC_USO={oral:'Uso oral',topico:'Uso tópico',adicional:'Se ocorrer o sintoma'};
+const REC_ORIENT=`RECOMENDAÇÕES
+1 - Roupinha (pelo menos 2 e estarem justas no corpo) e/ou colar elizabetano até a retirada dos pontos.
+2 - Evitar exercícios intensos / Manter o paciente em ambiente limpo (evitar areia) e calmo / Não banhar até a retirada dos pontos.
+3 - Retornar para reavaliação (com 7 dias) e retirada de pontos com média de 15 dias, necessário marcar o horário na recepção.
+4 - Caso tenha mudança no quadro clínico / piora ou não resposta terapêutica, retornar o mais breve possível!
+5 - Nos casos de abertura de pontos; secreção purulenta, odor forte ou sangramento persistente; inchaço excessivo, dor intensa ou febre e/ou falta de apetite por mais de 48h, o paciente deve retornar o mais breve possível.
+6 - Nos casos cirúrgicos oncológicos, o paciente deve retornar para reavaliação complementar em até 30 dias com o resultado do exame LAUDO HISTOPATOLÓGICO em mãos, para dar continuidade ao tratamento.
+7 - Em caso de bandagens, devem ser trocadas a cada 48h.
+8 - Manipular a ferida com uso de luvas, gazes e material estéril.`;
+const RI=(o)=>({on:true,uso:'oral',verbo:'Dar',cond:'',modo:'peso',via:'oral',freq:12,dias:5,gotasMl:20,qtd:'1 CX',origem:'Farmácia humana',controle:false,obs:'',...o});
+const REC_V=3;
 const REC_SEED=[
- {id:'rec-posop-liq',tipo:'receita',nome:'Pós-operatório cirúrgico · medicação líquida',estrut:true,orientacoes:REC_ORIENT,itens:[
-  RI({nome:'Dipirona',apres:'500 mg/mL (gotas)',conc:500,concUn:'mg/mL',dose:25,doseUn:'mg/kg',forma:'gotas',freq:12,dias:5,qtd:'1 frasco'}),
-  RI({nome:'Meloxicam suspensão oral (Ourofino)',apres:'conferir concentração na bula',modo:'peso',dose:0.1,doseUn:'mL/kg',forma:'mL',freq:24,dias:5,origem:'Uso veterinário',qtd:'1 frasco',obs:'Conferir a dose na bula do produto.'}),
-  RI({on:false,nome:'Prednisolona (alternativa ao meloxicam)',apres:'3 mg/mL (solução oral)',conc:3,concUn:'mg/mL',dose:0.5,doseUn:'mg/kg',forma:'mL',freq:24,dias:5,qtd:'1 frasco'}),
-  RI({nome:'Amoxicilina + clavulanato de potássio',apres:'250 mg + 62,5 mg / 5 mL (suspensão oral)',conc:50,concUn:'mg/mL',dose:20,doseUn:'mg/kg',forma:'mL',freq:12,dias:10,qtd:'1 frasco',controle:true,obs:'Manter o produto na geladeira para conservar.'}),
-  RI({nome:'Tramadol',apres:'100 mg/mL (gotas)',conc:100,concUn:'mg/mL',dose:3,doseUn:'mg/kg',forma:'mL',freq:8,dias:7,qtd:'1 frasco',controle:true}),
-  RI({on:false,nome:'Omeprazol PET (Gaviz®, Gastroblock® ou Petprazol®)',apres:'comprimido',modo:'fixo',fixo:'1 comprimido',freq:12,dias:10,origem:'Uso veterinário',qtd:'1 caixa',obs:'Usar em caso de vômitos.'})]},
- {id:'rec-posop-comp',tipo:'receita',nome:'Pós-operatório cirúrgico · comprimidos',estrut:true,orientacoes:REC_ORIENT,itens:[
-  RI({nome:'Dipirona',apres:'500 mg (comprimido)',conc:500,concUn:'mg/comprimido',dose:25,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:5}),
-  RI({nome:'Meloxicam',apres:'0,5 mg (comprimido)',conc:0.5,concUn:'mg/comprimido',dose:0.1,doseUn:'mg/kg',forma:'comprimido',freq:24,dias:5,origem:'Uso veterinário'}),
-  RI({on:false,nome:'Prednisolona (alternativa ao meloxicam)',apres:'5 mg (comprimido)',conc:5,concUn:'mg/comprimido',dose:0.5,doseUn:'mg/kg',forma:'comprimido',freq:24,dias:5}),
-  RI({nome:'Amoxicilina + clavulanato de potássio',apres:'250 mg (comprimido)',conc:250,concUn:'mg/comprimido',dose:20,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:10,controle:true}),
-  RI({nome:'Tramadol',apres:'50 mg (comprimido)',conc:50,concUn:'mg/comprimido',dose:3,doseUn:'mg/kg',forma:'comprimido',freq:8,dias:7,controle:true}),
-  RI({on:false,nome:'Omeprazol PET (Gaviz®, Gastroblock® ou Petprazol®)',apres:'comprimido',modo:'fixo',fixo:'1 comprimido',freq:12,dias:10,origem:'Uso veterinário',obs:'Usar em caso de vômitos.'})]}];
+ {id:'rec-posop-liq',v:REC_V,tipo:'receita',nome:'Pós-operatório cirurgia geral',estrut:true,orientacoes:REC_ORIENT,itens:[
+  RI({nome:'Dipirona',apres:'500 mg/mL (gotas)',conc:500,concUn:'mg/mL',dose:25,doseUn:'mg/kg',forma:'gotas',freq:8,dias:5}),
+  RI({nome:'Tramadol',apres:'100 mg/mL',conc:100,concUn:'mg/mL',dose:3,doseUn:'mg/kg',forma:'mL',freq:12,dias:7,controle:true}),
+  RI({nome:'Amoxicilina + clavulanato',apres:'250 mg/5 mL',conc:50,concUn:'mg/mL',dose:20,doseUn:'mg/kg',forma:'mL',freq:12,dias:6,controle:true,obs:'Manter o produto na geladeira.'}),
+  RI({nome:'Prednisolona 5 mg (farmácia humana) ou Meloxicam 0,5 mg (veterinário)',apres:'',conc:5,concUn:'mg/comprimido',dose:1,doseUn:'mg/kg',forma:'comprimido',freq:24,dias:5,origem:''}),
+  RI({uso:'topico',verbo:'Aplicar',nome:'Spray Rifocina',apres:'',modo:'fixo',fixo:'1 borrifada',via:'no local da lesão',freq:12,dias:15}),
+  RI({uso:'adicional',cond:'Náuseas',nome:'Ondansetrona',apres:'4 mg',conc:4,concUn:'mg/comprimido',dose:0.8,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:3}),
+  RI({uso:'adicional',cond:'Vômitos após uso de medicações',nome:'Gaviz',apres:'10 mg',conc:10,concUn:'mg/comprimido',dose:2,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:10,origem:'Uso veterinário',obs:'Administrar 1h antes das demais medicações.'}),
+  RI({uso:'adicional',cond:'Sangramento intenso no local da ferida',nome:'Ácido tranexâmico',apres:'250 mg',conc:250,concUn:'mg/comprimido',dose:25,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:4})]},
+ {id:'rec-posop-comp',v:REC_V,tipo:'receita',nome:'Pós-operatório cirurgia geral · só comprimidos',estrut:true,orientacoes:REC_ORIENT,itens:[
+  RI({nome:'Dipirona',apres:'500 mg',conc:500,concUn:'mg/comprimido',dose:25,doseUn:'mg/kg',forma:'comprimido',freq:8,dias:5}),
+  RI({nome:'Tramadol',apres:'50 mg',conc:50,concUn:'mg/comprimido',dose:3,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:7,controle:true}),
+  RI({nome:'Amoxicilina + clavulanato',apres:'250 mg',conc:250,concUn:'mg/comprimido',dose:20,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:6,controle:true}),
+  RI({nome:'Prednisolona 5 mg (farmácia humana) ou Meloxicam 0,5 mg (veterinário)',apres:'',conc:5,concUn:'mg/comprimido',dose:1,doseUn:'mg/kg',forma:'comprimido',freq:24,dias:5,origem:''}),
+  RI({uso:'topico',verbo:'Aplicar',nome:'Spray Rifocina',apres:'',modo:'fixo',fixo:'1 borrifada',via:'no local da lesão',freq:12,dias:15}),
+  RI({uso:'adicional',cond:'Náuseas',nome:'Ondansetrona',apres:'4 mg',conc:4,concUn:'mg/comprimido',dose:0.8,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:3}),
+  RI({uso:'adicional',cond:'Vômitos após uso de medicações',nome:'Gaviz',apres:'10 mg',conc:10,concUn:'mg/comprimido',dose:2,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:10,origem:'Uso veterinário',obs:'Administrar 1h antes das demais medicações.'}),
+  RI({uso:'adicional',cond:'Sangramento intenso no local da ferida',nome:'Ácido tranexâmico',apres:'250 mg',conc:250,concUn:'mg/comprimido',dose:25,doseUn:'mg/kg',forma:'comprimido',freq:12,dias:4})]}];
 const r2=(x,st)=>Math.round(x/st)*st;
 function recQtd(it,peso){if(it.modo==='fixo')return it.fixo||'';if(!peso||it.dose==null||it.dose==='')return'';const d=nv(it.dose),c=nv(it.conc);
   let mL=null,mg=null;if(it.doseUn==='mL/kg')mL=d*peso;else if(it.doseUn==='gotas/kg'){const g=Math.max(1,Math.round(d*peso));return g+' gota(s)'}else mg=d*peso;
@@ -1433,22 +1441,29 @@ function recQtd(it,peso){if(it.modo==='fixo')return it.fixo||'';if(!peso||it.dos
   if(mL==null){if(!c)return'';mL=mg/c}
   if(it.forma==='gotas'){const g=Math.max(1,Math.round(mL*(nv(it.gotasMl)||20)));return g+(g===1?' gota':' gotas')}
   return num(mL<1?r2(mL,.05):r2(mL,.1),2)+' mL'}
-function recPoso(it,peso){const q=recQtd(it,peso);const fr=(REC_FREQ.find(f=>f[0]===Number(it.freq))||[0,''])[1];
-  return`Dar ${q||'____'}, via ${it.via||'oral'}, ${fr||'____'}, durante ${it.dias||'____'} dia(s).${it.obs?' '+it.obs:''}`}
-function recItemTxt(it,peso,n){return`${n}) ${it.nome}${it.apres?' '+it.apres:''} ........ ${it.qtd||''}${it.origem?' · '+it.origem:''}\n   ${recPoso(it,peso)}`}
+function recPoso(it,peso){const q=recQtd(it,peso);const fr=(REC_FREQ.find(f=>f[0]===Number(it.freq))||[0,''])[1];const via=String(it.via||'oral').trim();
+  return`${it.verbo||'Dar'} ${q||'____'}${via&&via!=='oral'?', '+(/^(no|na|nos|nas|em|via)\b/i.test(via)?via:'via '+via):''}, ${fr||'____'}, por ${it.dias||'____'} dia${Number(it.dias)===1?'':'s'}.${it.obs?' '+it.obs:''}`}
+const origS=o=>({'Farmácia humana':'F. humana','Uso veterinário':'Veterinário','Farmácia de manipulação':'Manipulação'}[o]||o||'');
+function recItemTxt(it,peso,n){return it.uso==='adicional'?`* ${it.cond||'Se necessário'}: ${it.nome}${it.apres?' '+it.apres:''}${it.origem?' ('+origS(it.origem)+')':''}, ${recPoso(it,peso).replace(/^\S+\s/,'')}`:`${n} - ${it.nome}${it.apres?' '+it.apres:''} - ${it.qtd||''}${it.origem?' ('+origS(it.origem)+')':''}\n${recPoso(it,peso)}`}
+function recTexto(itens,peso,ori){const on=itens.filter(x=>x.on);const out=[];for(const u of ['oral','topico']){const L=on.filter(x=>(x.uso||'oral')===u);if(L.length)out.push(REC_USO[u]+'\n'+L.map((x,i)=>recItemTxt(x,peso,i+1)).join('\n'))}
+  if(ori)out.push(ori);const A=on.filter(x=>x.uso==='adicional');if(A.length)out.push('Orientações adicionais, nos casos onde ocorram sintomas:\n'+A.map(x=>recItemTxt(x,peso)).join('\n'));return out.join('\n\n')}
 function recRow(it,i,peso){const o=(l,v)=>l.map(([k,t])=>`<option value="${k}" ${String(k)===String(v)?'selected':''}>${t}</option>`).join('');
   return`<div class="rec-it ${it.on?'':'off'}" data-i="${i}">
    <div class="row" style="gap:8px;align-items:center"><label class="chk" style="margin:0"><input type="checkbox" data-r="on" ${it.on?'checked':''}><span></span></label><input class="inp" data-r="nome" value="${esc(it.nome||'')}" placeholder="Medicamento" style="flex:2;min-width:160px"><input class="inp" data-r="apres" value="${esc(it.apres||'')}" placeholder="Apresentação (ex.: 500 mg/mL gotas)" style="flex:2;min-width:160px"><button type="button" class="xbtn" data-rdel="${i}" aria-label="Remover">${ic('x')}</button></div>
    <div class="rec-g">
+    <label>Seção<select class="inp" data-r="uso">${o(Object.entries(REC_USO),it.uso||'oral')}</select></label>
+    ${it.uso==='adicional'?`<label class="w2">Se ocorrer (sintoma)<input class="inp" data-r="cond" value="${esc(it.cond||'')}" placeholder="Ex.: Náuseas"></label>`:''}
+    <label>Ação<select class="inp" data-r="verbo">${o([['Dar','Dar'],['Aplicar','Aplicar'],['Pingar','Pingar'],['Borrifar','Borrifar']],it.verbo||'Dar')}</select></label>
     <label>Cálculo<select class="inp" data-r="modo">${o([['peso','Pelo peso'],['fixo','Quantidade fixa']],it.modo)}</select></label>
-    ${it.modo==='fixo'?`<label class="w2">Dar por vez<input class="inp" data-r="fixo" value="${esc(it.fixo||'')}" placeholder="1 comprimido"></label>`:`
+    ${it.modo==='fixo'?`<label class="w2">Dar por vez<input class="inp" data-r="fixo" value="${esc(it.fixo||'')}" placeholder="1 comprimido, 1 borrifada…"></label>`:`
     <label>Dose<div class="row" style="gap:4px;flex-wrap:nowrap"><input class="inp tnum" data-r="dose" inputmode="decimal" value="${esc(it.dose??'')}" style="width:64px"><select class="inp" data-r="doseUn">${o([['mg/kg','mg/kg'],['mL/kg','mL/kg'],['gotas/kg','gotas/kg']],it.doseUn)}</select></div></label>
     <label>Concentração<div class="row" style="gap:4px;flex-wrap:nowrap"><input class="inp tnum" data-r="conc" inputmode="decimal" value="${esc(it.conc??'')}" style="width:64px"><select class="inp" data-r="concUn">${o([['mg/mL','mg/mL'],['mg/comprimido','mg/comp.']],it.concUn)}</select></div></label>
     <label>Dar em<select class="inp" data-r="forma">${o(Object.entries(REC_FORMA).slice(0,4),it.forma)}</select></label>`}
-    <label>Frequência<select class="inp" data-r="freq">${o(REC_FREQ.map(([h])=>[h,'a cada '+h+'h']),it.freq)}</select></label>
+    <label>Via / local<input class="inp" data-r="via" value="${esc(it.via||'oral')}" style="width:130px"></label>
+    <label>Frequência<select class="inp" data-r="freq">${o(REC_FREQ,it.freq)}</select></label>
     <label>Dias<input class="inp tnum" data-r="dias" inputmode="numeric" value="${esc(it.dias??'')}" style="width:60px"></label>
     <label>Quantidade<input class="inp" data-r="qtd" value="${esc(it.qtd||'')}" placeholder="1 caixa"></label>
-    <label>Onde comprar<select class="inp" data-r="origem">${o(REC_ORIG.map(x=>[x,x]),it.origem)}</select></label>
+    <label>Onde comprar<select class="inp" data-r="origem">${o([['','—'],...REC_ORIG.map(x=>[x,x])],it.origem)}</select></label>
     <label class="chk" style="align-self:end"><input type="checkbox" data-r="controle" ${it.controle?'checked':''}><span>Controle especial</span></label>
     <label class="w3">Observação<input class="inp" data-r="obs" value="${esc(it.obs||'')}" placeholder="Ex.: manter na geladeira"></label>
    </div>
@@ -1457,11 +1472,11 @@ function recRead(box){return $$('.rec-it',box).map(el=>{const it={};$$('[data-r]
   for(const k of ['dose','conc','dias','freq'])if(it[k]!==undefined)it[k]=it[k]===''?null:nv(it[k]);if(!it.modo)it.modo='peso';return RI(it)})}
 function recWire(box,itens,pesoFn,onCh){const draw=()=>{box.innerHTML=itens.map((it,i)=>recRow(it,i,pesoFn())).join('')+`<button type="button" class="btn sm" data-radd>${ic('plus')}Adicionar medicamento</button>`};
   box.addEventListener('input',()=>{itens=recRead(box);$$('.rec-it',box).forEach((el,i)=>{el.querySelector('.rec-pos').textContent=recPoso(itens[i],pesoFn());el.classList.toggle('off',!itens[i].on)});onCh&&onCh(itens)});
-  box.addEventListener('change',e=>{if(e.target.dataset.r==='modo'){itens=recRead(box);draw()}});
+  box.addEventListener('change',e=>{if(['modo','uso'].includes(e.target.dataset.r)){itens=recRead(box);draw()}});
   box.addEventListener('click',e=>{const d=e.target.closest('[data-rdel]');if(d){itens=recRead(box);itens.splice(+d.dataset.rdel,1);draw();onCh&&onCh(itens)}if(e.target.closest('[data-radd]')){itens=[...recRead(box),RI({nome:''})];draw()}});
   draw();return{get:()=>recRead(box),redraw:()=>{itens=recRead(box);draw()}}}
 function modalRec(doc,modeloId){const p=curP();if(!p)return;doc=doc||{};
-  const ms=S.mSaida.filter(m=>m.tipo==='receita'&&m.ativo!==false&&m.estrut);
+  const ms=S.mSaida.filter(m=>m.tipo==='receita'&&m.ativo!==false&&m.estrut).sort((a,b)=>a.nome.localeCompare(b.nome));
   const m0=byId(S.mSaida,modeloId||doc.modeloId)||ms[0];
   let itens=doc.itens||(m0?.itens||[]).map(x=>({...x}));
   openModal(`${H((doc.id?'Editar':'Nova')+' receita · '+esc(p.nome))}<form class="modal-b" id="fRec" onsubmit="return false">
@@ -1477,7 +1492,7 @@ function modalRec(doc,modeloId){const p=curP();if(!p)return;doc=doc||{};
   $('#rcMod').onchange=()=>{const m=byId(S.mSaida,$('#rcMod').value);if(!m)return;if(!confirm('Carregar os medicamentos e orientações do modelo escolhido?'))return;closeModal();modalRec({...doc,itens:null,orientacoes:undefined,peso:$('#rcPeso').value,vet:$('#rcVet').value},m.id)};
   const save=async pr=>{const its=R.get();if(!its.some(x=>x.on))return toast('Marque pelo menos um medicamento');if(!$('#rcVet').value)return toast('Escolha o(a) veterinário(a)');
     const pz=peso();const d={internacaoId:p.id,tipo:'receita',estrut:true,modeloId:$('#rcMod').value||null,titulo:'Receita',peso:pz,itens:its,orientacoes:$('#rcOri').value,
-      texto:its.filter(x=>x.on).map((x,i)=>recItemTxt(x,pz,i+1)).join('\n\n')+'\n\n'+$('#rcOri').value,vet:$('#rcVet').value,em:doc.em||nowDT(),atualizadoEm:nowDT()};
+      texto:recTexto(its,pz,$('#rcOri').value),vet:$('#rcVet').value,em:doc.em||nowDT(),atualizadoEm:nowDT()};
     try{let id=doc.id;if(id)await S.db.doc('saidaDocs/'+id).update(d);else id=(await S.db.collection('saidaDocs').add(d)).id;closeModal();toast('Receita salva');if(pr)recPDF({...d,id})}catch(e){fail(e)}};
   $('#rcSave').onclick=()=>save(false);$('#rcPrint').onclick=()=>save(true)}
 async function recPDF(d){const p=byId(S.intern,d.internacaoId);if(!p)return;
@@ -1486,17 +1501,20 @@ async function recPDF(d){const p=byId(S.intern,d.internacaoId);if(!p)return;
   const L=t=>String(t??'').replace(/[–—]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/…/g,'...').replace(/•/g,'-').replace(/[¼]/g,'1/4').replace(/[½]/g,'1/2').replace(/[¾]/g,'3/4').replace(/[^\x00-\xFF]/g,'');const K={lg,cl,L,PW,M};
   const tu=tutorOf(p)||{nome:p.tutor,cpf:p.cpf,telefone:p.telefone,endereco:p.endereco};const IDF=docHeader(phCtx(d.peso?{...p,peso:d.peso}:p,tu,{})).split('\n').slice(1).filter(Boolean);
   const v=byId(S.equipe,d.vet);const crmv=v?.crmv||v?.registro||'';const dt=fmtD((d.em||nowDT()).slice(0,10));
-  const on=(d.itens||[]).filter(x=>x.on);const simples=on.filter(x=>!x.controle);const ctrl=on.filter(x=>x.controle);let y;
+  const on=(d.itens||[]).filter(x=>x.on);const ctrl=on.filter(x=>x.controle&&x.uso!=='adicional');let y;
   const ink=()=>doc.setTextColor(20,48,58);
-  const para=(t,sz,b)=>{doc.setFont('helvetica',b?'bold':'normal');doc.setFontSize(sz||10.5);ink();for(const ln of doc.splitTextToSize(L(t),PW-2*M)){if(y>262){doc.addPage();y=20}doc.text(ln,M,y);y+=(sz||10.5)*.47}};
-  const item=(it,n)=>{if(y>250){doc.addPage();y=20}doc.setFont('helvetica','bold');doc.setFontSize(11);ink();const left=L(`${n}) ${it.nome}${it.apres?' '+it.apres:''}`);const right=L([it.qtd,it.origem].filter(Boolean).join(' · '));
+  const para=(t,sz,b)=>{doc.setFont('helvetica',b?'bold':'normal');doc.setFontSize(sz||10.5);ink();for(const ln of doc.splitTextToSize(L(t),PW-2*M)){if(y>262){doc.addPage();y=20}doc.text(ln,M,y);y+=(sz||10.5)*.43}};
+  const item=(it,n)=>{if(y>250){doc.addPage();y=20}doc.setFont('helvetica','bold');doc.setFontSize(11);ink();const left=L(`${n} - ${it.nome}${it.apres?' '+it.apres:''}`);const right=L([it.qtd,origS(it.origem)].filter(Boolean).join(' · '));
     const lw=doc.splitTextToSize(left,PW-2*M-58);doc.text(lw,M,y);doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.text(right,PW-M,y,{align:'right'});y+=lw.length*5.2;
-    doc.setFontSize(10.5);for(const ln of doc.splitTextToSize(L(recPoso(it,d.peso)),PW-2*M-6)){doc.text(ln,M+6,y);y+=5}y+=3};
-  const sign=()=>{y=Math.max(y+14,236);if(y>262){doc.addPage();y=240}doc.setDrawColor(120,140,145);doc.setLineWidth(.3);doc.line(PW/2-40,y,PW/2+40,y);doc.setFont('helvetica','bold');doc.setFontSize(9.5);ink();doc.text(L(v?.nome||'Médico(a) veterinário(a)'),PW/2,y+5,{align:'center'});doc.setFont('helvetica','normal');doc.setFontSize(8.8);doc.text(L('Médico(a) veterinário(a)'+(crmv?' · CRMV '+crmv:'')),PW/2,y+9.5,{align:'center'});doc.text(L(`${cl.cidade||''}${cl.cidade?', ':''}${dt}`),PW/2,y+14,{align:'center'})};
+    doc.setFontSize(10.5);for(const ln of doc.splitTextToSize(L(recPoso(it,d.peso)),PW-2*M-6)){doc.text(ln,M+6,y);y+=4.6}y+=1.8};
+  const sign=()=>{y=Math.max(y+12,236);if(y>270){doc.addPage();y=40}doc.setDrawColor(120,140,145);doc.setLineWidth(.3);doc.line(PW/2-40,y,PW/2+40,y);doc.setFont('helvetica','bold');doc.setFontSize(9.5);ink();doc.text(L(v?.nome||'Médico(a) veterinário(a)'),PW/2,y+5,{align:'center'});doc.setFont('helvetica','normal');doc.setFontSize(8.8);doc.text(L('Médico(a) veterinário(a)'+(crmv?' · CRMV '+crmv:'')),PW/2,y+9.5,{align:'center'});doc.text(L(`${cl.cidade||''}${cl.cidade?', ':''}${dt}`),PW/2,y+14,{align:'center'})};
   const sec=[];
-  if(simples.length||d.orientacoes){y=drawDocHeader(doc,K,'Receita',IDF);y+=3;para('USO VETERINÁRIO',10,true);y+=3;simples.forEach((it,i)=>item(it,i+1));
-    if(ctrl.length){y+=1;para('Medicamentos de controle especial em receituário próprio: '+ctrl.map(x=>x.nome).join(', ')+'.',9.5)}
-    if(d.orientacoes){y+=4;for(const ln of String(d.orientacoes).split('\n'))para(ln,10,/^[A-ZÁÉÍÓÚÇÃÕ ]{6,}$/.test(ln.trim()))}sign();sec.push({t:'Receita · '+p.nome,s:doc.getNumberOfPages()})}
+  {y=drawDocHeader(doc,K,d.titulo&&d.titulo!=='Receita'?d.titulo:'Receita',IDF);y+=3;
+    for(const u of ['oral','topico']){const Lu=on.filter(x=>(x.uso||'oral')===u);if(!Lu.length)continue;para(REC_USO[u],11,true);y+=2;Lu.forEach((it,i)=>item(it,i+1));y+=1}
+    if(ctrl.length){para('Controle especial ('+ctrl.map(x=>x.nome).join(', ')+'): receituário próprio em 2 vias, nas páginas seguintes.',9);y+=2}
+    if(d.orientacoes){y+=2;for(const ln of String(d.orientacoes).split('\n'))para(ln,9.5,/^[A-ZÁÉÍÓÚÇÃÕ ]{6,}$/.test(ln.trim()))}
+    const A=on.filter(x=>x.uso==='adicional');if(A.length){y+=4;para('Orientações adicionais, nos casos onde ocorram sintomas:',10.5,true);y+=1;for(const it of A)para(recItemTxt(it,d.peso).replace(/^\* /,'• '),10)}
+    sign();sec.push({t:'Receita · '+p.nome,s:doc.getNumberOfPages()})}
   for(const it of ctrl)for(const via of ['1ª via · Farmácia','2ª via · Paciente / Tutor']){if(sec.length||y!==undefined)doc.addPage();y=16;
     doc.setFont('helvetica','bold');doc.setFontSize(13);ink();doc.text(L('RECEITUÁRIO DE CONTROLE ESPECIAL'),PW/2,y,{align:'center'});y+=6;doc.setFontSize(10);doc.setTextColor(7,115,105);doc.text(L(via),PW/2,y,{align:'center'});y+=6;ink();
     doc.setDrawColor(150,170,175);doc.setLineWidth(.3);doc.rect(M,y,PW-2*M,30);doc.setFontSize(8.6);doc.setFont('helvetica','bold');doc.text(L('IDENTIFICAÇÃO DO EMITENTE'),M+3,y+5);doc.setFont('helvetica','normal');
@@ -1510,7 +1528,7 @@ async function recPDF(d){const p=byId(S.intern,d.internacaoId);if(!p)return;
     sec.push({t:`Controle especial · ${it.nome} · ${via}`,s:doc.getNumberOfPages()})}
   docFooters(doc,K,sec.map((x,i)=>({t:x.t,s:(i?sec[i-1].s+1:1)})),'');
   await S.downloads.save({filename:`Receita_${String(p.nome).replace(/[^\w-]+/g,'_')}.pdf`,data:doc.output('blob')});toast(ctrl.length?`Receita pronta: ${ctrl.length} medicamento(s) de controle especial em receituário próprio (2 vias cada)`:'Receita pronta')}
-async function msSeed(){try{const has=new Set(S.mSaida.map(m=>m.id));if(has.has('rec-castracao'))try{await S.db.doc('modelosSaida/rec-castracao').delete()}catch(_){}for(const m of [...REC_SEED,...MS_SEED0]){if(m.id==='rec-castracao'||has.has(m.id))continue;const{id,...d}=m;await S.db.doc('modelosSaida/'+id).set({...d,ativo:true,criadoEm:nowDT()})}}catch(_){}}
+async function msSeed(){try{for(const r of REC_SEED){const m=S.mSaida.find(x=>x.id===r.id);if(m&&!m.editadoEm&&(m.v||0)<REC_V){const{id,...d}=r;await S.db.doc('modelosSaida/'+id).set({...d,ativo:true,criadoEm:m.criadoEm||nowDT()})}}const has=new Set(S.mSaida.map(m=>m.id));if(has.has('rec-castracao'))try{await S.db.doc('modelosSaida/rec-castracao').delete()}catch(_){}for(const m of [...REC_SEED,...MS_SEED0]){if(m.id==='rec-castracao'||has.has(m.id))continue;const{id,...d}=m;await S.db.doc('modelosSaida/'+id).set({...d,ativo:true,criadoEm:nowDT()})}}catch(_){}}
 function cadSaidaHTML(){const L=[...S.mSaida].sort((a,b)=>(a.tipo+a.nome).localeCompare(b.tipo+b.nome));
   return Object.entries(MS_TIPOS).map(([k,l])=>{const it=L.filter(m=>m.tipo===k);return`<div class="panel-h"><h2>${l}s</h2><span class="muted small">${it.length}</span></div><div class="tbl-wrap"><table class="tbl"><tbody>${it.map(m=>`<tr><td class="nm">${esc(m.nome)}${m.faixa?` <span class="chip">${esc(m.faixa)}</span>`:''}${m.ativo===false?' <span class="chip">inativo</span>':''}<div class="muted small">${m.estrut?esc((m.itens||[]).map(x=>x.nome+(x.on?'':' (opcional)')).join(' · ')):esc(String(m.texto||'').replace(/\s+/g,' ').slice(0,140))+'…'}</div></td><td style="text-align:right;white-space:nowrap"><button class="btn sm ghost" data-act="msEdit" data-id="${m.id}">${ic('edit')}</button><button class="btn sm ghost danger" data-act="msDel" data-id="${m.id}">${ic('trash')}</button></td></tr>`).join('')||`<tr><td class="muted">Nenhum modelo.</td></tr>`}</tbody></table></div>`}).join('')}
 function modalMS(m){m=m||{tipo:'receita',ativo:true,estrut:true,itens:[RI({nome:''})],orientacoes:REC_ORIENT};if(m.estrut)return modalMSRec(m);
@@ -1535,7 +1553,7 @@ function modalMSRec(m){
    <label class="chk"><input type="checkbox" id="mrAt" ${m.ativo!==false?'checked':''}><span>Ativo</span></label>
   </form><div class="modal-f"><button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="mrOk">Salvar</button></div>`,'wide');
   const R=recWire($('#mrItens'),(m.itens||[]).map(x=>({...x})),()=>nv($('#mrPeso').value));$('#mrPeso').addEventListener('input',()=>R.redraw());
-  $('#mrOk').onclick=async()=>{const nome=$('#mrNome').value.trim();if(!nome)return toast('Dê um nome ao modelo');const d={tipo:'receita',estrut:true,nome,itens:R.get(),orientacoes:$('#mrOri').value,ativo:$('#mrAt').checked,texto:''};
+  $('#mrOk').onclick=async()=>{const nome=$('#mrNome').value.trim();if(!nome)return toast('Dê um nome ao modelo');const d={tipo:'receita',estrut:true,nome,itens:R.get(),orientacoes:$('#mrOri').value,ativo:$('#mrAt').checked,texto:'',editadoEm:nowDT()};
     try{if(m.id)await S.db.doc('modelosSaida/'+m.id).update(d);else await S.db.collection('modelosSaida').add({...d,criadoEm:nowDT()});closeModal();toast('Modelo salvo')}catch(e){fail(e)}}}
 const vetOpts=sel=>S.equipe.filter(e=>e.ativo!==false||e.id===sel).map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${esc(e.nome)}${(e.crmv||e.registro)?' · CRMV '+esc(e.crmv||e.registro):''}</option>`).join('');
 function sdCtx(p,extra){const tu=tutorOf(p)||{nome:p.tutor,cpf:p.cpf,telefone:p.telefone,email:p.emailTutor};const a=p.alta||{};const ob=a.obito||{};const v=byId(S.equipe,extra.vet);
@@ -4580,7 +4598,7 @@ async function boot(){
   db.collection('protocolos').onSnapshot(once(s=>{S.prots=docs(s)}),onErr);
   db.collection('assinaturas').onSnapshot(s=>{S.assin=docs(s);render()},onErr);
   db.collection('convites').onSnapshot(s=>{S.conv=docs(s);render()},()=>{});
-  db.collection('modelosSaida').onSnapshot(s=>{S.mSaida=docs(s);if(S.master&&!S._msSeed&&!S.mSaida.some(m=>m.estrut)){S._msSeed=1;msSeed()}render()},()=>{});
+  db.collection('modelosSaida').onSnapshot(s=>{S.mSaida=docs(s);if(S.master&&!S._msSeed&&REC_SEED.some(r=>{const m=S.mSaida.find(x=>x.id===r.id);return!m||(!m.editadoEm&&(m.v||0)<REC_V)})){S._msSeed=1;msSeed()}render()},()=>{});
   db.collection('saidaDocs').onSnapshot(s=>{S.saidaDocs=docs(s);render()},()=>{});
   db.collection('tutores').onSnapshot(s=>{S.tutores=docs(s);S.tutLoaded=true;tutImport();render()},onErr);
   db.collection('modelosDoc').onSnapshot(s=>{S.modelosDoc=docs(s);importDocs();render()},onErr);
