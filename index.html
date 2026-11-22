@@ -725,6 +725,9 @@ const S={agenda:[],agCfg:null,agDay:null,agView:'dia',agProf:'',tutores:[],tq:''
 
 const byId=(arr,id)=>arr.find(x=>x.id===id);
 const equipeNome=id=>{const e=byId(S.equipe,id);return e?e.nome:''};
+/* Profissional: da equipe (select) ou externo digitado à mão (campo <nome>Ext) */
+const profNm=(r,k)=>equipeNome(r&&r[k])||(r&&r[k+'Ext'])||'';
+const profField=(lbl,name,r,cls)=>{r=r||{};const sel=r[name];return`<label class="f ${cls||''}">${lbl}<select class="inp" name="${name}"><option value="">—</option>${S.equipe.filter(e=>e.ativo!==false||e.id===sel).map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${esc(e.nome)}</option>`).join('')}</select><input class="inp" name="${name}Ext" value="${esc(r[name+'Ext']||'')}" placeholder="Externo: digite o nome" aria-label="${lbl} externo" style="margin-top:4px"></label>`};
 const preAdms=()=>S.intern.filter(p=>p.status==='pre').sort((a,b)=>String(a.nome).localeCompare(b.nome));
 const ativos=()=>S.intern.filter(p=>p.status!=='alta'&&p.status!=='pre').sort((a,b)=>{const o={critico:0,urgente:1,nao:2,estavel:3};return (o[a.urgencia]??2)-(o[b.urgencia]??2)||String(a.nome).localeCompare(b.nome)});
 const curP=()=>byId(S.intern,S.pid);
@@ -988,7 +991,7 @@ function tabAdmissao(p){
     <div class="yn" role="radiogroup" aria-label="${esc(q.l)}"><label><input type="radio" name="q_${q.k}" value="sim" ${v==='sim'?'checked':''}><span>Sim</span></label><label><input type="radio" class="n" name="q_${q.k}" value="nao" ${v==='nao'?'checked':''}><span>Não</span></label></div>
     ${q.noText?'':`<textarea class="inp qt" name="t_${q.k}" rows="2" placeholder="${esc(q.ph)}" ${v===on?'':'hidden'}>${esc(qv[q.k]?.t||'')}</textarea>`}</div>`}).join('');
   return`<form class="panel" id="fAdm" data-track onsubmit="return false">
-   <div class="panel-h"><h2>Ficha de admissão</h2><span class="spacer"></span>${a.salvoEm?`<span class="muted small">Salva em ${fmtDT(a.salvoEm)}${a.responsavel?' · '+esc(equipeNome(a.responsavel)):''}</span>`:'<span class="chip warn">Ainda não preenchida</span>'}</div>
+   <div class="panel-h"><h2>Ficha de admissão</h2><span class="spacer"></span>${a.salvoEm?`${a.rascunho?'<span class="chip warn">Rascunho</span> ':'<span class="chip ok">Concluída</span> '}<span class="muted small">Salva em ${fmtDT(a.salvoEm)}${a.responsavel?' · '+esc(equipeNome(a.responsavel)):''}</span>`:'<span class="chip warn">Ainda não preenchida</span>'}</div>
    <div class="panel-b">
     <div class="sec-t">Avaliação na entrada</div>
     <div class="grid g6">
@@ -997,6 +1000,9 @@ function tabAdmissao(p){
      <label class="f">FC (bpm)<input class="inp tnum" name="fc" inputmode="numeric" value="${esc(a.fc||'')}"></label>
      <label class="f">FR (mpm)<input class="inp tnum" name="fr" inputmode="numeric" value="${esc(a.fr||'')}"></label>
      <label class="f">TPC (s)<input class="inp tnum" name="tpc" inputmode="decimal" value="${esc(a.tpc||'')}"></label>
+     <label class="f">PAS (mmHg)<input class="inp tnum" name="pas" inputmode="numeric" value="${esc(a.pas||'')}"></label>
+     <label class="f">PAM (mmHg)<input class="inp tnum" name="pam" inputmode="numeric" value="${esc(a.pam||'')}"></label>
+     <label class="f">PAD (mmHg)<input class="inp tnum" name="pad" inputmode="numeric" value="${esc(a.pad||'')}"></label>
      <label class="f">Dor (0–10)<input class="inp tnum" name="dor" inputmode="numeric" value="${esc(a.dor||'')}"></label>
      <label class="f span2">Mucosas<select class="inp" name="mucosas">${['','Normocoradas','Hipocoradas','Hipercoradas','Ictéricas','Cianóticas','Pálidas'].map(o=>`<option ${a.mucosas===o?'selected':''}>${o}</option>`).join('')}</select></label>
      <label class="f span2">Hidratação<select class="inp" name="hidratacao">${['','Normohidratado','Desidratação leve (5%)','Desidratação moderada (6–8%)','Desidratação grave (>8%)'].map(o=>`<option ${a.hidratacao===o?'selected':''}>${o}</option>`).join('')}</select></label>
@@ -1013,7 +1019,7 @@ function tabAdmissao(p){
      <label class="f spanall">Observações gerais<textarea class="inp" name="obs" rows="2">${esc(a.obs||'')}</textarea></label>
     </div>
    </div>
-   <div class="savebar"><span class="dirty-ind small muted" hidden><span class="dirty-dot"></span> Alterações não salvas</span><span class="spacer"></span><button class="btn ghost" data-act="discard" type="button">Descartar</button><button class="btn pri" data-act="saveAdm" type="button" ${W()}>${ic('check')}Salvar admissão</button></div>
+   <div class="savebar"><span class="dirty-ind small muted" hidden><span class="dirty-dot"></span> Alterações não salvas</span><span class="spacer"></span><button class="btn ghost" data-act="discard" type="button">Descartar</button><button class="btn" data-act="saveAdm" data-rasc="1" type="button" ${W()}>Salvar rascunho</button><button class="btn pri" data-act="saveAdm" type="button" ${W()}>${ic('check')}Concluir admissão</button></div>
   </form>`;
 }
 
@@ -1201,7 +1207,7 @@ function tabCirurgia(p){
   const list=[...S.pCir].sort((a,b)=>String(b.data).localeCompare(String(a.data)));
   const c=S.cirSel?list.find(x=>x.id===S.cirSel):null;
   const side=`<div class="panel"><div class="panel-h"><h2>Cirurgias</h2><span class="spacer"></span><button class="btn pri sm" data-act="cirNew" ${W()}>${ic('plus')}Nova ficha cirúrgica</button></div>
-    ${list.length?`<div class="log">${list.map(x=>`<div style="cursor:pointer;${x.id===S.cirSel?'background:var(--brand-soft)':''}" data-act="cirSel" data-id="${x.id}"><span class="mono small">${fmtDs(x.data?.slice(0,10))}</span><span><b>${esc(x.titulo||'Sem procedimento')}</b><div class="muted small">${esc(equipeNome(x.cirurgiao)||'')}</div></span><span>${x.finalizada?'<span class="chip ok">Finalizada</span>':'<span class="chip warn">Rascunho</span>'}${(x.fotos||[]).length?` <span class="chip">${ic('cam')}${x.fotos.length}</span>`:''}</span></div>`).join('')}</div>`:emptyBox('scalp','Nenhuma cirurgia registrada','Abra uma ficha e inclua um ou mais procedimentos do banco de descrições. Cada um entra com seu texto, que você ajusta para o paciente.')}</div>`;
+    ${list.length?`<div class="log">${list.map(x=>`<div style="cursor:pointer;${x.id===S.cirSel?'background:var(--brand-soft)':''}" data-act="cirSel" data-id="${x.id}"><span class="mono small">${fmtDs(x.data?.slice(0,10))}</span><span><b>${esc(x.titulo||'Sem procedimento')}</b><div class="muted small">${esc(profNm(x,'cirurgiao'))}</div></span><span>${x.finalizada?'<span class="chip ok">Finalizada</span>':'<span class="chip warn">Rascunho</span>'}${(x.fotos||[]).length?` <span class="chip">${ic('cam')}${x.fotos.length}</span>`:''}</span></div>`).join('')}</div>`:emptyBox('scalp','Nenhuma cirurgia registrada','Abra uma ficha e inclua um ou mais procedimentos do banco de descrições. Cada um entra com seu texto, que você ajusta para o paciente.')}</div>`;
   if(!c)return side;
   const eq=sel=>`<option value="">—</option>`+S.equipe.filter(e=>e.ativo!==false||e.id===sel).map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${esc(e.nome)}</option>`).join('');
   let blocos=c.blocos||[];if(!blocos.length&&c.descricao)blocos=[{id:'legado',nome:c.titulo||'Descrição',texto:c.descricao,modeloId:c.modeloId||null}];
@@ -1212,9 +1218,9 @@ function tabCirurgia(p){
    <div class="panel-b">
     <div class="grid g4">
      <label class="f">Data e hora<input class="inp" type="datetime-local" name="data" value="${esc(c.data||'')}"></label>
-     <label class="f">Cirurgião<select class="inp" name="cirurgiao">${eq(c.cirurgiao)}</select></label>
-     <label class="f">Auxiliar<select class="inp" name="auxiliar">${eq(c.auxiliar)}</select></label>
-     <label class="f">Anestesista<select class="inp" name="anestesista">${eq(c.anestesista)}</select></label>
+     ${profField('Cirurgião','cirurgiao',c)}
+     ${profField('Auxiliar','auxiliar',c)}
+     ${profField('Anestesista','anestesista',c)}
      <label class="f">ASA<select class="inp" name="asa">${['','I','II','III','IV','V','E'].map(o=>`<option ${c.asa===o?'selected':''}>${o}</option>`).join('')}</select></label>
      <label class="f span3">Protocolo anestésico (resumo)<input class="inp" name="protocolo" value="${esc(c.protocolo||'')}" placeholder="Detalhes ficam na ficha de anestesia"></label>
     </div>
@@ -1727,8 +1733,8 @@ function linhaEventos(p){const E=[];const add=(t,tipo,icn,tit,ds)=>{if(t)E.push(
       if(m.s==='ok')add(t,it?.tipo==='proc'?'':'med',it?.tipo==='fluido'?'drop':it?.tipo==='proc'?'hand':it?.tipo==='alim'?'bowl':'pill',nm+(it?.tipo==='med'&&it.volume!=null?` · ${num(it.volume)} mL ${it.via||''}`:''),[quem&&'por '+quem,m.interc&&m.interc!=='Nenhuma'?m.interc:'',m.obs].filter(Boolean).join(' · '));
       else if(m.s==='nao')add(t,'bad','x','Não realizado: '+nm,[m.motivo,m.obs,quem].filter(Boolean).join(' · '))}}
   for(const e of S.pEvo)add(e.data+'T'+(e.hora||'00:00'),'','thermo','Parâmetros / evolução',[e.estado,e.temp&&e.temp+' °C',e.fc&&'FC '+e.fc,e.fr&&'FR '+e.fr,e.dor,equipeNome(e.avaliador)].filter(Boolean).join(' · '));
-  for(const a of S.pAnest){add(a.data,'cir','anes','Anestesia',[a.procedimento,equipeNome(a.anestesista)].filter(Boolean).join(' · '));for(const x of a.reaberturas||[])add(x.em,'','edit','Ficha de anestesia editada',equipeNome(x.por)||'')}
-  for(const c of S.pCir){add(c.data,'cir','scalp','Cirurgia: '+(c.titulo||'procedimento'),equipeNome(c.cirurgiao));for(const x of c.reaberturas||[])add(x.em,'','edit','Ficha de cirurgia editada',equipeNome(x.por)||'')}
+  for(const a of S.pAnest){add(a.data,'cir','anes','Anestesia',[a.procedimento,profNm(a,'anestesista')].filter(Boolean).join(' · '));for(const x of a.reaberturas||[])add(x.em,'','edit','Ficha de anestesia editada',equipeNome(x.por)||'')}
+  for(const c of S.pCir){add(c.data,'cir','scalp','Cirurgia: '+(c.titulo||'procedimento'),profNm(c,'cirurgiao'));for(const x of c.reaberturas||[])add(x.em,'','edit','Ficha de cirurgia editada',equipeNome(x.por)||'')}
   for(const x of S.pTransf)add(x.data+'T'+(x.inicio||'00:00'),'cir','drop','Transfusão',x.componente||'');
   for(const x of S.pInter)add(x.data+'T'+(x.inicio||'00:00'),'bad','flag','Intercorrência: '+(x.tipo||''),x.descricao||'');
   for(const x of S.pComm)add(x.em,'','users','Comunicação com o tutor ('+(x.canal||'')+')',equipeNome(x.autor)||'');
@@ -2038,21 +2044,22 @@ function drugRow(d={},fase,post){
    <td><input class="inp tin tnum" data-f="dose" inputmode="decimal" value="${esc(d.dose??'')}" style="width:66px" aria-label="Dose"></td>
    <td><select class="inp tin" data-f="doseUn" aria-label="Unidade da dose">${uns.map(o=>`<option ${du===o?'selected':''}>${o}</option>`).join('')}</select></td>
    <td class="vol dvol" style="white-space:nowrap;padding-top:14px">—</td>
+   <td><input class="inp tin tnum" data-f="volMl" inputmode="decimal" value="${esc(d.volMl??'')}" style="width:66px" placeholder="mL" title="Volume em mL (digite para sobrepor o calculado)" aria-label="Volume em mL"></td>
    <td><select class="inp tin" data-f="via" aria-label="Via">${VIAS.map(o=>`<option ${(d.via||(post?'SC':'IV'))===o?'selected':''}>${o}</option>`).join('')}</select></td>
    <td><input class="inp tin" type="time" data-f="hora" value="${esc(d.hora||'')}" aria-label="Horário"></td>
    <td><input class="inp tin" data-f="obs" value="${esc(d.obs||'')}" placeholder="${inf?'Diluição':'Obs.'}" style="min-width:110px" aria-label="Observação"></td>
    <td><button type="button" class="btn sm ghost danger" data-act="rowDel" aria-label="Remover linha">${ic('x')}</button></td></tr>`;
 }
-const drugHead=`<thead><tr><th>Fármaco</th><th>Conc.</th><th></th><th>Dose</th><th></th><th>Volume</th><th>Via</th><th>Hora</th><th>Obs.</th><th></th></tr></thead>`;
+const drugHead=`<thead><tr><th>Fármaco</th><th>Conc.</th><th></th><th>Dose</th><th></th><th>Vol. calc.</th><th>Vol. (mL)</th><th>Via</th><th>Hora</th><th>Obs.</th><th></th></tr></thead>`;
 function monRow(m={}){
   return`<tr class="mrow">${MONF.map(([k,l,t])=>`<td><input class="inp tin ${k==='obs'?'':'tnum'}" data-f="${k}" ${t?`type="${t}"`:'inputmode="decimal"'} value="${esc(m[k]||'')}" style="${k==='obs'?'min-width:150px':k==='hora'?'':'width:58px'}" aria-label="${l}"></td>`).join('')}<td><button type="button" class="btn sm ghost danger" data-act="rowDel" aria-label="Remover linha">${ic('x')}</button></td></tr>`;
 }
 /* Gráficos da monitorização */
 const SERIES=[
  {g:0,k:'fc',l:'FC (bpm)',c:'var(--crit)',pc:[201,48,74],m:'circle'},
- {g:0,k:'pas',l:'PAS (mmHg)',c:'var(--info)',pc:[44,103,219],m:'down'},
+ {g:0,k:'pas',l:'PAS (mmHg)',c:'var(--info)',pc:[44,103,219],m:'up'},
  {g:0,k:'pam',l:'PAM (mmHg)',c:'var(--brand)',pc:[10,143,132],m:'square'},
- {g:0,k:'pad',l:'PAD (mmHg)',c:'var(--ink-3)',pc:[120,140,145],m:'up'},
+ {g:0,k:'pad',l:'PAD (mmHg)',c:'var(--ink-3)',pc:[120,140,145],m:'down'},
  {g:1,k:'spo2',l:'SpO₂ (%)',c:'var(--ok)',pc:[27,143,78],m:'circle'},
  {g:1,k:'etco2',l:'EtCO₂ (mmHg)',c:'var(--warn)',pc:[180,111,6],m:'square'},
  {g:1,k:'fr',l:'FR (mpm)',c:'var(--info)',pc:[44,103,219],m:'up'},
@@ -2083,7 +2090,7 @@ function tabAnestesia(p){
   const list=[...S.pAnest].sort((a,b)=>String(b.data).localeCompare(String(a.data)));
   const a=S.anSel?list.find(x=>x.id===S.anSel):null;
   const side=`<div class="panel"><div class="panel-h"><h2>Fichas de anestesia</h2><span class="spacer"></span><button class="btn pri sm" data-act="anNew" ${W()}>${ic('plus')}Nova ficha</button></div>
-    ${list.length?`<div class="log">${list.map(x=>`<div style="cursor:pointer;${x.id===S.anSel?'background:var(--brand-soft)':''}" data-act="anSel" data-id="${x.id}"><span class="mono small">${fmtDs((x.data||'').slice(0,10))}</span><span><b>${esc(x.procedimento||'Sem procedimento')}</b><div class="muted small">${esc(equipeNome(x.anestesista)||'')}${x.asa?' · ASA '+esc(x.asa):''}</div></span><span>${x.finalizada?'<span class="chip ok">Finalizada</span>':'<span class="chip warn">Rascunho</span>'} <span class="chip">${(x.mon||[]).length} reg.</span></span></div>`).join('')}</div>`:emptyBox('anes','Nenhuma ficha de anestesia','Registre avaliação pré-anestésica, protocolo por fase com doses calculadas pelo peso, monitorização com gráficos e medicações do pós-operatório.')}</div>`;
+    ${list.length?`<div class="log">${list.map(x=>`<div style="cursor:pointer;${x.id===S.anSel?'background:var(--brand-soft)':''}" data-act="anSel" data-id="${x.id}"><span class="mono small">${fmtDs((x.data||'').slice(0,10))}</span><span><b>${esc(x.procedimento||'Sem procedimento')}</b><div class="muted small">${esc(profNm(x,'anestesista'))}${x.asa?' · ASA '+esc(x.asa):''}</div></span><span>${x.finalizada?'<span class="chip ok">Finalizada</span>':'<span class="chip warn">Rascunho</span>'} <span class="chip">${(x.mon||[]).length} reg.</span></span></div>`).join('')}</div>`:emptyBox('anes','Nenhuma ficha de anestesia','Registre avaliação pré-anestésica, protocolo por fase com doses calculadas pelo peso, monitorização com gráficos e medicações do pós-operatório.')}</div>`;
   if(!a)return side;
   const eq=sel=>`<option value="">—</option>`+S.equipe.filter(e=>e.ativo!==false||e.id===sel).map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${esc(e.nome)}</option>`).join('');
   const sel=(n,opts,v)=>`<select class="inp" name="${n}">${opts.map(o=>`<option ${v===o?'selected':''}>${o}</option>`).join('')}</select>`;
@@ -2106,7 +2113,7 @@ function tabAnestesia(p){
     <div class="grid g4">
      <label class="f span2">Procedimento<input class="inp" name="procedimento" value="${esc(a.procedimento||'')}"></label>
      <label class="f">Data e hora<input class="inp" type="datetime-local" name="data" value="${esc(a.data||'')}"></label>
-     <label class="f">Anestesista<select class="inp" name="anestesista">${eq(a.anestesista)}</select></label>
+     ${profField('Anestesista','anestesista',a)}
      <label class="f">Peso (kg)<input class="inp tnum" name="peso" id="anPeso" inputmode="decimal" value="${esc(a.peso??p.peso??'')}"></label>
      <label class="f">ASA${sel('asa',['','I','II','III','IV','V','I E','II E','III E','IV E','V E'],a.asa)}</label>
      <label class="f">Jejum sólido (h)<input class="inp tnum" name="jejumS" inputmode="decimal" value="${esc(a.jejumS||'')}"></label>
@@ -2114,7 +2121,8 @@ function tabAnestesia(p){
      <label class="f">FC (bpm)<input class="inp tnum" name="fc" value="${esc(a.fc||'')}"></label>
      <label class="f">FR (mpm)<input class="inp tnum" name="fr" value="${esc(a.fr||'')}"></label>
      <label class="f">Temperatura (°C)<input class="inp tnum" name="temp" value="${esc(a.temp||'')}"></label>
-     <label class="f">TPC / mucosas<input class="inp" name="tpc" value="${esc(a.tpc||'')}"></label>
+     <label class="f">TPC (s)<input class="inp tnum" name="tpc" inputmode="decimal" value="${esc(a.tpc||'')}"></label>
+     <label class="f">Mucosas<select class="inp" name="mucosas">${['','Normocoradas','Hipocoradas','Hipercoradas','Ictéricas','Cianóticas','Pálidas'].map(o=>`<option ${a.mucosas===o?'selected':''}>${o}</option>`).join('')}</select></label>
      <label class="f span2">Exames pré-anestésicos<textarea class="inp" name="exames" rows="2" placeholder="Hemograma, bioquímicos, ECG, ecocardiograma…">${esc(a.exames||'')}</textarea></label>
      <label class="f span2">Riscos / observações<textarea class="inp" name="riscos" rows="2">${esc(a.riscos||'')}</textarea></label>
     </div>
@@ -2155,7 +2163,7 @@ function tabAnestesia(p){
 }
 function anCalc(){
   const f=$('#fAn');if(!f)return;const peso=parseFloat(String($('#anPeso').value).replace(',','.'));
-  $$('#fAn tr.drow').forEach(tr=>{const g=k=>$(`[data-f="${k}"]`,tr);$('.dvol',tr).textContent=volTxt(calcAny(g('dose').value,g('doseUn').value,g('conc').value,g('concUn').value,peso))});
+  $$('#fAn tr.drow').forEach(tr=>{const g=k=>$(`[data-f="${k}"]`,tr);const r=calcAny(g('dose').value,g('doseUn').value,g('conc').value,g('concUn').value,peso);$('.dvol',tr).textContent=volTxt(r);const vi=g('volMl');if(vi)vi.placeholder=r&&r.ml!=null&&!r.rate?String(Math.round(r.ml*100)/100).replace('.',','):'mL'});
 }
 function anRows(sel){return $$(sel).map(tr=>{const o={};if(tr.dataset.fase!=null&&tr.dataset.fase!=='')o.fase=tr.dataset.fase;$$('[data-f]',tr).forEach(i=>o[i.dataset.f]=i.value);return o})}
 function anWire(){
@@ -2221,7 +2229,7 @@ async function exportPDF(mode){if(!PERM('exportar')){toast('Você não tem permi
   // 2. Admissão
   const a=p.admissao;
   if(a){h2('Ficha de admissão');
-    kv([['Peso',a.peso?num(a.peso,2)+' kg':''],['Temperatura',a.temp?a.temp+' °C':''],['FC',a.fc?a.fc+' bpm':''],['FR',a.fr?a.fr+' mpm':''],['TPC',a.tpc?a.tpc+' s':''],['Dor (0-10)',a.dor],['Mucosas',a.mucosas],['Hidratação',a.hidratacao],['Consciência',a.consciencia],['Responsável',eqn(a.responsavel)],['Termo',a.termo],['Contato emergência',a.contato]]);
+    kv([['Peso',a.peso?num(a.peso,2)+' kg':''],['Temperatura',a.temp?a.temp+' °C':''],['FC',a.fc?a.fc+' bpm':''],['FR',a.fr?a.fr+' mpm':''],['TPC',a.tpc?a.tpc+' s':''],['PAS',a.pas?a.pas+' mmHg':''],['PAM',a.pam?a.pam+' mmHg':''],['PAD',a.pad?a.pad+' mmHg':''],['Dor (0-10)',a.dor],['Mucosas',a.mucosas],['Hidratação',a.hidratacao],['Consciência',a.consciencia],['Responsável',eqn(a.responsavel)],['Termo',a.termo],['Contato emergência',a.contato]]);
     para('Queixa / motivo',a.queixa);
     table(['Pergunta','Resposta','Detalhes'],ADM_Q.map(q=>[q.l,a.q?.[q.k]?.v==='sim'?'Sim':a.q?.[q.k]?.v==='nao'?'Não':'-',a.q?.[q.k]?.t||'']),{columnStyles:{0:{cellWidth:70},1:{cellWidth:18}}});
     para('Observações',a.obs);
@@ -2259,10 +2267,10 @@ async function exportPDF(mode){if(!PERM('exportar')){toast('Você não tem permi
   // 4. Anestesia
   for(const an of [...S.pAnest].sort((a,b)=>String(a.data).localeCompare(String(b.data)))){
     h2('Ficha de anestesia · '+fmtDT(an.data));
-    kv([['Procedimento',an.procedimento],['Anestesista',eqn(an.anestesista)],['ASA',an.asa],['Peso',an.peso?num(an.peso,2)+' kg':''],['Jejum sólido',an.jejumS?an.jejumS+' h':''],['Jejum hídrico',an.jejumH?an.jejumH+' h':''],['FC',an.fc],['FR',an.fr],['Temperatura',an.temp],['TPC / mucosas',an.tpc]]);
+    kv([['Procedimento',an.procedimento],['Anestesista',profNm(an,'anestesista')],['ASA',an.asa],['Peso',an.peso?num(an.peso,2)+' kg':''],['Jejum sólido',an.jejumS?an.jejumS+' h':''],['Jejum hídrico',an.jejumH?an.jejumH+' h':''],['FC',an.fc],['FR',an.fr],['Temperatura',an.temp],['TPC',an.tpc?an.tpc+' s':''],['Mucosas',an.mucosas]]);
     para('Exames pré-anestésicos',an.exames);para('Riscos / observações',an.riscos);
     const pe=parseFloat(String(an.peso||'').replace(',','.'));
-    const drugBody=arr=>arr.map(d=>[d.nome,d.conc?`${d.conc} ${d.concUn}`:'',d.dose?`${d.dose} ${d.doseUn}`:'',volTxt(calcAny(d.dose,d.doseUn,d.conc,d.concUn,pe)),d.via,d.hora,d.obs||'']);
+    const drugBody=arr=>arr.map(d=>[d.nome,d.conc?`${d.conc} ${d.concUn}`:'',d.dose?`${d.dose} ${d.doseUn}`:'',d.volMl?String(d.volMl).replace('.',',')+' mL':volTxt(calcAny(d.dose,d.doseUn,d.conc,d.concUn,pe)),d.via,d.hora,d.obs||'']);
     const dh=['Fármaco','Conc.','Dose','Volume','Via','Hora','Obs.'];
     const fs=an.farmacos||[];
     for(const f of FASES_AN){const rows=fs.filter(d=>(d.fase||'Outros')===f.k||(f.k==='Outros'&&!FASES_AN.some(x=>x.k===d.fase)));
@@ -2293,7 +2301,7 @@ async function exportPDF(mode){if(!PERM('exportar')){toast('Você não tem permi
   for(const c of [...S.pCir].sort((a,b)=>String(a.data).localeCompare(String(b.data)))){
     let blocos=c.blocos||[];if(!blocos.length&&c.descricao)blocos=[{nome:c.titulo||'Descrição',texto:c.descricao}];
     h2('Ficha cirúrgica · '+(c.titulo||'Procedimento'));
-    kv([['Data',fmtDT(c.data)],['Cirurgião',eqn(c.cirurgiao)],['Auxiliar',eqn(c.auxiliar)],['Anestesista',eqn(c.anestesista)],['ASA',c.asa],['Programação',c.programacao],['Finalidade',c.finalidade],['Classificação',c.classificacao],['Citopatológico transop.',c.cito],['Histopatológico transop.',c.histo]]);
+    kv([['Data',fmtDT(c.data)],['Cirurgião',profNm(c,'cirurgiao')],['Auxiliar',profNm(c,'auxiliar')],['Anestesista',profNm(c,'anestesista')],['ASA',c.asa],['Programação',c.programacao],['Finalidade',c.finalidade],['Classificação',c.classificacao],['Citopatológico transop.',c.cito],['Histopatológico transop.',c.histo]]);
     para('Diagnóstico ou suspeita',c.diagnostico);para('Protocolo anestésico',c.protocolo);if(c.cito==='Sim')para('Resultado citopatológico',c.citoRes);if(c.histo==='Sim')para('Resultado histopatológico',c.histoRes);if((c.atb||[]).length||c.atbObs)para('Antibioticoterapia pré-cirúrgica',[(c.atb||[]).join(', '),c.atbObs].filter(Boolean).join(' · '));
     blocos.forEach((b,i)=>{h3(`${i+1}. ${b.nome||'Procedimento'}`);para('',b.texto)});
     para('Achados transoperatórios / intercorrências',c.intercorrencias);para('Material enviado para análise',c.material);
@@ -2419,11 +2427,11 @@ const ACT={
    try{await S.db.doc('anestesias/'+S.anSel).update({...fd,farmacos,mon,tempos,editadoEm:nowDT()});S.dirty=false;render(true);toast('Ficha de anestesia salva')}catch(e){fail(e)}},
  anDel(){confirmBox('Excluir esta ficha de anestesia?','Excluir',async()=>{try{await S.db.doc('anestesias/'+S.anSel).delete();S.anSel=null;S.dirty=false;toast('Ficha excluída')}catch(e){fail(e)}})},
  exec(el){modalExec(el.dataset.pid,el.dataset.day,el.dataset.item,el.dataset.h,!!el.dataset.new)},
- async saveAdm(){const p=curP();const fd=formData('#fAdm');const q={};
+ async saveAdm(el){const rasc=!!(el&&el.dataset&&el.dataset.rasc);const p=curP();const fd=formData('#fAdm');const q={};
    for(const x of ADM_Q){q[x.k]={v:fd['q_'+x.k]||'',t:fd['t_'+x.k]||''}}
-   const a={peso:fd.peso?parseFloat(fd.peso.replace(',','.')):null,temp:fd.temp,fc:fd.fc,fr:fd.fr,tpc:fd.tpc,dor:fd.dor,mucosas:fd.mucosas,hidratacao:fd.hidratacao,consciencia:fd.consciencia,queixa:fd.queixa,q,responsavel:fd.responsavel,termo:fd.termo,contato:fd.contato,obs:fd.obs,salvoEm:nowDT(),salvoPor:S.uid||null};
+   const a={peso:fd.peso?parseFloat(fd.peso.replace(',','.')):null,temp:fd.temp,fc:fd.fc,fr:fd.fr,tpc:fd.tpc,pas:fd.pas,pam:fd.pam,pad:fd.pad,dor:fd.dor,mucosas:fd.mucosas,hidratacao:fd.hidratacao,consciencia:fd.consciencia,queixa:fd.queixa,q,responsavel:fd.responsavel,termo:fd.termo,contato:fd.contato,obs:fd.obs,rascunho:rasc,salvoEm:nowDT(),salvoPor:S.uid||null};
    const patch={admissao:a};if(a.peso&&!p.peso)patch.peso=a.peso;
-   try{await S.db.doc('internacoes/'+p.id).update(patch);S.dirty=false;render(true);toast('Admissão salva')}catch(e){fail(e)}},
+   try{await S.db.doc('internacoes/'+p.id).update(patch);S.dirty=false;render(true);toast(rasc?'Rascunho da admissão salvo':'Admissão concluída')}catch(e){fail(e)}},
  async saveAlta(el,e,final){const p=curP();const fd=formData('#fAlta');const conf={};
    for(const k of CONF_KEYS)if(('cn_'+k) in fd||('cc_'+k) in fd)conf[k]={ok:!!fd['cc_'+k],nota:fd['cn_'+k]||''};
    const a={dataHora:fd.dataHora,condicao:fd.condicao,peso:fd.peso,retorno:fd.retorno,resumo:fd.resumo,alimentacao:fd.alimentacao,medicacoes:fd.medicacoes,cuidados:fd.cuidados,entregueA:fd.entregueA,responsavel:fd.responsavel,orientacao:fd.orientacao,conf,salvoEm:nowDT(),salvoPor:S.uid||null};
@@ -4250,7 +4258,7 @@ Object.assign(ACT,{sigPrep(el){modalSigPrep(el.dataset.id)},sigEmail(el){modalSi
 /* ===== Ficha anestésica padrão: grade 5 min × 10, um símbolo por parâmetro */
 const FICHA_P=[
  {k:'fc',l:'FC (bpm)',c:'#13303A',m:'dot'},{k:'fr',l:'FR (mpm)',c:'#2C67DB',m:'ring'},
- {k:'pas',l:'PAS (mmHg)',c:'#C9304A',m:'v'},{k:'pad',l:'PAD (mmHg)',c:'#C9304A',m:'^'},{k:'pam',l:'PAM (mmHg)',c:'#8F1D31',m:'x'},
+ {k:'pas',l:'PAS (mmHg)',c:'#C9304A',m:'^'},{k:'pad',l:'PAD (mmHg)',c:'#C9304A',m:'v'},{k:'pam',l:'PAM (mmHg)',c:'#8F1D31',m:'x'},
  {k:'spo2',l:'SpO₂ (%)',c:'#0A8F84',m:'sq'},{k:'etco2',l:'EtCO₂ (mmHg)',c:'#B46F06',m:'osq'},{k:'temp',l:'Temperatura (°C)',c:'#7A4FD0',m:'T'}];
 function fichaSym(m,x,y,c,r=5){switch(m){
  case'dot':return`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`;
