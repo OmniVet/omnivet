@@ -1088,7 +1088,7 @@ function viewProtocolo(){
      <label class="f spanall">Observações do plano<input class="inp" id="protPlanoObs" value="${esc(pt.planoObs||'')}" placeholder="Ex.: pode ser necessário sondar se não urinar" ${W()}></label></div></div>
    <div class="panel">
     <div class="panel-h"><h2>Itens do protocolo</h2><span class="spacer"></span><label class="row small muted" for="protPeso">Simular com peso<input id="protPeso" class="inp tnum" style="width:74px;padding:5px 8px" inputmode="decimal" value="${esc(S.protPeso)}"> kg</label></div>
-    <div class="panel-b row" style="padding-block:12px;border-bottom:1px solid var(--line-2)">${addBtns('prot')}<span class="spacer"></span><span class="muted small">Dose em mL/kg ou mg/kg. O volume é recalculado com o peso de cada paciente.</span></div>
+    <div class="panel-b row" style="padding-block:12px;border-bottom:1px solid var(--line-2)">${addBtns('prot')}<button class="btn" data-act="protGastro" title="Cimetidina, omeprazol, sucralfato e ondansetrona injetável" ${W()}>${ic('pill')}Gastroproteção e antiemético</button><span class="spacer"></span><span class="muted small">Dose em mL/kg ou mg/kg. O volume é recalculado com o peso de cada paciente.</span></div>
     ${(pt.itens||[]).length?itemsTable(pt.itens,'prot',S.protPeso):emptyBox('book','Protocolo vazio','Adicione os medicamentos com dose, via e horários fixos. Ao aplicar num paciente, os volumes saem calculados pelo peso dele.')}
    </div>`;
 }
@@ -3476,6 +3476,18 @@ Object.assign(ACT,{
 
 Object.assign(ACT,{
  protAprovar(){const pt=byId(S.prots,S.protId);confirmBox(`Aprovar <b>${esc(pt.nome)}</b>? Ele passa a aparecer na nova internação e em Aplicar protocolo.`,'Aprovar',async()=>{try{await S.db.doc('protocolos/'+pt.id).update({status:'aprovado',aprovadoEm:nowDT(),aprovadoPor:lsGet('vp_resp','')||null,revisar:''});toast('Protocolo aprovado')}catch(e){fail(e)}},false)},
+ protGastro(){const pt=byId(S.prots,S.protId);if(!pt)return;
+  const R='Dose de referência: conferir com o veterinário responsável (ajustar na doença renal).';
+  const base=[
+   {nome:'Cimetidina',conc:150,concUn:'mg/mL',dose:5,doseUn:'mg/kg',via:'IV lenta',freq:'8',grupo:'Protetor gástrico (escolher um)',obs:'Diluir e aplicar lentamente. '+R},
+   {nome:'Omeprazol',conc:null,concUn:'mg/mL',dose:1,doseUn:'mg/kg',via:'VO',freq:'24',grupo:'Protetor gástrico (escolher um)',obs:'Em jejum, 30 min antes da alimentação. '+R},
+   {nome:'Sucralfato',conc:200,concUn:'mg/mL',dose:25,doseUn:'mg/kg',via:'VO',freq:'8',grupo:'Protetor gástrico (escolher um)',obs:'Dar 2 h antes ou depois de outros medicamentos orais. '+R},
+   {nome:'Ondansetrona injetável',conc:2,concUn:'mg/mL',dose:0.2,doseUn:'mg/kg',via:'IV lenta',freq:'8',grupo:'Antiemético',obs:'Aplicar lentamente. '+R}];
+  const have=(pt.itens||[]).map(x=>norm(x.nome||''));const novos=base.filter(b=>!have.some(h=>h.startsWith(norm(b.nome).split(' ')[0])));
+  if(!novos.length){toast('Este protocolo já tem esses medicamentos');return}
+  confirmBox(`Adicionar ao protocolo <b>${esc(pt.nome)}</b>: ${novos.map(b=>esc(b.nome)).join(', ')}? Entram como alternativas (grupos Protetor gástrico e Antiemético) com doses de referência que você pode editar item por item.`,'Adicionar',async()=>{
+   try{const its=novos.map(b=>{const r=calc(b.dose,b.doseUn,b.conc,b.concUn,S.protPeso);return{...b,tipo:'med',id:rid(),inicio:'08:00',total:r?.total??null,totalUn:r?.un||null,volume:r?.ml!=null?Math.round(r.ml*100)/100:null,medId:(S.meds.find(m=>norm(m.nome)===norm(b.nome))||{}).id||null}});
+    await S.db.doc('protocolos/'+pt.id).update({itens:sortItens([...(pt.itens||[]),...its])});toast(its.length+' item(ns) adicionado(s). Revise as doses.')}catch(e){fail(e)}},false)},
  async protRascunho(){try{await S.db.doc('protocolos/'+S.protId).update({status:'rascunho'});toast('Protocolo voltou para rascunho')}catch(e){fail(e)}},
 });
 /* ===== Evolução: sub-abas Avaliações · Intercorrências · Comunicação com o tutor ===== */
