@@ -1607,9 +1607,56 @@ async function sdPDF(d){const p=byId(S.intern,d.internacaoId);if(!p)return;
   doc.text(L(`${cl.cidade||''}${cl.cidade?', ':''}${fmtD((d.em||nowDT()).slice(0,10))}`),PW/2,y+14,{align:'center'});
   docFooters(doc,K,[{t:(d.titulo||'')+' · '+p.nome,s:1}],'');
   await S.downloads.save({filename:`${String(d.titulo||'documento').replace(/[^\w-]+/g,'_')}_${String(p.nome).replace(/[^\w-]+/g,'_')}.pdf`,data:doc.output('blob')})}
+/* ===== Atestado de óbito (atestado médico: identificação do paciente, sem parâmetros clínicos) */
+const OB_LOCAL_PADRAO='VetPlus Especialidades Veterinária';
+function obitoTexto(x){const b=(v,n)=>v&&String(v).trim()?String(v).trim():'_'.repeat(n);
+  return`Atesto, para os devidos fins, que o animal identificado neste documento veio a óbito na localidade da ${b(x.local,30)}, às ${b(x.hora,6)} horas do dia ${x.data?fmtD(x.data):'____/____/________'}, em razão de quadro clínico cuja provável causa mortis foi ${b(x.causa,45)}.`}
+function modalObito(doc){const p=curP();if(!p)return;doc=doc||{};const x=doc.extra||{};const a=p.alta||{};const ob=a.obito||{};
+  openModal(`${H('Atestado de óbito · '+esc(p.nome))}<form class="modal-b" id="fOb" onsubmit="return false">
+   <div class="grid g4">
+    <label class="f">Dia do óbito<input class="inp" type="date" name="data" value="${esc(x.data||(a.dataHora||'').slice(0,10)||today())}"></label>
+    <label class="f">Hora do óbito<input class="inp" type="time" name="hora" value="${esc(x.hora||ob.hora||'')}"></label>
+    <label class="f span2">Local<input class="inp" name="local" value="${esc(x.local||OB_LOCAL_PADRAO)}"></label>
+    <label class="f spanall">Provável causa mortis<input class="inp" name="causa" value="${esc(x.causa??ob.causaProvavel??'')}" placeholder="Ex.: insuficiência renal crônica agudizada"></label>
+    <label class="f spanall">Observações (opcional)<textarea class="inp" name="obs" rows="4">${esc(x.obs||'')}</textarea></label>
+    <label class="f span2">Data e hora deste documento<input class="inp" type="datetime-local" name="emitido" value="${esc(x.emitido||nowDT())}"></label>
+    <label class="f span2">Médico(a) veterinário(a) que assina<select class="inp" name="vet"><option value="">— assina e carimba à mão —</option>${vetOpts(doc.vet||a.responsavel||'')}</select></label>
+   </div>
+   <div class="sec-t" style="margin-top:12px">Como vai ficar</div><div class="decl" id="obPrev" style="white-space:pre-wrap"></div>
+  </form><div class="modal-f"><button class="btn" data-act="close">Cancelar</button><button class="btn" id="obSave">Salvar</button><button class="btn pri" id="obPrint">${ic('file')}Salvar e imprimir</button></div>`,'wide');
+  const prev=()=>{const fd=formData('#fOb');$('#obPrev').textContent=obitoTexto(fd)+(fd.obs.trim()?'\n\nObservações: '+fd.obs.trim():'')};
+  $('#fOb').addEventListener('input',prev);prev();
+  const save=async pr=>{const fd=formData('#fOb');if(!fd.hora||!fd.causa.trim())if(!confirm('Hora ou causa mortis em branco: o atestado sai com o espaço para preencher à mão. Continuar?'))return;
+    const d={internacaoId:p.id,tipo:'atestado',obito:true,titulo:'Atestado de óbito',texto:obitoTexto(fd),vet:fd.vet||'',extra:{data:fd.data,hora:fd.hora,local:fd.local,causa:fd.causa.trim(),obs:fd.obs.trim(),emitido:fd.emitido},em:doc.em||nowDT(),atualizadoEm:nowDT()};
+    try{let id=doc.id;if(id)await S.db.doc('saidaDocs/'+id).update(d);else id=(await S.db.collection('saidaDocs').add(d)).id;closeModal();toast('Atestado salvo');if(pr)obitoPDF({...d,id})}catch(e){fail(e)}};
+  $('#obSave').onclick=()=>save(false);$('#obPrint').onclick=()=>save(true)}
+async function obitoPDF(d){const p=byId(S.intern,d.internacaoId);if(!p)return;const x=d.extra||{};
+  try{await loadScript(JSPDF)}catch(e){toast('Não foi possível carregar o gerador de PDF');return}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const PW=210,M=22;const cl=S.clinica||{};const lg=await logoPNG();
+  const L=t=>String(t??'').replace(/[–—]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/…/g,'...').replace(/[^\x00-\xFF]/g,'');const K={lg,cl,L,PW,M};
+  const tu=tutorOf(p)||{nome:p.tutor,cpf:p.cpf};const v=y=>y!=null&&String(y).trim()!==''?String(y):'_______';
+  const ident=[`Paciente: ${v(p.nome)} · Espécie: ${v(p.especie)} · Raça: ${v(p.raca)} · Sexo: ${v(p.sexo)} · Idade: ${v(p.idade)}${p.microchip?' · Microchip: '+p.microchip:''}`,
+    `Tutor(a) responsável: ${v(tu.nome)} · CPF: ${v(cpfMask(tu.cpf))}`];
+  let y=drawDocHeader(doc,K,'ATESTADO DE ÓBITO',ident)+8;
+  doc.setFont('helvetica','normal');doc.setFontSize(12);doc.setTextColor(20,48,58);
+  for(const ln of doc.splitTextToSize(L(obitoTexto(x)),PW-2*M)){doc.text(ln,M,y,{maxWidth:PW-2*M});y+=7}
+  y+=6;doc.setFont('helvetica','bold');doc.setFontSize(10.5);doc.text('Observações:',M,y);y+=6;doc.setFont('helvetica','normal');doc.setFontSize(10.5);
+  if(x.obs){for(const ln of doc.splitTextToSize(L(x.obs),PW-2*M)){doc.text(ln,M,y);y+=5.6}}
+  else{doc.setDrawColor(190,205,205);doc.setLineWidth(.2);for(let i=0;i<3;i++){doc.line(M,y+2,PW-M,y+2);y+=8}}
+  const em=x.emitido||nowDT();y=Math.max(y+14,200);
+  doc.setFontSize(10.5);doc.text(L(`${cl.cidade?cl.cidade+', ':''}${fmtD(em.slice(0,10))}, às ${em.slice(11,16)}.`),M,y);
+  // espaço para assinatura e carimbo
+  const by=y+12,bh=46;doc.setDrawColor(170,190,190);doc.setLineWidth(.25);doc.setLineDashPattern([1.5,1.2],0);doc.roundedRect(PW/2-55,by,110,bh,2,2);doc.setLineDashPattern([],0);
+  doc.setFontSize(7.5);doc.setTextColor(150,165,170);doc.text('Carimbo',PW/2+53,by+4.5,{align:'right'});
+  doc.setDrawColor(60,80,85);doc.setLineWidth(.35);doc.line(PW/2-42,by+bh-12,PW/2+42,by+bh-12);
+  const vt=byId(S.equipe,d.vet);doc.setTextColor(20,48,58);doc.setFont('helvetica','bold');doc.setFontSize(9.5);
+  doc.text(L(vt?.nome||'Assinatura e carimbo do(a) médico(a) veterinário(a)'),PW/2,by+bh-7,{align:'center'});
+  if(vt){doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.text(L(`Médico(a) veterinário(a)${(vt.crmv||vt.registro)?' · CRMV '+(vt.crmv||vt.registro):''}`),PW/2,by+bh-3,{align:'center'})}
+  docFooters(doc,K,[{t:'Atestado de óbito · '+p.nome,s:1}],'');
+  await S.downloads.save({filename:`Atestado_de_obito_${String(p.nome).replace(/[^\w-]+/g,'_')}.pdf`,data:doc.output('blob')})}
 function sdPanel(p){const L=S.saidaDocs.filter(d=>d.internacaoId===p.id).sort((a,b)=>String(b.em).localeCompare(a.em));
   return`<div class="panel" style="margin-top:16px"><div class="panel-h"><h2>Receitas, encaminhamentos e atestados</h2><span class="spacer"></span>
-   <button class="btn sm" data-act="sdNew" data-t="receita" ${W()}>${ic('pill')}Receita</button><button class="btn sm" data-act="sdNew" data-t="encaminhamento" ${W()}>${ic('file')}Encaminhamento</button><button class="btn sm" data-act="sdNew" data-t="atestado" ${W()}>${ic('edit')}Atestado</button></div>
+   <button class="btn sm" data-act="sdNew" data-t="receita" ${W()}>${ic('pill')}Receita</button><button class="btn sm" data-act="sdNew" data-t="encaminhamento" ${W()}>${ic('file')}Encaminhamento</button><button class="btn sm" data-act="sdNew" data-t="atestado" ${W()}>${ic('edit')}Atestado</button><button class="btn sm" data-act="obNew" ${W()}>${ic('file')}Atestado de óbito</button></div>
    <div class="panel-b">${L.length?L.map(d=>`<div class="pre-row"><div style="flex:1;min-width:0"><b>${esc(d.titulo)}</b> <span class="chip">${MS_TIPOS[d.tipo]||''}</span><div class="muted small">${fmtDT(d.em)} · ${esc(equipeNome(d.vet)||'')}${d.estrut?` · ${(d.itens||[]).filter(x=>x.on).length} medicamento(s)${(d.itens||[]).some(x=>x.on&&x.controle)?' · inclui controle especial':''}`:''}</div></div><button class="btn sm" data-act="sdPrint" data-id="${d.id}">${ic('file')}Imprimir</button><button class="btn sm ghost" data-act="sdEdit" data-id="${d.id}" ${W()}>${ic('edit')}</button><button class="btn sm ghost danger" data-act="sdDel" data-id="${d.id}">${ic('trash')}</button></div>`).join(''):'<div class="muted small">Nenhum documento ainda. Escolha um modelo, ajuste o texto, selecione o(a) veterinário(a) e imprima.</div>'}</div></div>`}
 function tabAlta(p){
   const a=p.alta||{};const adm=p.admissao||{};const qv=adm.q||{};const cf=a.conf||{};const ck=a.check||{};const pr=a.params||{};const ob=a.obito||{};const tr=a.transf||{};
@@ -1645,6 +1692,7 @@ ${ob.protocolo?`<input type="hidden" name="ob_protocolo" value="${esc(ob.protoco
       <label class="f span2">Observações<input class="inp" name="ob_obs" value="${esc(ob.obs||'')}"></label>
      </div>
      <div class="chks" style="margin-top:12px">${chkList(CHK_OBITO,ck)}</div>
+     <div class="row" style="margin-top:12px"><button type="button" class="btn pri sm" data-act="obNew" ${W()}>${ic('file')}Emitir atestado de óbito</button><span class="muted small">Atestado médico para imprimir, assinar e carimbar.</span></div>
      <div data-showc="eutanasia">${eutForm(p,ob.eut||{})}</div>
     </div>
 
@@ -3674,7 +3722,7 @@ ${raw}`;
 Object.assign(ACT,{
  msNew(){modalMS()},msEdit(el){modalMS(byId(S.mSaida,el.dataset.id))},
  msDel(el){const m=byId(S.mSaida,el.dataset.id);confirmBox(`Excluir o modelo <b>${esc(m?.nome)}</b>?`,'Excluir',async()=>{try{await S.db.doc('modelosSaida/'+m.id).delete();toast('Modelo excluído')}catch(e){fail(e)}})},
- sdNew(el){el.dataset.t==='receita'&&S.mSaida.some(m=>m.estrut&&m.tipo==='receita')?modalRec():modalSD(el.dataset.t)},sdEdit(el){const d=byId(S.saidaDocs,el.dataset.id);if(d)d.estrut?modalRec(d):modalSD(d.tipo,d)},sdPrint(el){const d=byId(S.saidaDocs,el.dataset.id);if(d)d.estrut?recPDF(d):sdPDF(d)},
+ sdNew(el){el.dataset.t==='receita'&&S.mSaida.some(m=>m.estrut&&m.tipo==='receita')?modalRec():modalSD(el.dataset.t)},sdEdit(el){const d=byId(S.saidaDocs,el.dataset.id);if(d)d.obito?modalObito(d):d.estrut?modalRec(d):modalSD(d.tipo,d)},sdPrint(el){const d=byId(S.saidaDocs,el.dataset.id);if(d)d.obito?obitoPDF(d):d.estrut?recPDF(d):sdPDF(d)},obNew(){modalObito()},
  sdDel(el){const d=byId(S.saidaDocs,el.dataset.id);confirmBox(`Excluir <b>${esc(d?.titulo)}</b>?`,'Excluir',async()=>{try{await S.db.doc('saidaDocs/'+d.id).delete();toast('Excluído')}catch(e){fail(e)}})},
  convComp(el){compEnvioPDF(el.dataset.id)},
  convCheck(el){convCheck(S.conv.find(x=>x.id===el.dataset.id),true)},
